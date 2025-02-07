@@ -1,5 +1,5 @@
 /*:
- * @plugindesc (v.0.8)[BASIC] Multiplayer for RPG Maker
+ * @plugindesc (v.0.8.3)[PRO] Multiplayer for RPG Maker
  * @author Pheonix KageDesu
  * @target MZ MV
  * @url https://kdworkshop.net/plugins/alpha-net-z/
@@ -15,6 +15,7 @@
  *  - file css\anet.css
  *  - file css\anet_chat.css
  *  - folder img\Alpha\*all files*
+ *  - folder data\ANETZ\*all files*
  *
  *
 
@@ -39,10 +40,31 @@
  * @default
  * @desc CAN'T be Empty. Should be UNIQUE for your game. Example: SuperGame1000FromJohnDoe
  * 
+ * @param isQuickDevConnectionAllowed:b
+ * @parent connection:s
+ * @type boolean
+ * @text Allow Quick Connection?
+ * @default false
+ * @desc For devs. Press C for quick connect right from Title Menu
+ * 
+ * @param isEndGameWhenHostIsLeave:b
+ * @parent connection:s
+ * @type boolean
+ * @text End when the host is disconnected?
+ * @default true
+ * @desc If false, other players will continue game (the host will be transferred to another)
+ * 
  * @param spacer|gamesettings @text‏‏‎ ‎@desc ===============================================
  * 
  * @param gameModeSettingsGroup
  * @text Multiplayer Settings
+ * 
+ * @param netGameTitleCmd:b
+ * @parent gameModeSettingsGroup
+ * @type boolean
+ * @text Add Network command?
+ * @default true
+ * @desc Adds Network command to Main Menu on Title Screen
  * 
  * @param onlySameMap:b
  * @parent gameModeSettingsGroup
@@ -50,6 +72,13 @@
  * @text Wait Map Transfer?
  * @default false
  * @desc When player transferred to the new map he will wait until all players not transfered on same map.
+ * 
+ * @param isCustomStartMap:b
+ * @parent onlySameMap:b
+ * @type boolean
+ * @text Is Custom Start?
+ * @default false
+ * @desc Each Actor can use own custom start map and position. Read Wiki for more info.
  * 
  * @param singlePlayerAllowed:b
  * @parent gameModeSettingsGroup
@@ -367,7 +396,7 @@
  * 
  * @param isShowMyNameplate:b
  * @parent isUseNameplates:b
- * @text My namaplate?
+ * @text My nameplate?
  * @type boolean
  * @on Show
  * @off No, only for other
@@ -387,6 +416,13 @@
  * @type common_event
  * @default 0
  * @desc That common event will be called when somebody leave (disconnect) game. 0 - nothing
+ * 
+ * @param isAllowCollsBetweenNetChars:b
+ * @parent playersSettingsGroup
+ * @text Players Collisions
+ * @type boolean
+ * @default false
+ * @desc Allows collisions on map between players characters?
  * 
  * @param globalData:s
  * @text Global Data
@@ -508,7 +544,7 @@
  * 
  */
  /*:ru
- * @plugindesc (v.0.8)[BASIC] Мультиплеер для RPG Maker
+ * @plugindesc (v.0.8.3)[PRO] Мультиплеер для RPG Maker
  * @author Pheonix KageDesu
  * @target MZ MV
  * @url https://kdworkshop.net/plugins/alpha-net-z/
@@ -525,7 +561,7 @@
  *  - файл css\anet.css
  *  - файл css\anet_chat.css
  *  - папка img\Alpha\*все картинки*
- *
+ *  - папка data\ANETZ\*все .json файлы*
  *
 
 
@@ -550,10 +586,31 @@
  * @default
  * @desc НЕЛЬЗЯ пустой. Должен быть уникальный для Вашей игры. Пример: SuperGame1000FromJohnDoe
  * 
+ * @param isQuickDevConnectionAllowed:b
+ * @parent connection:s
+ * @type boolean
+ * @text Быстрое соединение?
+ * @default false
+ * @desc Для разработчиков. Нажмите С на главном экране чтобы быстро подключиться к серверу.
+ * 
+ * @param isEndGameWhenHostIsLeave:b
+ * @parent connection:s
+ * @type boolean
+ * @text Заканчивать игру если хост вышел?
+ * @default true
+ * @desc Если ВЫКЛ, то другие игроки продолжат игру (будет назначен другой хост)
+ * 
  * @param spacer|gamesettings @text‏‏‎ ‎@desc ===============================================
  * 
  * @param gameModeSettingsGroup
  * @text Мультиплеер
+ * 
+ * @param netGameTitleCmd:b
+ * @parent gameModeSettingsGroup
+ * @type boolean
+ * @text Сетевая игра в меню?
+ * @default true
+ * @desc Добавляет команду Network в меню (титульный экран)
  * 
  * @param onlySameMap:b
  * @parent gameModeSettingsGroup
@@ -561,6 +618,13 @@
  * @text Ждать игроков при смене карты?
  * @default false
  * @desc Когда игрок перемещается на другую карту, он будет ждать пока все остальные не перейдут на данную карту вместе с ним
+ * 
+ * @param isCustomStartMap:b
+ * @parent onlySameMap:b
+ * @type boolean
+ * @text Свой старт?
+ * @default false
+ * @desc Каждый персонаж будет использовать определённую карту для старта. Больше информации на Wiki
  * 
  * @param singlePlayerAllowed:b
  * @parent gameModeSettingsGroup
@@ -897,6 +961,14 @@
  * @type common_event
  * @default 0
  * @desc Общее событие, которое будет вызвано у всех, когда кто-то покидает игру (выходит)
+ * 
+ * @param isAllowCollsBetweenNetChars:b
+ * @parent playersSettingsGroup
+ * @text Коллизии игроков
+ * @type boolean
+ * @default false
+ * @desc Включить коллизии на карте между персонажами игроков?
+ * 
  * 
  * @param globalData:s
  * @text Глобальные данные
@@ -1437,6 +1509,7 @@
     @type combo
     @option localhost
     @option anetzglobal.ru
+    @option 195.161.41.20
     @desc Server IP address (ip4) or domain name
     @default anetzglobal.ru
 
@@ -1506,87 +1579,11 @@
 /*~struct~LLocaleDB:
     @param network
     @default Network
-
-    @param createRoom
-    @default Create Room
-
-    @param joinRoom
-    @default Join Room
-
-    @param joinRandomRoom
-    @default Join Random Room
-
-    @param settings
-    @default Settings
-
-    @param start
-    @default Start
-
-    @param leave
-    @default Leave
-
-    @param joinGame
-    @default Join Game
-
-    @param ready
-    @default Ready
-
-    @param character
-    @default Character
-
-    @param close
-    @default Close
-
-    @param welcome
-    @default Welcome, %1
-    @desc %1 will be replaced by Player Name
-
-    @param playersCount
-    @default Players on server: %1
-    @desc %1 will be replaced by players count (number)
 */
 
 /*~struct~LLocaleDB:ru
     @param network
     @default Мультиплеер
-
-    @param createRoom
-    @default Создать комнату
-
-    @param joinRoom
-    @default Присоединиться
-
-    @param joinRandomRoom
-    @default Слуйчайная комната
-
-    @param settings
-    @default Настройки
-
-    @param start
-    @default Начать
-
-    @param leave
-    @default Покинуть
-
-    @param joinGame
-    @default Вступить
-
-    @param ready
-    @default Готов
-
-    @param character
-    @default Персонаж
-
-    @param close
-    @default Закрыть
-
-    @param welcome
-    @default Привет, %1
-    @desc %1 будет заменён на имя игрока
-
-    @param playersCount
-    @default Игроков на сервере: %1
-    @desc %1 будет заменён на количество игроков (число)
 */
 
 /*~struct~LPlayerMenuOption:
@@ -2096,9 +2093,9 @@ var Imported = Imported || {};
 Imported.Alpha_NETZ = true;
 
 var ANET = {};
-ANET.Version = 80; // 0.8
+ANET.Version = 83; // 0.8.3
 
-ANET.MinServerRev = 115; // * Необходимая ревизия сервера
+ANET.MinServerRev = 116; // * Необходимая ревизия сервера
 
 // * Данный символ переопределяется в 1_DevSymbol_TEST как dev
 ANET._define = 'build'; // * По умолчанию -> сборка
@@ -2109,6 +2106,10 @@ ANET.link = function (library) {
 
 ANET.isDEV = function () {
     return ANET._define == 'dev';
+};
+
+ANET.isShowExtOutput = function() {
+    return false;
 };
 
 ANET.w = (e) => KDCore.warning('', e);
@@ -2129,6 +2130,17 @@ ANET.w = (e) => KDCore.warning('', e);
 
 
 
+/*!
+ * pixi-filters - v4.2.0
+ * Compiled Fri, 05 Aug 2022 19:51:27 UTC
+ *
+ * pixi-filters is licensed under the MIT License.
+ * http://www.opensource.org/licenses/mit-license
+ */
+var __filters=function(e,n,t,r,o,i,l,a){"use strict";var s=function(e,n){return(s=Object.setPrototypeOf||{__proto__:[]}instanceof Array&&function(e,n){e.__proto__=n}||function(e,n){for(var t in n)Object.prototype.hasOwnProperty.call(n,t)&&(e[t]=n[t])})(e,n)};function u(e,n){function t(){this.constructor=e}s(e,n),e.prototype=null===n?Object.create(n):(t.prototype=n.prototype,new t)}var f=function(){return(f=Object.assign||function(e){for(var n,t=arguments,r=1,o=arguments.length;r<o;r++)for(var i in n=t[r])Object.prototype.hasOwnProperty.call(n,i)&&(e[i]=n[i]);return e}).apply(this,arguments)};Object.create;Object.create;var c="attribute vec2 aVertexPosition;\nattribute vec2 aTextureCoord;\n\nuniform mat3 projectionMatrix;\n\nvarying vec2 vTextureCoord;\n\nvoid main(void)\n{\n    gl_Position = vec4((projectionMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);\n    vTextureCoord = aTextureCoord;\n}",m=function(e){function n(n){var t=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform float gamma;\nuniform float contrast;\nuniform float saturation;\nuniform float brightness;\nuniform float red;\nuniform float green;\nuniform float blue;\nuniform float alpha;\n\nvoid main(void)\n{\n    vec4 c = texture2D(uSampler, vTextureCoord);\n\n    if (c.a > 0.0) {\n        c.rgb /= c.a;\n\n        vec3 rgb = pow(c.rgb, vec3(1. / gamma));\n        rgb = mix(vec3(.5), mix(vec3(dot(vec3(.2125, .7154, .0721), rgb)), rgb, saturation), contrast);\n        rgb.r *= red;\n        rgb.g *= green;\n        rgb.b *= blue;\n        c.rgb = rgb * brightness;\n\n        c.rgb *= c.a;\n    }\n\n    gl_FragColor = c * alpha;\n}\n")||this;return t.gamma=1,t.saturation=1,t.contrast=1,t.brightness=1,t.red=1,t.green=1,t.blue=1,t.alpha=1,Object.assign(t,n),t}return u(n,e),n.prototype.apply=function(e,n,t,r){this.uniforms.gamma=Math.max(this.gamma,1e-4),this.uniforms.saturation=this.saturation,this.uniforms.contrast=this.contrast,this.uniforms.brightness=this.brightness,this.uniforms.red=this.red,this.uniforms.green=this.green,this.uniforms.blue=this.blue,this.uniforms.alpha=this.alpha,e.applyFilter(this,n,t,r)},n}(n.Filter),p=function(e){function n(n){void 0===n&&(n=.5);var t=e.call(this,c,"\nuniform sampler2D uSampler;\nvarying vec2 vTextureCoord;\n\nuniform float threshold;\n\nvoid main() {\n    vec4 color = texture2D(uSampler, vTextureCoord);\n\n    // A simple & fast algorithm for getting brightness.\n    // It's inaccuracy , but good enought for this feature.\n    float _max = max(max(color.r, color.g), color.b);\n    float _min = min(min(color.r, color.g), color.b);\n    float brightness = (_max + _min) * 0.5;\n\n    if(brightness > threshold) {\n        gl_FragColor = color;\n    } else {\n        gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);\n    }\n}\n")||this;return t.threshold=n,t}return u(n,e),Object.defineProperty(n.prototype,"threshold",{get:function(){return this.uniforms.threshold},set:function(e){this.uniforms.threshold=e},enumerable:!1,configurable:!0}),n}(n.Filter),d=function(e){function n(n,r,o){void 0===n&&(n=4),void 0===r&&(r=3),void 0===o&&(o=!1);var i=e.call(this,c,o?"\nvarying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec2 uOffset;\nuniform vec4 filterClamp;\n\nvoid main(void)\n{\n    vec4 color = vec4(0.0);\n\n    // Sample top left pixel\n    color += texture2D(uSampler, clamp(vec2(vTextureCoord.x - uOffset.x, vTextureCoord.y + uOffset.y), filterClamp.xy, filterClamp.zw));\n\n    // Sample top right pixel\n    color += texture2D(uSampler, clamp(vec2(vTextureCoord.x + uOffset.x, vTextureCoord.y + uOffset.y), filterClamp.xy, filterClamp.zw));\n\n    // Sample bottom right pixel\n    color += texture2D(uSampler, clamp(vec2(vTextureCoord.x + uOffset.x, vTextureCoord.y - uOffset.y), filterClamp.xy, filterClamp.zw));\n\n    // Sample bottom left pixel\n    color += texture2D(uSampler, clamp(vec2(vTextureCoord.x - uOffset.x, vTextureCoord.y - uOffset.y), filterClamp.xy, filterClamp.zw));\n\n    // Average\n    color *= 0.25;\n\n    gl_FragColor = color;\n}\n":"\nvarying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec2 uOffset;\n\nvoid main(void)\n{\n    vec4 color = vec4(0.0);\n\n    // Sample top left pixel\n    color += texture2D(uSampler, vec2(vTextureCoord.x - uOffset.x, vTextureCoord.y + uOffset.y));\n\n    // Sample top right pixel\n    color += texture2D(uSampler, vec2(vTextureCoord.x + uOffset.x, vTextureCoord.y + uOffset.y));\n\n    // Sample bottom right pixel\n    color += texture2D(uSampler, vec2(vTextureCoord.x + uOffset.x, vTextureCoord.y - uOffset.y));\n\n    // Sample bottom left pixel\n    color += texture2D(uSampler, vec2(vTextureCoord.x - uOffset.x, vTextureCoord.y - uOffset.y));\n\n    // Average\n    color *= 0.25;\n\n    gl_FragColor = color;\n}")||this;return i._kernels=[],i._blur=4,i._quality=3,i.uniforms.uOffset=new Float32Array(2),i._pixelSize=new t.Point,i.pixelSize=1,i._clamp=o,Array.isArray(n)?i.kernels=n:(i._blur=n,i.quality=r),i}return u(n,e),n.prototype.apply=function(e,n,t,r){var o,i=this._pixelSize.x/n._frame.width,l=this._pixelSize.y/n._frame.height;if(1===this._quality||0===this._blur)o=this._kernels[0]+.5,this.uniforms.uOffset[0]=o*i,this.uniforms.uOffset[1]=o*l,e.applyFilter(this,n,t,r);else{for(var a=e.getFilterTexture(),s=n,u=a,f=void 0,c=this._quality-1,m=0;m<c;m++)o=this._kernels[m]+.5,this.uniforms.uOffset[0]=o*i,this.uniforms.uOffset[1]=o*l,e.applyFilter(this,s,u,1),f=s,s=u,u=f;o=this._kernels[c]+.5,this.uniforms.uOffset[0]=o*i,this.uniforms.uOffset[1]=o*l,e.applyFilter(this,s,t,r),e.returnFilterTexture(a)}},n.prototype._updatePadding=function(){this.padding=Math.ceil(this._kernels.reduce((function(e,n){return e+n+.5}),0))},n.prototype._generateKernels=function(){var e=this._blur,n=this._quality,t=[e];if(e>0)for(var r=e,o=e/n,i=1;i<n;i++)r-=o,t.push(r);this._kernels=t,this._updatePadding()},Object.defineProperty(n.prototype,"kernels",{get:function(){return this._kernels},set:function(e){Array.isArray(e)&&e.length>0?(this._kernels=e,this._quality=e.length,this._blur=Math.max.apply(Math,e)):(this._kernels=[0],this._quality=1)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"clamp",{get:function(){return this._clamp},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"pixelSize",{get:function(){return this._pixelSize},set:function(e){"number"==typeof e?(this._pixelSize.x=e,this._pixelSize.y=e):Array.isArray(e)?(this._pixelSize.x=e[0],this._pixelSize.y=e[1]):e instanceof t.Point?(this._pixelSize.x=e.x,this._pixelSize.y=e.y):(this._pixelSize.x=1,this._pixelSize.y=1)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"quality",{get:function(){return this._quality},set:function(e){this._quality=Math.max(1,Math.round(e)),this._generateKernels()},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"blur",{get:function(){return this._blur},set:function(e){this._blur=e,this._generateKernels()},enumerable:!1,configurable:!0}),n}(n.Filter),h=function(e){function n(t){var o=e.call(this,c,"uniform sampler2D uSampler;\nvarying vec2 vTextureCoord;\n\nuniform sampler2D bloomTexture;\nuniform float bloomScale;\nuniform float brightness;\n\nvoid main() {\n    vec4 color = texture2D(uSampler, vTextureCoord);\n    color.rgb *= brightness;\n    vec4 bloomColor = vec4(texture2D(bloomTexture, vTextureCoord).rgb, 0.0);\n    bloomColor.rgb *= bloomScale;\n    gl_FragColor = color + bloomColor;\n}\n")||this;o.bloomScale=1,o.brightness=1,o._resolution=r.settings.FILTER_RESOLUTION,"number"==typeof t&&(t={threshold:t});var i=Object.assign(n.defaults,t);o.bloomScale=i.bloomScale,o.brightness=i.brightness;var l=i.kernels,a=i.blur,s=i.quality,u=i.pixelSize,f=i.resolution;return o._extractFilter=new p(i.threshold),o._extractFilter.resolution=f,o._blurFilter=l?new d(l):new d(a,s),o.pixelSize=u,o.resolution=f,o}return u(n,e),n.prototype.apply=function(e,n,t,r,o){var i=e.getFilterTexture();this._extractFilter.apply(e,n,i,1,o);var l=e.getFilterTexture();this._blurFilter.apply(e,i,l,1),this.uniforms.bloomScale=this.bloomScale,this.uniforms.brightness=this.brightness,this.uniforms.bloomTexture=l,e.applyFilter(this,n,t,r),e.returnFilterTexture(l),e.returnFilterTexture(i)},Object.defineProperty(n.prototype,"resolution",{get:function(){return this._resolution},set:function(e){this._resolution=e,this._extractFilter&&(this._extractFilter.resolution=e),this._blurFilter&&(this._blurFilter.resolution=e)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"threshold",{get:function(){return this._extractFilter.threshold},set:function(e){this._extractFilter.threshold=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"kernels",{get:function(){return this._blurFilter.kernels},set:function(e){this._blurFilter.kernels=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"blur",{get:function(){return this._blurFilter.blur},set:function(e){this._blurFilter.blur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"quality",{get:function(){return this._blurFilter.quality},set:function(e){this._blurFilter.quality=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"pixelSize",{get:function(){return this._blurFilter.pixelSize},set:function(e){this._blurFilter.pixelSize=e},enumerable:!1,configurable:!0}),n.defaults={threshold:.5,bloomScale:1,brightness:1,kernels:null,blur:8,quality:4,pixelSize:1,resolution:r.settings.FILTER_RESOLUTION},n}(n.Filter),g=function(e){function n(n){void 0===n&&(n=8);var t=e.call(this,c,"varying vec2 vTextureCoord;\n\nuniform vec4 filterArea;\nuniform float pixelSize;\nuniform sampler2D uSampler;\n\nvec2 mapCoord( vec2 coord )\n{\n    coord *= filterArea.xy;\n    coord += filterArea.zw;\n\n    return coord;\n}\n\nvec2 unmapCoord( vec2 coord )\n{\n    coord -= filterArea.zw;\n    coord /= filterArea.xy;\n\n    return coord;\n}\n\nvec2 pixelate(vec2 coord, vec2 size)\n{\n    return floor( coord / size ) * size;\n}\n\nvec2 getMod(vec2 coord, vec2 size)\n{\n    return mod( coord , size) / size;\n}\n\nfloat character(float n, vec2 p)\n{\n    p = floor(p*vec2(4.0, -4.0) + 2.5);\n\n    if (clamp(p.x, 0.0, 4.0) == p.x)\n    {\n        if (clamp(p.y, 0.0, 4.0) == p.y)\n        {\n            if (int(mod(n/exp2(p.x + 5.0*p.y), 2.0)) == 1) return 1.0;\n        }\n    }\n    return 0.0;\n}\n\nvoid main()\n{\n    vec2 coord = mapCoord(vTextureCoord);\n\n    // get the rounded color..\n    vec2 pixCoord = pixelate(coord, vec2(pixelSize));\n    pixCoord = unmapCoord(pixCoord);\n\n    vec4 color = texture2D(uSampler, pixCoord);\n\n    // determine the character to use\n    float gray = (color.r + color.g + color.b) / 3.0;\n\n    float n =  65536.0;             // .\n    if (gray > 0.2) n = 65600.0;    // :\n    if (gray > 0.3) n = 332772.0;   // *\n    if (gray > 0.4) n = 15255086.0; // o\n    if (gray > 0.5) n = 23385164.0; // &\n    if (gray > 0.6) n = 15252014.0; // 8\n    if (gray > 0.7) n = 13199452.0; // @\n    if (gray > 0.8) n = 11512810.0; // #\n\n    // get the mod..\n    vec2 modd = getMod(coord, vec2(pixelSize));\n\n    gl_FragColor = color * character( n, vec2(-1.0) + modd * 2.0);\n\n}\n")||this;return t.size=n,t}return u(n,e),Object.defineProperty(n.prototype,"size",{get:function(){return this.uniforms.pixelSize},set:function(e){this.uniforms.pixelSize=e},enumerable:!1,configurable:!0}),n}(n.Filter),v=function(e){function n(n){var t=e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\n\nuniform float transformX;\nuniform float transformY;\nuniform vec3 lightColor;\nuniform float lightAlpha;\nuniform vec3 shadowColor;\nuniform float shadowAlpha;\n\nvoid main(void) {\n    vec2 transform = vec2(1.0 / filterArea) * vec2(transformX, transformY);\n    vec4 color = texture2D(uSampler, vTextureCoord);\n    float light = texture2D(uSampler, vTextureCoord - transform).a;\n    float shadow = texture2D(uSampler, vTextureCoord + transform).a;\n\n    color.rgb = mix(color.rgb, lightColor, clamp((color.a - light) * lightAlpha, 0.0, 1.0));\n    color.rgb = mix(color.rgb, shadowColor, clamp((color.a - shadow) * shadowAlpha, 0.0, 1.0));\n    gl_FragColor = vec4(color.rgb * color.a, color.a);\n}\n")||this;return t._thickness=2,t._angle=0,t.uniforms.lightColor=new Float32Array(3),t.uniforms.shadowColor=new Float32Array(3),Object.assign(t,{rotation:45,thickness:2,lightColor:16777215,lightAlpha:.7,shadowColor:0,shadowAlpha:.7},n),t.padding=1,t}return u(n,e),n.prototype._updateTransform=function(){this.uniforms.transformX=this._thickness*Math.cos(this._angle),this.uniforms.transformY=this._thickness*Math.sin(this._angle)},Object.defineProperty(n.prototype,"rotation",{get:function(){return this._angle/t.DEG_TO_RAD},set:function(e){this._angle=e*t.DEG_TO_RAD,this._updateTransform()},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"thickness",{get:function(){return this._thickness},set:function(e){this._thickness=e,this._updateTransform()},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"lightColor",{get:function(){return o.rgb2hex(this.uniforms.lightColor)},set:function(e){o.hex2rgb(e,this.uniforms.lightColor)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"lightAlpha",{get:function(){return this.uniforms.lightAlpha},set:function(e){this.uniforms.lightAlpha=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"shadowColor",{get:function(){return o.rgb2hex(this.uniforms.shadowColor)},set:function(e){o.hex2rgb(e,this.uniforms.shadowColor)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"shadowAlpha",{get:function(){return this.uniforms.shadowAlpha},set:function(e){this.uniforms.shadowAlpha=e},enumerable:!1,configurable:!0}),n}(n.Filter),y=function(e){function n(n,o,s,u){void 0===n&&(n=2),void 0===o&&(o=4),void 0===s&&(s=r.settings.FILTER_RESOLUTION),void 0===u&&(u=5);var f,c,m=e.call(this)||this;return"number"==typeof n?(f=n,c=n):n instanceof t.Point?(f=n.x,c=n.y):Array.isArray(n)&&(f=n[0],c=n[1]),m.blurXFilter=new a.BlurFilterPass(!0,f,o,s,u),m.blurYFilter=new a.BlurFilterPass(!1,c,o,s,u),m.blurYFilter.blendMode=i.BLEND_MODES.SCREEN,m.defaultFilter=new l.AlphaFilter,m}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=e.getFilterTexture();this.defaultFilter.apply(e,n,t,r),this.blurXFilter.apply(e,n,o,1),this.blurYFilter.apply(e,o,t,0),e.returnFilterTexture(o)},Object.defineProperty(n.prototype,"blur",{get:function(){return this.blurXFilter.blur},set:function(e){this.blurXFilter.blur=this.blurYFilter.blur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"blurX",{get:function(){return this.blurXFilter.blur},set:function(e){this.blurXFilter.blur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"blurY",{get:function(){return this.blurYFilter.blur},set:function(e){this.blurYFilter.blur=e},enumerable:!1,configurable:!0}),n}(n.Filter),b=function(e){function n(t){var r=e.call(this,c,"uniform float radius;\nuniform float strength;\nuniform vec2 center;\nuniform sampler2D uSampler;\nvarying vec2 vTextureCoord;\n\nuniform vec4 filterArea;\nuniform vec4 filterClamp;\nuniform vec2 dimensions;\n\nvoid main()\n{\n    vec2 coord = vTextureCoord * filterArea.xy;\n    coord -= center * dimensions.xy;\n    float distance = length(coord);\n    if (distance < radius) {\n        float percent = distance / radius;\n        if (strength > 0.0) {\n            coord *= mix(1.0, smoothstep(0.0, radius / distance, percent), strength * 0.75);\n        } else {\n            coord *= mix(1.0, pow(percent, 1.0 + strength * 0.75) * radius / distance, 1.0 - percent);\n        }\n    }\n    coord += center * dimensions.xy;\n    coord /= filterArea.xy;\n    vec2 clampedCoord = clamp(coord, filterClamp.xy, filterClamp.zw);\n    vec4 color = texture2D(uSampler, clampedCoord);\n    if (coord != clampedCoord) {\n        color *= max(0.0, 1.0 - length(coord - clampedCoord));\n    }\n\n    gl_FragColor = color;\n}\n")||this;return r.uniforms.dimensions=new Float32Array(2),Object.assign(r,n.defaults,t),r}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=n.filterFrame,i=o.width,l=o.height;this.uniforms.dimensions[0]=i,this.uniforms.dimensions[1]=l,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"radius",{get:function(){return this.uniforms.radius},set:function(e){this.uniforms.radius=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"strength",{get:function(){return this.uniforms.strength},set:function(e){this.uniforms.strength=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"center",{get:function(){return this.uniforms.center},set:function(e){this.uniforms.center=e},enumerable:!1,configurable:!0}),n.defaults={center:[.5,.5],radius:100,strength:1},n}(n.Filter),x=function(e){function t(n,t,r){void 0===t&&(t=!1),void 0===r&&(r=1);var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform sampler2D colorMap;\nuniform float _mix;\nuniform float _size;\nuniform float _sliceSize;\nuniform float _slicePixelSize;\nuniform float _sliceInnerSize;\nvoid main() {\n    vec4 color = texture2D(uSampler, vTextureCoord.xy);\n\n    vec4 adjusted;\n    if (color.a > 0.0) {\n        color.rgb /= color.a;\n        float innerWidth = _size - 1.0;\n        float zSlice0 = min(floor(color.b * innerWidth), innerWidth);\n        float zSlice1 = min(zSlice0 + 1.0, innerWidth);\n        float xOffset = _slicePixelSize * 0.5 + color.r * _sliceInnerSize;\n        float s0 = xOffset + (zSlice0 * _sliceSize);\n        float s1 = xOffset + (zSlice1 * _sliceSize);\n        float yOffset = _sliceSize * 0.5 + color.g * (1.0 - _sliceSize);\n        vec4 slice0Color = texture2D(colorMap, vec2(s0,yOffset));\n        vec4 slice1Color = texture2D(colorMap, vec2(s1,yOffset));\n        float zOffset = fract(color.b * innerWidth);\n        adjusted = mix(slice0Color, slice1Color, zOffset);\n\n        color.rgb *= color.a;\n    }\n    gl_FragColor = vec4(mix(color, adjusted, _mix).rgb, color.a);\n\n}")||this;return o.mix=1,o._size=0,o._sliceSize=0,o._slicePixelSize=0,o._sliceInnerSize=0,o._nearest=!1,o._scaleMode=null,o._colorMap=null,o._scaleMode=null,o.nearest=t,o.mix=r,o.colorMap=n,o}return u(t,e),t.prototype.apply=function(e,n,t,r){this.uniforms._mix=this.mix,e.applyFilter(this,n,t,r)},Object.defineProperty(t.prototype,"colorSize",{get:function(){return this._size},enumerable:!1,configurable:!0}),Object.defineProperty(t.prototype,"colorMap",{get:function(){return this._colorMap},set:function(e){var t;e&&(e instanceof n.Texture||(e=n.Texture.from(e)),(null===(t=e)||void 0===t?void 0:t.baseTexture)&&(e.baseTexture.scaleMode=this._scaleMode,e.baseTexture.mipmap=i.MIPMAP_MODES.OFF,this._size=e.height,this._sliceSize=1/this._size,this._slicePixelSize=this._sliceSize/this._size,this._sliceInnerSize=this._slicePixelSize*(this._size-1),this.uniforms._size=this._size,this.uniforms._sliceSize=this._sliceSize,this.uniforms._slicePixelSize=this._slicePixelSize,this.uniforms._sliceInnerSize=this._sliceInnerSize,this.uniforms.colorMap=e),this._colorMap=e)},enumerable:!1,configurable:!0}),Object.defineProperty(t.prototype,"nearest",{get:function(){return this._nearest},set:function(e){this._nearest=e,this._scaleMode=e?i.SCALE_MODES.NEAREST:i.SCALE_MODES.LINEAR;var n=this._colorMap;n&&n.baseTexture&&(n.baseTexture._glTextures={},n.baseTexture.scaleMode=this._scaleMode,n.baseTexture.mipmap=i.MIPMAP_MODES.OFF,n._updateID++,n.baseTexture.emit("update",n.baseTexture))},enumerable:!1,configurable:!0}),t.prototype.updateColorMap=function(){var e=this._colorMap;e&&e.baseTexture&&(e._updateID++,e.baseTexture.emit("update",e.baseTexture),this.colorMap=e)},t.prototype.destroy=function(n){void 0===n&&(n=!1),this._colorMap&&this._colorMap.destroy(n),e.prototype.destroy.call(this)},t}(n.Filter),_=function(e){function n(n,t){void 0===n&&(n=0),void 0===t&&(t=1);var r=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec3 color;\nuniform float alpha;\n\nvoid main(void) {\n    vec4 currentColor = texture2D(uSampler, vTextureCoord);\n    gl_FragColor = vec4(mix(currentColor.rgb, color.rgb, currentColor.a * alpha), currentColor.a);\n}\n")||this;return r._color=0,r._alpha=1,r.uniforms.color=new Float32Array(3),r.color=n,r.alpha=t,r}return u(n,e),Object.defineProperty(n.prototype,"color",{get:function(){return this._color},set:function(e){var n=this.uniforms.color;"number"==typeof e?(o.hex2rgb(e,n),this._color=e):(n[0]=e[0],n[1]=e[1],n[2]=e[2],this._color=o.rgb2hex(n))},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"alpha",{get:function(){return this._alpha},set:function(e){this.uniforms.alpha=e,this._alpha=e},enumerable:!1,configurable:!0}),n}(n.Filter),C=function(e){function n(n,t,r){void 0===n&&(n=16711680),void 0===t&&(t=0),void 0===r&&(r=.4);var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec3 originalColor;\nuniform vec3 newColor;\nuniform float epsilon;\nvoid main(void) {\n    vec4 currentColor = texture2D(uSampler, vTextureCoord);\n    vec3 colorDiff = originalColor - (currentColor.rgb / max(currentColor.a, 0.0000000001));\n    float colorDistance = length(colorDiff);\n    float doReplace = step(colorDistance, epsilon);\n    gl_FragColor = vec4(mix(currentColor.rgb, (newColor + colorDiff) * currentColor.a, doReplace), currentColor.a);\n}\n")||this;return o._originalColor=16711680,o._newColor=0,o.uniforms.originalColor=new Float32Array(3),o.uniforms.newColor=new Float32Array(3),o.originalColor=n,o.newColor=t,o.epsilon=r,o}return u(n,e),Object.defineProperty(n.prototype,"originalColor",{get:function(){return this._originalColor},set:function(e){var n=this.uniforms.originalColor;"number"==typeof e?(o.hex2rgb(e,n),this._originalColor=e):(n[0]=e[0],n[1]=e[1],n[2]=e[2],this._originalColor=o.rgb2hex(n))},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"newColor",{get:function(){return this._newColor},set:function(e){var n=this.uniforms.newColor;"number"==typeof e?(o.hex2rgb(e,n),this._newColor=e):(n[0]=e[0],n[1]=e[1],n[2]=e[2],this._newColor=o.rgb2hex(n))},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"epsilon",{get:function(){return this.uniforms.epsilon},set:function(e){this.uniforms.epsilon=e},enumerable:!1,configurable:!0}),n}(n.Filter),S=function(e){function n(n,t,r){void 0===t&&(t=200),void 0===r&&(r=200);var o=e.call(this,c,"precision mediump float;\n\nvarying mediump vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform vec2 texelSize;\nuniform float matrix[9];\n\nvoid main(void)\n{\n   vec4 c11 = texture2D(uSampler, vTextureCoord - texelSize); // top left\n   vec4 c12 = texture2D(uSampler, vec2(vTextureCoord.x, vTextureCoord.y - texelSize.y)); // top center\n   vec4 c13 = texture2D(uSampler, vec2(vTextureCoord.x + texelSize.x, vTextureCoord.y - texelSize.y)); // top right\n\n   vec4 c21 = texture2D(uSampler, vec2(vTextureCoord.x - texelSize.x, vTextureCoord.y)); // mid left\n   vec4 c22 = texture2D(uSampler, vTextureCoord); // mid center\n   vec4 c23 = texture2D(uSampler, vec2(vTextureCoord.x + texelSize.x, vTextureCoord.y)); // mid right\n\n   vec4 c31 = texture2D(uSampler, vec2(vTextureCoord.x - texelSize.x, vTextureCoord.y + texelSize.y)); // bottom left\n   vec4 c32 = texture2D(uSampler, vec2(vTextureCoord.x, vTextureCoord.y + texelSize.y)); // bottom center\n   vec4 c33 = texture2D(uSampler, vTextureCoord + texelSize); // bottom right\n\n   gl_FragColor =\n       c11 * matrix[0] + c12 * matrix[1] + c13 * matrix[2] +\n       c21 * matrix[3] + c22 * matrix[4] + c23 * matrix[5] +\n       c31 * matrix[6] + c32 * matrix[7] + c33 * matrix[8];\n\n   gl_FragColor.a = c22.a;\n}\n")||this;return o.uniforms.texelSize=new Float32Array(2),o.uniforms.matrix=new Float32Array(9),void 0!==n&&(o.matrix=n),o.width=t,o.height=r,o}return u(n,e),Object.defineProperty(n.prototype,"matrix",{get:function(){return this.uniforms.matrix},set:function(e){var n=this;e.forEach((function(e,t){n.uniforms.matrix[t]=e}))},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"width",{get:function(){return 1/this.uniforms.texelSize[0]},set:function(e){this.uniforms.texelSize[0]=1/e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"height",{get:function(){return 1/this.uniforms.texelSize[1]},set:function(e){this.uniforms.texelSize[1]=1/e},enumerable:!1,configurable:!0}),n}(n.Filter),F=function(e){function n(){return e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\n\nvoid main(void)\n{\n    float lum = length(texture2D(uSampler, vTextureCoord.xy).rgb);\n\n    gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);\n\n    if (lum < 1.00)\n    {\n        if (mod(gl_FragCoord.x + gl_FragCoord.y, 10.0) == 0.0)\n        {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n        }\n    }\n\n    if (lum < 0.75)\n    {\n        if (mod(gl_FragCoord.x - gl_FragCoord.y, 10.0) == 0.0)\n        {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n        }\n    }\n\n    if (lum < 0.50)\n    {\n        if (mod(gl_FragCoord.x + gl_FragCoord.y - 5.0, 10.0) == 0.0)\n        {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n        }\n    }\n\n    if (lum < 0.3)\n    {\n        if (mod(gl_FragCoord.x - gl_FragCoord.y - 5.0, 10.0) == 0.0)\n        {\n            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);\n        }\n    }\n}\n")||this}return u(n,e),n}(n.Filter),z=function(e){function n(t){var r=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec4 filterArea;\nuniform vec2 dimensions;\n\nconst float SQRT_2 = 1.414213;\n\nconst float light = 1.0;\n\nuniform float curvature;\nuniform float lineWidth;\nuniform float lineContrast;\nuniform bool verticalLine;\nuniform float noise;\nuniform float noiseSize;\n\nuniform float vignetting;\nuniform float vignettingAlpha;\nuniform float vignettingBlur;\n\nuniform float seed;\nuniform float time;\n\nfloat rand(vec2 co) {\n    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);\n}\n\nvoid main(void)\n{\n    vec2 pixelCoord = vTextureCoord.xy * filterArea.xy;\n    vec2 dir = vec2(vTextureCoord.xy * filterArea.xy / dimensions - vec2(0.5, 0.5));\n    \n    gl_FragColor = texture2D(uSampler, vTextureCoord);\n    vec3 rgb = gl_FragColor.rgb;\n\n    if (noise > 0.0 && noiseSize > 0.0)\n    {\n        pixelCoord.x = floor(pixelCoord.x / noiseSize);\n        pixelCoord.y = floor(pixelCoord.y / noiseSize);\n        float _noise = rand(pixelCoord * noiseSize * seed) - 0.5;\n        rgb += _noise * noise;\n    }\n\n    if (lineWidth > 0.0)\n    {\n        float _c = curvature > 0. ? curvature : 1.;\n        float k = curvature > 0. ?(length(dir * dir) * 0.25 * _c * _c + 0.935 * _c) : 1.;\n        vec2 uv = dir * k;\n\n        float v = (verticalLine ? uv.x * dimensions.x : uv.y * dimensions.y) * min(1.0, 2.0 / lineWidth ) / _c;\n        float j = 1. + cos(v * 1.2 - time) * 0.5 * lineContrast;\n        rgb *= j;\n        float segment = verticalLine ? mod((dir.x + .5) * dimensions.x, 4.) : mod((dir.y + .5) * dimensions.y, 4.);\n        rgb *= 0.99 + ceil(segment) * 0.015;\n    }\n\n    if (vignetting > 0.0)\n    {\n        float outter = SQRT_2 - vignetting * SQRT_2;\n        float darker = clamp((outter - length(dir) * SQRT_2) / ( 0.00001 + vignettingBlur * SQRT_2), 0.0, 1.0);\n        rgb *= darker + (1.0 - darker) * (1.0 - vignettingAlpha);\n    }\n\n    gl_FragColor.rgb = rgb;\n}\n")||this;return r.time=0,r.seed=0,r.uniforms.dimensions=new Float32Array(2),Object.assign(r,n.defaults,t),r}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=n.filterFrame,i=o.width,l=o.height;this.uniforms.dimensions[0]=i,this.uniforms.dimensions[1]=l,this.uniforms.seed=this.seed,this.uniforms.time=this.time,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"curvature",{get:function(){return this.uniforms.curvature},set:function(e){this.uniforms.curvature=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"lineWidth",{get:function(){return this.uniforms.lineWidth},set:function(e){this.uniforms.lineWidth=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"lineContrast",{get:function(){return this.uniforms.lineContrast},set:function(e){this.uniforms.lineContrast=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"verticalLine",{get:function(){return this.uniforms.verticalLine},set:function(e){this.uniforms.verticalLine=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"noise",{get:function(){return this.uniforms.noise},set:function(e){this.uniforms.noise=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"noiseSize",{get:function(){return this.uniforms.noiseSize},set:function(e){this.uniforms.noiseSize=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignetting",{get:function(){return this.uniforms.vignetting},set:function(e){this.uniforms.vignetting=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignettingAlpha",{get:function(){return this.uniforms.vignettingAlpha},set:function(e){this.uniforms.vignettingAlpha=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignettingBlur",{get:function(){return this.uniforms.vignettingBlur},set:function(e){this.uniforms.vignettingBlur=e},enumerable:!1,configurable:!0}),n.defaults={curvature:1,lineWidth:1,lineContrast:.25,verticalLine:!1,noise:0,noiseSize:1,seed:0,vignetting:.3,vignettingAlpha:1,vignettingBlur:.3,time:0},n}(n.Filter),O=function(e){function n(n,t){void 0===n&&(n=1),void 0===t&&(t=5);var r=e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\nvarying vec4 vColor;\n\nuniform vec4 filterArea;\nuniform sampler2D uSampler;\n\nuniform float angle;\nuniform float scale;\n\nfloat pattern()\n{\n   float s = sin(angle), c = cos(angle);\n   vec2 tex = vTextureCoord * filterArea.xy;\n   vec2 point = vec2(\n       c * tex.x - s * tex.y,\n       s * tex.x + c * tex.y\n   ) * scale;\n   return (sin(point.x) * sin(point.y)) * 4.0;\n}\n\nvoid main()\n{\n   vec4 color = texture2D(uSampler, vTextureCoord);\n   float average = (color.r + color.g + color.b) / 3.0;\n   gl_FragColor = vec4(vec3(average * 10.0 - 5.0 + pattern()), color.a);\n}\n")||this;return r.scale=n,r.angle=t,r}return u(n,e),Object.defineProperty(n.prototype,"scale",{get:function(){return this.uniforms.scale},set:function(e){this.uniforms.scale=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"angle",{get:function(){return this.uniforms.angle},set:function(e){this.uniforms.angle=e},enumerable:!1,configurable:!0}),n}(n.Filter),P=function(e){function i(o){var l=e.call(this)||this;l.angle=45,l._distance=5,l._resolution=r.settings.FILTER_RESOLUTION;var a=o?f(f({},i.defaults),o):i.defaults,s=a.kernels,u=a.blur,m=a.quality,p=a.pixelSize,h=a.resolution;l._tintFilter=new n.Filter(c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform float alpha;\nuniform vec3 color;\n\nuniform vec2 shift;\nuniform vec4 inputSize;\n\nvoid main(void){\n    vec4 sample = texture2D(uSampler, vTextureCoord - shift * inputSize.zw);\n\n    // Premultiply alpha\n    sample.rgb = color.rgb * sample.a;\n\n    // alpha user alpha\n    sample *= alpha;\n\n    gl_FragColor = sample;\n}"),l._tintFilter.uniforms.color=new Float32Array(4),l._tintFilter.uniforms.shift=new t.Point,l._tintFilter.resolution=h,l._blurFilter=s?new d(s):new d(u,m),l.pixelSize=p,l.resolution=h;var g=a.shadowOnly,v=a.rotation,y=a.distance,b=a.alpha,x=a.color;return l.shadowOnly=g,l.rotation=v,l.distance=y,l.alpha=b,l.color=x,l._updatePadding(),l}return u(i,e),i.prototype.apply=function(e,n,t,r){var o=e.getFilterTexture();this._tintFilter.apply(e,n,o,1),this._blurFilter.apply(e,o,t,r),!0!==this.shadowOnly&&e.applyFilter(this,n,t,0),e.returnFilterTexture(o)},i.prototype._updatePadding=function(){this.padding=this.distance+2*this.blur},i.prototype._updateShift=function(){this._tintFilter.uniforms.shift.set(this.distance*Math.cos(this.angle),this.distance*Math.sin(this.angle))},Object.defineProperty(i.prototype,"resolution",{get:function(){return this._resolution},set:function(e){this._resolution=e,this._tintFilter&&(this._tintFilter.resolution=e),this._blurFilter&&(this._blurFilter.resolution=e)},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"distance",{get:function(){return this._distance},set:function(e){this._distance=e,this._updatePadding(),this._updateShift()},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"rotation",{get:function(){return this.angle/t.DEG_TO_RAD},set:function(e){this.angle=e*t.DEG_TO_RAD,this._updateShift()},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"alpha",{get:function(){return this._tintFilter.uniforms.alpha},set:function(e){this._tintFilter.uniforms.alpha=e},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"color",{get:function(){return o.rgb2hex(this._tintFilter.uniforms.color)},set:function(e){o.hex2rgb(e,this._tintFilter.uniforms.color)},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"kernels",{get:function(){return this._blurFilter.kernels},set:function(e){this._blurFilter.kernels=e},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"blur",{get:function(){return this._blurFilter.blur},set:function(e){this._blurFilter.blur=e,this._updatePadding()},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"quality",{get:function(){return this._blurFilter.quality},set:function(e){this._blurFilter.quality=e},enumerable:!1,configurable:!0}),Object.defineProperty(i.prototype,"pixelSize",{get:function(){return this._blurFilter.pixelSize},set:function(e){this._blurFilter.pixelSize=e},enumerable:!1,configurable:!0}),i.defaults={rotation:45,distance:5,color:0,alpha:.5,shadowOnly:!1,kernels:null,blur:2,quality:3,pixelSize:1,resolution:r.settings.FILTER_RESOLUTION},i}(n.Filter),A=function(e){function n(n){void 0===n&&(n=5);var t=e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform float strength;\nuniform vec4 filterArea;\n\n\nvoid main(void)\n{\n\tvec2 onePixel = vec2(1.0 / filterArea);\n\n\tvec4 color;\n\n\tcolor.rgb = vec3(0.5);\n\n\tcolor -= texture2D(uSampler, vTextureCoord - onePixel) * strength;\n\tcolor += texture2D(uSampler, vTextureCoord + onePixel) * strength;\n\n\tcolor.rgb = vec3((color.r + color.g + color.b) / 3.0);\n\n\tfloat alpha = texture2D(uSampler, vTextureCoord).a;\n\n\tgl_FragColor = vec4(color.rgb * alpha, alpha);\n}\n")||this;return t.strength=n,t}return u(n,e),Object.defineProperty(n.prototype,"strength",{get:function(){return this.uniforms.strength},set:function(e){this.uniforms.strength=e},enumerable:!1,configurable:!0}),n}(n.Filter),T=function(e){function r(t){var o=e.call(this,c,"// precision highp float;\n\nvarying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec4 filterArea;\nuniform vec4 filterClamp;\nuniform vec2 dimensions;\nuniform float aspect;\n\nuniform sampler2D displacementMap;\nuniform float offset;\nuniform float sinDir;\nuniform float cosDir;\nuniform int fillMode;\n\nuniform float seed;\nuniform vec2 red;\nuniform vec2 green;\nuniform vec2 blue;\n\nconst int TRANSPARENT = 0;\nconst int ORIGINAL = 1;\nconst int LOOP = 2;\nconst int CLAMP = 3;\nconst int MIRROR = 4;\n\nvoid main(void)\n{\n    vec2 coord = (vTextureCoord * filterArea.xy) / dimensions;\n\n    if (coord.x > 1.0 || coord.y > 1.0) {\n        return;\n    }\n\n    float cx = coord.x - 0.5;\n    float cy = (coord.y - 0.5) * aspect;\n    float ny = (-sinDir * cx + cosDir * cy) / aspect + 0.5;\n\n    // displacementMap: repeat\n    // ny = ny > 1.0 ? ny - 1.0 : (ny < 0.0 ? 1.0 + ny : ny);\n\n    // displacementMap: mirror\n    ny = ny > 1.0 ? 2.0 - ny : (ny < 0.0 ? -ny : ny);\n\n    vec4 dc = texture2D(displacementMap, vec2(0.5, ny));\n\n    float displacement = (dc.r - dc.g) * (offset / filterArea.x);\n\n    coord = vTextureCoord + vec2(cosDir * displacement, sinDir * displacement * aspect);\n\n    if (fillMode == CLAMP) {\n        coord = clamp(coord, filterClamp.xy, filterClamp.zw);\n    } else {\n        if( coord.x > filterClamp.z ) {\n            if (fillMode == TRANSPARENT) {\n                discard;\n            } else if (fillMode == LOOP) {\n                coord.x -= filterClamp.z;\n            } else if (fillMode == MIRROR) {\n                coord.x = filterClamp.z * 2.0 - coord.x;\n            }\n        } else if( coord.x < filterClamp.x ) {\n            if (fillMode == TRANSPARENT) {\n                discard;\n            } else if (fillMode == LOOP) {\n                coord.x += filterClamp.z;\n            } else if (fillMode == MIRROR) {\n                coord.x *= -filterClamp.z;\n            }\n        }\n\n        if( coord.y > filterClamp.w ) {\n            if (fillMode == TRANSPARENT) {\n                discard;\n            } else if (fillMode == LOOP) {\n                coord.y -= filterClamp.w;\n            } else if (fillMode == MIRROR) {\n                coord.y = filterClamp.w * 2.0 - coord.y;\n            }\n        } else if( coord.y < filterClamp.y ) {\n            if (fillMode == TRANSPARENT) {\n                discard;\n            } else if (fillMode == LOOP) {\n                coord.y += filterClamp.w;\n            } else if (fillMode == MIRROR) {\n                coord.y *= -filterClamp.w;\n            }\n        }\n    }\n\n    gl_FragColor.r = texture2D(uSampler, coord + red * (1.0 - seed * 0.4) / filterArea.xy).r;\n    gl_FragColor.g = texture2D(uSampler, coord + green * (1.0 - seed * 0.3) / filterArea.xy).g;\n    gl_FragColor.b = texture2D(uSampler, coord + blue * (1.0 - seed * 0.2) / filterArea.xy).b;\n    gl_FragColor.a = texture2D(uSampler, coord).a;\n}\n")||this;return o.offset=100,o.fillMode=r.TRANSPARENT,o.average=!1,o.seed=0,o.minSize=8,o.sampleSize=512,o._slices=0,o._offsets=new Float32Array(1),o._sizes=new Float32Array(1),o._direction=-1,o.uniforms.dimensions=new Float32Array(2),o._canvas=document.createElement("canvas"),o._canvas.width=4,o._canvas.height=o.sampleSize,o.texture=n.Texture.from(o._canvas,{scaleMode:i.SCALE_MODES.NEAREST}),Object.assign(o,r.defaults,t),o}return u(r,e),r.prototype.apply=function(e,n,t,r){var o=n.filterFrame,i=o.width,l=o.height;this.uniforms.dimensions[0]=i,this.uniforms.dimensions[1]=l,this.uniforms.aspect=l/i,this.uniforms.seed=this.seed,this.uniforms.offset=this.offset,this.uniforms.fillMode=this.fillMode,e.applyFilter(this,n,t,r)},r.prototype._randomizeSizes=function(){var e=this._sizes,n=this._slices-1,t=this.sampleSize,r=Math.min(this.minSize/t,.9/this._slices);if(this.average){for(var o=this._slices,i=1,l=0;l<n;l++){var a=i/(o-l),s=Math.max(a*(1-.6*Math.random()),r);e[l]=s,i-=s}e[n]=i}else{i=1;var u=Math.sqrt(1/this._slices);for(l=0;l<n;l++){s=Math.max(u*i*Math.random(),r);e[l]=s,i-=s}e[n]=i}this.shuffle()},r.prototype.shuffle=function(){for(var e=this._sizes,n=this._slices-1;n>0;n--){var t=Math.random()*n>>0,r=e[n];e[n]=e[t],e[t]=r}},r.prototype._randomizeOffsets=function(){for(var e=0;e<this._slices;e++)this._offsets[e]=Math.random()*(Math.random()<.5?-1:1)},r.prototype.refresh=function(){this._randomizeSizes(),this._randomizeOffsets(),this.redraw()},r.prototype.redraw=function(){var e,n=this.sampleSize,t=this.texture,r=this._canvas.getContext("2d");r.clearRect(0,0,8,n);for(var o=0,i=0;i<this._slices;i++){e=Math.floor(256*this._offsets[i]);var l=this._sizes[i]*n,a=e>0?e:0,s=e<0?-e:0;r.fillStyle="rgba("+a+", "+s+", 0, 1)",r.fillRect(0,o>>0,n,l+1>>0),o+=l}t.baseTexture.update(),this.uniforms.displacementMap=t},Object.defineProperty(r.prototype,"sizes",{get:function(){return this._sizes},set:function(e){for(var n=Math.min(this._slices,e.length),t=0;t<n;t++)this._sizes[t]=e[t]},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"offsets",{get:function(){return this._offsets},set:function(e){for(var n=Math.min(this._slices,e.length),t=0;t<n;t++)this._offsets[t]=e[t]},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"slices",{get:function(){return this._slices},set:function(e){this._slices!==e&&(this._slices=e,this.uniforms.slices=e,this._sizes=this.uniforms.slicesWidth=new Float32Array(e),this._offsets=this.uniforms.slicesOffset=new Float32Array(e),this.refresh())},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"direction",{get:function(){return this._direction},set:function(e){if(this._direction!==e){this._direction=e;var n=e*t.DEG_TO_RAD;this.uniforms.sinDir=Math.sin(n),this.uniforms.cosDir=Math.cos(n)}},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"red",{get:function(){return this.uniforms.red},set:function(e){this.uniforms.red=e},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"green",{get:function(){return this.uniforms.green},set:function(e){this.uniforms.green=e},enumerable:!1,configurable:!0}),Object.defineProperty(r.prototype,"blue",{get:function(){return this.uniforms.blue},set:function(e){this.uniforms.blue=e},enumerable:!1,configurable:!0}),r.prototype.destroy=function(){var e;null===(e=this.texture)||void 0===e||e.destroy(!0),this.texture=this._canvas=this.red=this.green=this.blue=this._sizes=this._offsets=null},r.defaults={slices:5,offset:100,direction:0,fillMode:0,average:!1,seed:0,red:[0,0],green:[0,0],blue:[0,0],minSize:8,sampleSize:512},r.TRANSPARENT=0,r.ORIGINAL=1,r.LOOP=2,r.CLAMP=3,r.MIRROR=4,r}(n.Filter),w=function(e){function n(t){var r=this,o=Object.assign({},n.defaults,t),i=o.outerStrength,l=o.innerStrength,a=o.color,s=o.knockout,u=o.quality,f=Math.round(o.distance);return(r=e.call(this,c,"varying vec2 vTextureCoord;\nvarying vec4 vColor;\n\nuniform sampler2D uSampler;\n\nuniform float outerStrength;\nuniform float innerStrength;\n\nuniform vec4 glowColor;\n\nuniform vec4 filterArea;\nuniform vec4 filterClamp;\nuniform bool knockout;\n\nconst float PI = 3.14159265358979323846264;\n\nconst float DIST = __DIST__;\nconst float ANGLE_STEP_SIZE = min(__ANGLE_STEP_SIZE__, PI * 2.0);\nconst float ANGLE_STEP_NUM = ceil(PI * 2.0 / ANGLE_STEP_SIZE);\n\nconst float MAX_TOTAL_ALPHA = ANGLE_STEP_NUM * DIST * (DIST + 1.0) / 2.0;\n\nvoid main(void) {\n    vec2 px = vec2(1.0 / filterArea.x, 1.0 / filterArea.y);\n\n    float totalAlpha = 0.0;\n\n    vec2 direction;\n    vec2 displaced;\n    vec4 curColor;\n\n    for (float angle = 0.0; angle < PI * 2.0; angle += ANGLE_STEP_SIZE) {\n       direction = vec2(cos(angle), sin(angle)) * px;\n\n       for (float curDistance = 0.0; curDistance < DIST; curDistance++) {\n           displaced = clamp(vTextureCoord + direction * \n                   (curDistance + 1.0), filterClamp.xy, filterClamp.zw);\n\n           curColor = texture2D(uSampler, displaced);\n\n           totalAlpha += (DIST - curDistance) * curColor.a;\n       }\n    }\n    \n    curColor = texture2D(uSampler, vTextureCoord);\n\n    float alphaRatio = (totalAlpha / MAX_TOTAL_ALPHA);\n\n    float innerGlowAlpha = (1.0 - alphaRatio) * innerStrength * curColor.a;\n    float innerGlowStrength = min(1.0, innerGlowAlpha);\n    \n    vec4 innerColor = mix(curColor, glowColor, innerGlowStrength);\n\n    float outerGlowAlpha = alphaRatio * outerStrength * (1. - curColor.a);\n    float outerGlowStrength = min(1.0 - innerColor.a, outerGlowAlpha);\n\n    vec4 outerGlowColor = outerGlowStrength * glowColor.rgba;\n    \n    if (knockout) {\n      float resultAlpha = outerGlowAlpha + innerGlowAlpha;\n      gl_FragColor = vec4(glowColor.rgb * resultAlpha, resultAlpha);\n    }\n    else {\n      gl_FragColor = innerColor + outerGlowColor;\n    }\n}\n".replace(/__ANGLE_STEP_SIZE__/gi,""+(1/u/f).toFixed(7)).replace(/__DIST__/gi,f.toFixed(0)+".0"))||this).uniforms.glowColor=new Float32Array([0,0,0,1]),Object.assign(r,{color:a,outerStrength:i,innerStrength:l,padding:f,knockout:s}),r}return u(n,e),Object.defineProperty(n.prototype,"color",{get:function(){return o.rgb2hex(this.uniforms.glowColor)},set:function(e){o.hex2rgb(e,this.uniforms.glowColor)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"outerStrength",{get:function(){return this.uniforms.outerStrength},set:function(e){this.uniforms.outerStrength=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"innerStrength",{get:function(){return this.uniforms.innerStrength},set:function(e){this.uniforms.innerStrength=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"knockout",{get:function(){return this.uniforms.knockout},set:function(e){this.uniforms.knockout=e},enumerable:!1,configurable:!0}),n.defaults={distance:10,outerStrength:4,innerStrength:0,color:16777215,quality:.1,knockout:!1},n}(n.Filter),D=function(e){function n(r){var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\nuniform vec2 dimensions;\n\nuniform vec2 light;\nuniform bool parallel;\nuniform float aspect;\n\nuniform float gain;\nuniform float lacunarity;\nuniform float time;\nuniform float alpha;\n\n${perlin}\n\nvoid main(void) {\n    vec2 coord = vTextureCoord * filterArea.xy / dimensions.xy;\n\n    float d;\n\n    if (parallel) {\n        float _cos = light.x;\n        float _sin = light.y;\n        d = (_cos * coord.x) + (_sin * coord.y * aspect);\n    } else {\n        float dx = coord.x - light.x / dimensions.x;\n        float dy = (coord.y - light.y / dimensions.y) * aspect;\n        float dis = sqrt(dx * dx + dy * dy) + 0.00001;\n        d = dy / dis;\n    }\n\n    vec3 dir = vec3(d, d, 0.0);\n\n    float noise = turb(dir + vec3(time, 0.0, 62.1 + time) * 0.05, vec3(480.0, 320.0, 480.0), lacunarity, gain);\n    noise = mix(noise, 0.0, 0.3);\n    //fade vertically.\n    vec4 mist = vec4(noise, noise, noise, 1.0) * (1.0 - coord.y);\n    mist.a = 1.0;\n    // apply user alpha\n    mist *= alpha;\n\n    gl_FragColor = texture2D(uSampler, vTextureCoord) + mist;\n\n}\n".replace("${perlin}","vec3 mod289(vec3 x)\n{\n    return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\nvec4 mod289(vec4 x)\n{\n    return x - floor(x * (1.0 / 289.0)) * 289.0;\n}\nvec4 permute(vec4 x)\n{\n    return mod289(((x * 34.0) + 1.0) * x);\n}\nvec4 taylorInvSqrt(vec4 r)\n{\n    return 1.79284291400159 - 0.85373472095314 * r;\n}\nvec3 fade(vec3 t)\n{\n    return t * t * t * (t * (t * 6.0 - 15.0) + 10.0);\n}\n// Classic Perlin noise, periodic variant\nfloat pnoise(vec3 P, vec3 rep)\n{\n    vec3 Pi0 = mod(floor(P), rep); // Integer part, modulo period\n    vec3 Pi1 = mod(Pi0 + vec3(1.0), rep); // Integer part + 1, mod period\n    Pi0 = mod289(Pi0);\n    Pi1 = mod289(Pi1);\n    vec3 Pf0 = fract(P); // Fractional part for interpolation\n    vec3 Pf1 = Pf0 - vec3(1.0); // Fractional part - 1.0\n    vec4 ix = vec4(Pi0.x, Pi1.x, Pi0.x, Pi1.x);\n    vec4 iy = vec4(Pi0.yy, Pi1.yy);\n    vec4 iz0 = Pi0.zzzz;\n    vec4 iz1 = Pi1.zzzz;\n    vec4 ixy = permute(permute(ix) + iy);\n    vec4 ixy0 = permute(ixy + iz0);\n    vec4 ixy1 = permute(ixy + iz1);\n    vec4 gx0 = ixy0 * (1.0 / 7.0);\n    vec4 gy0 = fract(floor(gx0) * (1.0 / 7.0)) - 0.5;\n    gx0 = fract(gx0);\n    vec4 gz0 = vec4(0.5) - abs(gx0) - abs(gy0);\n    vec4 sz0 = step(gz0, vec4(0.0));\n    gx0 -= sz0 * (step(0.0, gx0) - 0.5);\n    gy0 -= sz0 * (step(0.0, gy0) - 0.5);\n    vec4 gx1 = ixy1 * (1.0 / 7.0);\n    vec4 gy1 = fract(floor(gx1) * (1.0 / 7.0)) - 0.5;\n    gx1 = fract(gx1);\n    vec4 gz1 = vec4(0.5) - abs(gx1) - abs(gy1);\n    vec4 sz1 = step(gz1, vec4(0.0));\n    gx1 -= sz1 * (step(0.0, gx1) - 0.5);\n    gy1 -= sz1 * (step(0.0, gy1) - 0.5);\n    vec3 g000 = vec3(gx0.x, gy0.x, gz0.x);\n    vec3 g100 = vec3(gx0.y, gy0.y, gz0.y);\n    vec3 g010 = vec3(gx0.z, gy0.z, gz0.z);\n    vec3 g110 = vec3(gx0.w, gy0.w, gz0.w);\n    vec3 g001 = vec3(gx1.x, gy1.x, gz1.x);\n    vec3 g101 = vec3(gx1.y, gy1.y, gz1.y);\n    vec3 g011 = vec3(gx1.z, gy1.z, gz1.z);\n    vec3 g111 = vec3(gx1.w, gy1.w, gz1.w);\n    vec4 norm0 = taylorInvSqrt(vec4(dot(g000, g000), dot(g010, g010), dot(g100, g100), dot(g110, g110)));\n    g000 *= norm0.x;\n    g010 *= norm0.y;\n    g100 *= norm0.z;\n    g110 *= norm0.w;\n    vec4 norm1 = taylorInvSqrt(vec4(dot(g001, g001), dot(g011, g011), dot(g101, g101), dot(g111, g111)));\n    g001 *= norm1.x;\n    g011 *= norm1.y;\n    g101 *= norm1.z;\n    g111 *= norm1.w;\n    float n000 = dot(g000, Pf0);\n    float n100 = dot(g100, vec3(Pf1.x, Pf0.yz));\n    float n010 = dot(g010, vec3(Pf0.x, Pf1.y, Pf0.z));\n    float n110 = dot(g110, vec3(Pf1.xy, Pf0.z));\n    float n001 = dot(g001, vec3(Pf0.xy, Pf1.z));\n    float n101 = dot(g101, vec3(Pf1.x, Pf0.y, Pf1.z));\n    float n011 = dot(g011, vec3(Pf0.x, Pf1.yz));\n    float n111 = dot(g111, Pf1);\n    vec3 fade_xyz = fade(Pf0);\n    vec4 n_z = mix(vec4(n000, n100, n010, n110), vec4(n001, n101, n011, n111), fade_xyz.z);\n    vec2 n_yz = mix(n_z.xy, n_z.zw, fade_xyz.y);\n    float n_xyz = mix(n_yz.x, n_yz.y, fade_xyz.x);\n    return 2.2 * n_xyz;\n}\nfloat turb(vec3 P, vec3 rep, float lacunarity, float gain)\n{\n    float sum = 0.0;\n    float sc = 1.0;\n    float totalgain = 1.0;\n    for (float i = 0.0; i < 6.0; i++)\n    {\n        sum += totalgain * pnoise(P * sc, rep);\n        sc *= lacunarity;\n        totalgain *= gain;\n    }\n    return abs(sum);\n}\n"))||this;o.parallel=!0,o.time=0,o._angle=0,o.uniforms.dimensions=new Float32Array(2);var i=Object.assign(n.defaults,r);return o._angleLight=new t.Point,o.angle=i.angle,o.gain=i.gain,o.lacunarity=i.lacunarity,o.alpha=i.alpha,o.parallel=i.parallel,o.center=i.center,o.time=i.time,o}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=n.filterFrame,i=o.width,l=o.height;this.uniforms.light=this.parallel?this._angleLight:this.center,this.uniforms.parallel=this.parallel,this.uniforms.dimensions[0]=i,this.uniforms.dimensions[1]=l,this.uniforms.aspect=l/i,this.uniforms.time=this.time,this.uniforms.alpha=this.alpha,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"angle",{get:function(){return this._angle},set:function(e){this._angle=e;var n=e*t.DEG_TO_RAD;this._angleLight.x=Math.cos(n),this._angleLight.y=Math.sin(n)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"gain",{get:function(){return this.uniforms.gain},set:function(e){this.uniforms.gain=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"lacunarity",{get:function(){return this.uniforms.lacunarity},set:function(e){this.uniforms.lacunarity=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"alpha",{get:function(){return this.uniforms.alpha},set:function(e){this.uniforms.alpha=e},enumerable:!1,configurable:!0}),n.defaults={angle:30,gain:.5,lacunarity:2.5,time:0,parallel:!0,center:[0,0],alpha:1},n}(n.Filter),j=function(e){function n(n,r,o){void 0===n&&(n=[0,0]),void 0===r&&(r=5),void 0===o&&(o=0);var i=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\n\nuniform vec2 uVelocity;\nuniform int uKernelSize;\nuniform float uOffset;\n\nconst int MAX_KERNEL_SIZE = 2048;\n\n// Notice:\n// the perfect way:\n//    int kernelSize = min(uKernelSize, MAX_KERNELSIZE);\n// BUT in real use-case , uKernelSize < MAX_KERNELSIZE almost always.\n// So use uKernelSize directly.\n\nvoid main(void)\n{\n    vec4 color = texture2D(uSampler, vTextureCoord);\n\n    if (uKernelSize == 0)\n    {\n        gl_FragColor = color;\n        return;\n    }\n\n    vec2 velocity = uVelocity / filterArea.xy;\n    float offset = -uOffset / length(uVelocity) - 0.5;\n    int k = uKernelSize - 1;\n\n    for(int i = 0; i < MAX_KERNEL_SIZE - 1; i++) {\n        if (i == k) {\n            break;\n        }\n        vec2 bias = velocity * (float(i) / float(k) + offset);\n        color += texture2D(uSampler, vTextureCoord + bias);\n    }\n    gl_FragColor = color / float(uKernelSize);\n}\n")||this;return i.kernelSize=5,i.uniforms.uVelocity=new Float32Array(2),i._velocity=new t.ObservablePoint(i.velocityChanged,i),i.setVelocity(n),i.kernelSize=r,i.offset=o,i}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=this.velocity,i=o.x,l=o.y;this.uniforms.uKernelSize=0!==i||0!==l?this.kernelSize:0,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"velocity",{get:function(){return this._velocity},set:function(e){this.setVelocity(e)},enumerable:!1,configurable:!0}),n.prototype.setVelocity=function(e){if(Array.isArray(e)){var n=e[0],t=e[1];this._velocity.set(n,t)}else this._velocity.copyFrom(e)},n.prototype.velocityChanged=function(){this.uniforms.uVelocity[0]=this._velocity.x,this.uniforms.uVelocity[1]=this._velocity.y,this.padding=1+(Math.max(Math.abs(this._velocity.x),Math.abs(this._velocity.y))>>0)},Object.defineProperty(n.prototype,"offset",{get:function(){return this.uniforms.uOffset},set:function(e){this.uniforms.uOffset=e},enumerable:!1,configurable:!0}),n}(n.Filter),M=function(e){function n(n,t,r){void 0===t&&(t=.05),void 0===r&&(r=n.length);var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform float epsilon;\n\nconst int MAX_COLORS = %maxColors%;\n\nuniform vec3 originalColors[MAX_COLORS];\nuniform vec3 targetColors[MAX_COLORS];\n\nvoid main(void)\n{\n    gl_FragColor = texture2D(uSampler, vTextureCoord);\n\n    float alpha = gl_FragColor.a;\n    if (alpha < 0.0001)\n    {\n      return;\n    }\n\n    vec3 color = gl_FragColor.rgb / alpha;\n\n    for(int i = 0; i < MAX_COLORS; i++)\n    {\n      vec3 origColor = originalColors[i];\n      if (origColor.r < 0.0)\n      {\n        break;\n      }\n      vec3 colorDiff = origColor - color;\n      if (length(colorDiff) < epsilon)\n      {\n        vec3 targetColor = targetColors[i];\n        gl_FragColor = vec4((targetColor + colorDiff) * alpha, alpha);\n        return;\n      }\n    }\n}\n".replace(/%maxColors%/g,r.toFixed(0)))||this;return o._replacements=[],o._maxColors=0,o.epsilon=t,o._maxColors=r,o.uniforms.originalColors=new Float32Array(3*r),o.uniforms.targetColors=new Float32Array(3*r),o.replacements=n,o}return u(n,e),Object.defineProperty(n.prototype,"replacements",{get:function(){return this._replacements},set:function(e){var n=this.uniforms.originalColors,t=this.uniforms.targetColors,r=e.length;if(r>this._maxColors)throw new Error("Length of replacements ("+r+") exceeds the maximum colors length ("+this._maxColors+")");n[3*r]=-1;for(var i=0;i<r;i++){var l=e[i],a=l[0];"number"==typeof a?a=o.hex2rgb(a):l[0]=o.rgb2hex(a),n[3*i]=a[0],n[3*i+1]=a[1],n[3*i+2]=a[2];var s=l[1];"number"==typeof s?s=o.hex2rgb(s):l[1]=o.rgb2hex(s),t[3*i]=s[0],t[3*i+1]=s[1],t[3*i+2]=s[2]}this._replacements=e},enumerable:!1,configurable:!0}),n.prototype.refresh=function(){this.replacements=this._replacements},Object.defineProperty(n.prototype,"maxColors",{get:function(){return this._maxColors},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"epsilon",{get:function(){return this.uniforms.epsilon},set:function(e){this.uniforms.epsilon=e},enumerable:!1,configurable:!0}),n}(n.Filter),R=function(e){function n(t,r){void 0===r&&(r=0);var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\nuniform vec2 dimensions;\n\nuniform float sepia;\nuniform float noise;\nuniform float noiseSize;\nuniform float scratch;\nuniform float scratchDensity;\nuniform float scratchWidth;\nuniform float vignetting;\nuniform float vignettingAlpha;\nuniform float vignettingBlur;\nuniform float seed;\n\nconst float SQRT_2 = 1.414213;\nconst vec3 SEPIA_RGB = vec3(112.0 / 255.0, 66.0 / 255.0, 20.0 / 255.0);\n\nfloat rand(vec2 co) {\n    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);\n}\n\nvec3 Overlay(vec3 src, vec3 dst)\n{\n    // if (dst <= 0.5) then: 2 * src * dst\n    // if (dst > 0.5) then: 1 - 2 * (1 - dst) * (1 - src)\n    return vec3((dst.x <= 0.5) ? (2.0 * src.x * dst.x) : (1.0 - 2.0 * (1.0 - dst.x) * (1.0 - src.x)),\n                (dst.y <= 0.5) ? (2.0 * src.y * dst.y) : (1.0 - 2.0 * (1.0 - dst.y) * (1.0 - src.y)),\n                (dst.z <= 0.5) ? (2.0 * src.z * dst.z) : (1.0 - 2.0 * (1.0 - dst.z) * (1.0 - src.z)));\n}\n\n\nvoid main()\n{\n    gl_FragColor = texture2D(uSampler, vTextureCoord);\n    vec3 color = gl_FragColor.rgb;\n\n    if (sepia > 0.0)\n    {\n        float gray = (color.x + color.y + color.z) / 3.0;\n        vec3 grayscale = vec3(gray);\n\n        color = Overlay(SEPIA_RGB, grayscale);\n\n        color = grayscale + sepia * (color - grayscale);\n    }\n\n    vec2 coord = vTextureCoord * filterArea.xy / dimensions.xy;\n\n    if (vignetting > 0.0)\n    {\n        float outter = SQRT_2 - vignetting * SQRT_2;\n        vec2 dir = vec2(vec2(0.5, 0.5) - coord);\n        dir.y *= dimensions.y / dimensions.x;\n        float darker = clamp((outter - length(dir) * SQRT_2) / ( 0.00001 + vignettingBlur * SQRT_2), 0.0, 1.0);\n        color.rgb *= darker + (1.0 - darker) * (1.0 - vignettingAlpha);\n    }\n\n    if (scratchDensity > seed && scratch != 0.0)\n    {\n        float phase = seed * 256.0;\n        float s = mod(floor(phase), 2.0);\n        float dist = 1.0 / scratchDensity;\n        float d = distance(coord, vec2(seed * dist, abs(s - seed * dist)));\n        if (d < seed * 0.6 + 0.4)\n        {\n            highp float period = scratchDensity * 10.0;\n\n            float xx = coord.x * period + phase;\n            float aa = abs(mod(xx, 0.5) * 4.0);\n            float bb = mod(floor(xx / 0.5), 2.0);\n            float yy = (1.0 - bb) * aa + bb * (2.0 - aa);\n\n            float kk = 2.0 * period;\n            float dw = scratchWidth / dimensions.x * (0.75 + seed);\n            float dh = dw * kk;\n\n            float tine = (yy - (2.0 - dh));\n\n            if (tine > 0.0) {\n                float _sign = sign(scratch);\n\n                tine = s * tine / period + scratch + 0.1;\n                tine = clamp(tine + 1.0, 0.5 + _sign * 0.5, 1.5 + _sign * 0.5);\n\n                color.rgb *= tine;\n            }\n        }\n    }\n\n    if (noise > 0.0 && noiseSize > 0.0)\n    {\n        vec2 pixelCoord = vTextureCoord.xy * filterArea.xy;\n        pixelCoord.x = floor(pixelCoord.x / noiseSize);\n        pixelCoord.y = floor(pixelCoord.y / noiseSize);\n        // vec2 d = pixelCoord * noiseSize * vec2(1024.0 + seed * 512.0, 1024.0 - seed * 512.0);\n        // float _noise = snoise(d) * 0.5;\n        float _noise = rand(pixelCoord * noiseSize * seed) - 0.5;\n        color += _noise * noise;\n    }\n\n    gl_FragColor.rgb = color;\n}\n")||this;return o.seed=0,o.uniforms.dimensions=new Float32Array(2),"number"==typeof t?(o.seed=t,t=void 0):o.seed=r,Object.assign(o,n.defaults,t),o}return u(n,e),n.prototype.apply=function(e,n,t,r){var o,i;this.uniforms.dimensions[0]=null===(o=n.filterFrame)||void 0===o?void 0:o.width,this.uniforms.dimensions[1]=null===(i=n.filterFrame)||void 0===i?void 0:i.height,this.uniforms.seed=this.seed,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"sepia",{get:function(){return this.uniforms.sepia},set:function(e){this.uniforms.sepia=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"noise",{get:function(){return this.uniforms.noise},set:function(e){this.uniforms.noise=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"noiseSize",{get:function(){return this.uniforms.noiseSize},set:function(e){this.uniforms.noiseSize=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"scratch",{get:function(){return this.uniforms.scratch},set:function(e){this.uniforms.scratch=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"scratchDensity",{get:function(){return this.uniforms.scratchDensity},set:function(e){this.uniforms.scratchDensity=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"scratchWidth",{get:function(){return this.uniforms.scratchWidth},set:function(e){this.uniforms.scratchWidth=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignetting",{get:function(){return this.uniforms.vignetting},set:function(e){this.uniforms.vignetting=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignettingAlpha",{get:function(){return this.uniforms.vignettingAlpha},set:function(e){this.uniforms.vignettingAlpha=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"vignettingBlur",{get:function(){return this.uniforms.vignettingBlur},set:function(e){this.uniforms.vignettingBlur=e},enumerable:!1,configurable:!0}),n.defaults={sepia:.3,noise:.3,noiseSize:1,scratch:.5,scratchDensity:.3,scratchWidth:1,vignetting:.3,vignettingAlpha:1,vignettingBlur:.3},n}(n.Filter),E=function(e){function n(t,r,o){void 0===t&&(t=1),void 0===r&&(r=0),void 0===o&&(o=.1);var i=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec2 thickness;\nuniform vec4 outlineColor;\nuniform vec4 filterClamp;\n\nconst float DOUBLE_PI = 3.14159265358979323846264 * 2.;\n\nvoid main(void) {\n    vec4 ownColor = texture2D(uSampler, vTextureCoord);\n    vec4 curColor;\n    float maxAlpha = 0.;\n    vec2 displaced;\n    for (float angle = 0.; angle <= DOUBLE_PI; angle += ${angleStep}) {\n        displaced.x = vTextureCoord.x + thickness.x * cos(angle);\n        displaced.y = vTextureCoord.y + thickness.y * sin(angle);\n        curColor = texture2D(uSampler, clamp(displaced, filterClamp.xy, filterClamp.zw));\n        maxAlpha = max(maxAlpha, curColor.a);\n    }\n    float resultAlpha = max(maxAlpha, ownColor.a);\n    gl_FragColor = vec4((ownColor.rgb + outlineColor.rgb * (1. - ownColor.a)) * resultAlpha, resultAlpha);\n}\n".replace(/\$\{angleStep\}/,n.getAngleStep(o)))||this;return i._thickness=1,i.uniforms.thickness=new Float32Array([0,0]),i.uniforms.outlineColor=new Float32Array([0,0,0,1]),Object.assign(i,{thickness:t,color:r,quality:o}),i}return u(n,e),n.getAngleStep=function(e){var t=Math.max(e*n.MAX_SAMPLES,n.MIN_SAMPLES);return(2*Math.PI/t).toFixed(7)},n.prototype.apply=function(e,n,t,r){this.uniforms.thickness[0]=this._thickness/n._frame.width,this.uniforms.thickness[1]=this._thickness/n._frame.height,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"color",{get:function(){return o.rgb2hex(this.uniforms.outlineColor)},set:function(e){o.hex2rgb(e,this.uniforms.outlineColor)},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"thickness",{get:function(){return this._thickness},set:function(e){this._thickness=e,this.padding=e},enumerable:!1,configurable:!0}),n.MIN_SAMPLES=1,n.MAX_SAMPLES=100,n}(n.Filter),I=function(e){function n(n){void 0===n&&(n=10);var t=e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\n\nuniform vec2 size;\nuniform sampler2D uSampler;\n\nuniform vec4 filterArea;\n\nvec2 mapCoord( vec2 coord )\n{\n    coord *= filterArea.xy;\n    coord += filterArea.zw;\n\n    return coord;\n}\n\nvec2 unmapCoord( vec2 coord )\n{\n    coord -= filterArea.zw;\n    coord /= filterArea.xy;\n\n    return coord;\n}\n\nvec2 pixelate(vec2 coord, vec2 size)\n{\n\treturn floor( coord / size ) * size;\n}\n\nvoid main(void)\n{\n    vec2 coord = mapCoord(vTextureCoord);\n\n    coord = pixelate(coord, size);\n\n    coord = unmapCoord(coord);\n\n    gl_FragColor = texture2D(uSampler, coord);\n}\n")||this;return t.size=n,t}return u(n,e),Object.defineProperty(n.prototype,"size",{get:function(){return this.uniforms.size},set:function(e){"number"==typeof e&&(e=[e,e]),this.uniforms.size=e},enumerable:!1,configurable:!0}),n}(n.Filter),k=function(e){function n(n,t,r,o){void 0===n&&(n=0),void 0===t&&(t=[0,0]),void 0===r&&(r=5),void 0===o&&(o=-1);var i=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\n\nuniform float uRadian;\nuniform vec2 uCenter;\nuniform float uRadius;\nuniform int uKernelSize;\n\nconst int MAX_KERNEL_SIZE = 2048;\n\nvoid main(void)\n{\n    vec4 color = texture2D(uSampler, vTextureCoord);\n\n    if (uKernelSize == 0)\n    {\n        gl_FragColor = color;\n        return;\n    }\n\n    float aspect = filterArea.y / filterArea.x;\n    vec2 center = uCenter.xy / filterArea.xy;\n    float gradient = uRadius / filterArea.x * 0.3;\n    float radius = uRadius / filterArea.x - gradient * 0.5;\n    int k = uKernelSize - 1;\n\n    vec2 coord = vTextureCoord;\n    vec2 dir = vec2(center - coord);\n    float dist = length(vec2(dir.x, dir.y * aspect));\n\n    float radianStep = uRadian;\n    if (radius >= 0.0 && dist > radius) {\n        float delta = dist - radius;\n        float gap = gradient;\n        float scale = 1.0 - abs(delta / gap);\n        if (scale <= 0.0) {\n            gl_FragColor = color;\n            return;\n        }\n        radianStep *= scale;\n    }\n    radianStep /= float(k);\n\n    float s = sin(radianStep);\n    float c = cos(radianStep);\n    mat2 rotationMatrix = mat2(vec2(c, -s), vec2(s, c));\n\n    for(int i = 0; i < MAX_KERNEL_SIZE - 1; i++) {\n        if (i == k) {\n            break;\n        }\n\n        coord -= center;\n        coord.y *= aspect;\n        coord = rotationMatrix * coord;\n        coord.y /= aspect;\n        coord += center;\n\n        vec4 sample = texture2D(uSampler, coord);\n\n        // switch to pre-multiplied alpha to correctly blur transparent images\n        // sample.rgb *= sample.a;\n\n        color += sample;\n    }\n\n    gl_FragColor = color / float(uKernelSize);\n}\n")||this;return i._angle=0,i.angle=n,i.center=t,i.kernelSize=r,i.radius=o,i}return u(n,e),n.prototype.apply=function(e,n,t,r){this.uniforms.uKernelSize=0!==this._angle?this.kernelSize:0,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"angle",{get:function(){return this._angle},set:function(e){this._angle=e,this.uniforms.uRadian=e*Math.PI/180},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"center",{get:function(){return this.uniforms.uCenter},set:function(e){this.uniforms.uCenter=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"radius",{get:function(){return this.uniforms.uRadius},set:function(e){(e<0||e===1/0)&&(e=-1),this.uniforms.uRadius=e},enumerable:!1,configurable:!0}),n}(n.Filter),L=function(e){function n(t){var r=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\n\nuniform vec4 filterArea;\nuniform vec4 filterClamp;\nuniform vec2 dimensions;\n\nuniform bool mirror;\nuniform float boundary;\nuniform vec2 amplitude;\nuniform vec2 waveLength;\nuniform vec2 alpha;\nuniform float time;\n\nfloat rand(vec2 co) {\n    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);\n}\n\nvoid main(void)\n{\n    vec2 pixelCoord = vTextureCoord.xy * filterArea.xy;\n    vec2 coord = pixelCoord / dimensions;\n\n    if (coord.y < boundary) {\n        gl_FragColor = texture2D(uSampler, vTextureCoord);\n        return;\n    }\n\n    float k = (coord.y - boundary) / (1. - boundary + 0.0001);\n    float areaY = boundary * dimensions.y / filterArea.y;\n    float v = areaY + areaY - vTextureCoord.y;\n    float y = mirror ? v : vTextureCoord.y;\n\n    float _amplitude = ((amplitude.y - amplitude.x) * k + amplitude.x ) / filterArea.x;\n    float _waveLength = ((waveLength.y - waveLength.x) * k + waveLength.x) / filterArea.y;\n    float _alpha = (alpha.y - alpha.x) * k + alpha.x;\n\n    float x = vTextureCoord.x + cos(v * 6.28 / _waveLength - time) * _amplitude;\n    x = clamp(x, filterClamp.x, filterClamp.z);\n\n    vec4 color = texture2D(uSampler, vec2(x, y));\n\n    gl_FragColor = color * _alpha;\n}\n")||this;return r.time=0,r.uniforms.amplitude=new Float32Array(2),r.uniforms.waveLength=new Float32Array(2),r.uniforms.alpha=new Float32Array(2),r.uniforms.dimensions=new Float32Array(2),Object.assign(r,n.defaults,t),r}return u(n,e),n.prototype.apply=function(e,n,t,r){var o,i;this.uniforms.dimensions[0]=null===(o=n.filterFrame)||void 0===o?void 0:o.width,this.uniforms.dimensions[1]=null===(i=n.filterFrame)||void 0===i?void 0:i.height,this.uniforms.time=this.time,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"mirror",{get:function(){return this.uniforms.mirror},set:function(e){this.uniforms.mirror=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"boundary",{get:function(){return this.uniforms.boundary},set:function(e){this.uniforms.boundary=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"amplitude",{get:function(){return this.uniforms.amplitude},set:function(e){this.uniforms.amplitude[0]=e[0],this.uniforms.amplitude[1]=e[1]},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"waveLength",{get:function(){return this.uniforms.waveLength},set:function(e){this.uniforms.waveLength[0]=e[0],this.uniforms.waveLength[1]=e[1]},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"alpha",{get:function(){return this.uniforms.alpha},set:function(e){this.uniforms.alpha[0]=e[0],this.uniforms.alpha[1]=e[1]},enumerable:!1,configurable:!0}),n.defaults={mirror:!0,boundary:.5,amplitude:[0,20],waveLength:[30,100],alpha:[1,1],time:0},n}(n.Filter),N=function(e){function n(n,t,r){void 0===n&&(n=[-10,0]),void 0===t&&(t=[0,10]),void 0===r&&(r=[0,0]);var o=e.call(this,c,"precision mediump float;\n\nvarying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\nuniform vec2 red;\nuniform vec2 green;\nuniform vec2 blue;\n\nvoid main(void)\n{\n   gl_FragColor.r = texture2D(uSampler, vTextureCoord + red/filterArea.xy).r;\n   gl_FragColor.g = texture2D(uSampler, vTextureCoord + green/filterArea.xy).g;\n   gl_FragColor.b = texture2D(uSampler, vTextureCoord + blue/filterArea.xy).b;\n   gl_FragColor.a = texture2D(uSampler, vTextureCoord).a;\n}\n")||this;return o.red=n,o.green=t,o.blue=r,o}return u(n,e),Object.defineProperty(n.prototype,"red",{get:function(){return this.uniforms.red},set:function(e){this.uniforms.red=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"green",{get:function(){return this.uniforms.green},set:function(e){this.uniforms.green=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"blue",{get:function(){return this.uniforms.blue},set:function(e){this.uniforms.blue=e},enumerable:!1,configurable:!0}),n}(n.Filter),X=function(e){function n(t,r,o){void 0===t&&(t=[0,0]),void 0===o&&(o=0);var i=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\nuniform vec4 filterClamp;\n\nuniform vec2 center;\n\nuniform float amplitude;\nuniform float wavelength;\n// uniform float power;\nuniform float brightness;\nuniform float speed;\nuniform float radius;\n\nuniform float time;\n\nconst float PI = 3.14159;\n\nvoid main()\n{\n    float halfWavelength = wavelength * 0.5 / filterArea.x;\n    float maxRadius = radius / filterArea.x;\n    float currentRadius = time * speed / filterArea.x;\n\n    float fade = 1.0;\n\n    if (maxRadius > 0.0) {\n        if (currentRadius > maxRadius) {\n            gl_FragColor = texture2D(uSampler, vTextureCoord);\n            return;\n        }\n        fade = 1.0 - pow(currentRadius / maxRadius, 2.0);\n    }\n\n    vec2 dir = vec2(vTextureCoord - center / filterArea.xy);\n    dir.y *= filterArea.y / filterArea.x;\n    float dist = length(dir);\n\n    if (dist <= 0.0 || dist < currentRadius - halfWavelength || dist > currentRadius + halfWavelength) {\n        gl_FragColor = texture2D(uSampler, vTextureCoord);\n        return;\n    }\n\n    vec2 diffUV = normalize(dir);\n\n    float diff = (dist - currentRadius) / halfWavelength;\n\n    float p = 1.0 - pow(abs(diff), 2.0);\n\n    // float powDiff = diff * pow(p, 2.0) * ( amplitude * fade );\n    float powDiff = 1.25 * sin(diff * PI) * p * ( amplitude * fade );\n\n    vec2 offset = diffUV * powDiff / filterArea.xy;\n\n    // Do clamp :\n    vec2 coord = vTextureCoord + offset;\n    vec2 clampedCoord = clamp(coord, filterClamp.xy, filterClamp.zw);\n    vec4 color = texture2D(uSampler, clampedCoord);\n    if (coord != clampedCoord) {\n        color *= max(0.0, 1.0 - length(coord - clampedCoord));\n    }\n\n    // No clamp :\n    // gl_FragColor = texture2D(uSampler, vTextureCoord + offset);\n\n    color.rgb *= 1.0 + (brightness - 1.0) * p * fade;\n\n    gl_FragColor = color;\n}\n")||this;return i.center=t,Object.assign(i,n.defaults,r),i.time=o,i}return u(n,e),n.prototype.apply=function(e,n,t,r){this.uniforms.time=this.time,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"center",{get:function(){return this.uniforms.center},set:function(e){this.uniforms.center=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"amplitude",{get:function(){return this.uniforms.amplitude},set:function(e){this.uniforms.amplitude=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"wavelength",{get:function(){return this.uniforms.wavelength},set:function(e){this.uniforms.wavelength=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"brightness",{get:function(){return this.uniforms.brightness},set:function(e){this.uniforms.brightness=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"speed",{get:function(){return this.uniforms.speed},set:function(e){this.uniforms.speed=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"radius",{get:function(){return this.uniforms.radius},set:function(e){this.uniforms.radius=e},enumerable:!1,configurable:!0}),n.defaults={amplitude:30,wavelength:160,brightness:1,speed:500,radius:-1},n}(n.Filter),B=function(e){function n(n,t,r){void 0===t&&(t=0),void 0===r&&(r=1);var o=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform sampler2D uLightmap;\nuniform vec4 filterArea;\nuniform vec2 dimensions;\nuniform vec4 ambientColor;\nvoid main() {\n    vec4 diffuseColor = texture2D(uSampler, vTextureCoord);\n    vec2 lightCoord = (vTextureCoord * filterArea.xy) / dimensions;\n    vec4 light = texture2D(uLightmap, lightCoord);\n    vec3 ambient = ambientColor.rgb * ambientColor.a;\n    vec3 intensity = ambient + light.rgb;\n    vec3 finalColor = diffuseColor.rgb * intensity;\n    gl_FragColor = vec4(finalColor, diffuseColor.a);\n}\n")||this;return o._color=0,o.uniforms.dimensions=new Float32Array(2),o.uniforms.ambientColor=new Float32Array([0,0,0,r]),o.texture=n,o.color=t,o}return u(n,e),n.prototype.apply=function(e,n,t,r){var o,i;this.uniforms.dimensions[0]=null===(o=n.filterFrame)||void 0===o?void 0:o.width,this.uniforms.dimensions[1]=null===(i=n.filterFrame)||void 0===i?void 0:i.height,e.applyFilter(this,n,t,r)},Object.defineProperty(n.prototype,"texture",{get:function(){return this.uniforms.uLightmap},set:function(e){this.uniforms.uLightmap=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"color",{get:function(){return this._color},set:function(e){var n=this.uniforms.ambientColor;"number"==typeof e?(o.hex2rgb(e,n),this._color=e):(n[0]=e[0],n[1]=e[1],n[2]=e[2],n[3]=e[3],this._color=o.rgb2hex(n))},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"alpha",{get:function(){return this.uniforms.ambientColor[3]},set:function(e){this.uniforms.ambientColor[3]=e},enumerable:!1,configurable:!0}),n}(n.Filter),G=function(e){function n(n,r,o,i){void 0===n&&(n=100),void 0===r&&(r=600);var l=e.call(this,c,"varying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform float blur;\nuniform float gradientBlur;\nuniform vec2 start;\nuniform vec2 end;\nuniform vec2 delta;\nuniform vec2 texSize;\n\nfloat random(vec3 scale, float seed)\n{\n    return fract(sin(dot(gl_FragCoord.xyz + seed, scale)) * 43758.5453 + seed);\n}\n\nvoid main(void)\n{\n    vec4 color = vec4(0.0);\n    float total = 0.0;\n\n    float offset = random(vec3(12.9898, 78.233, 151.7182), 0.0);\n    vec2 normal = normalize(vec2(start.y - end.y, end.x - start.x));\n    float radius = smoothstep(0.0, 1.0, abs(dot(vTextureCoord * texSize - start, normal)) / gradientBlur) * blur;\n\n    for (float t = -30.0; t <= 30.0; t++)\n    {\n        float percent = (t + offset - 0.5) / 30.0;\n        float weight = 1.0 - abs(percent);\n        vec4 sample = texture2D(uSampler, vTextureCoord + delta / texSize * percent * radius);\n        sample.rgb *= sample.a;\n        color += sample * weight;\n        total += weight;\n    }\n\n    color /= total;\n    color.rgb /= color.a + 0.00001;\n\n    gl_FragColor = color;\n}\n")||this;return l.uniforms.blur=n,l.uniforms.gradientBlur=r,l.uniforms.start=o||new t.Point(0,window.innerHeight/2),l.uniforms.end=i||new t.Point(600,window.innerHeight/2),l.uniforms.delta=new t.Point(30,30),l.uniforms.texSize=new t.Point(window.innerWidth,window.innerHeight),l.updateDelta(),l}return u(n,e),n.prototype.updateDelta=function(){this.uniforms.delta.x=0,this.uniforms.delta.y=0},Object.defineProperty(n.prototype,"blur",{get:function(){return this.uniforms.blur},set:function(e){this.uniforms.blur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"gradientBlur",{get:function(){return this.uniforms.gradientBlur},set:function(e){this.uniforms.gradientBlur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"start",{get:function(){return this.uniforms.start},set:function(e){this.uniforms.start=e,this.updateDelta()},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"end",{get:function(){return this.uniforms.end},set:function(e){this.uniforms.end=e,this.updateDelta()},enumerable:!1,configurable:!0}),n}(n.Filter),K=function(e){function n(){return null!==e&&e.apply(this,arguments)||this}return u(n,e),n.prototype.updateDelta=function(){var e=this.uniforms.end.x-this.uniforms.start.x,n=this.uniforms.end.y-this.uniforms.start.y,t=Math.sqrt(e*e+n*n);this.uniforms.delta.x=e/t,this.uniforms.delta.y=n/t},n}(G),q=function(e){function n(){return null!==e&&e.apply(this,arguments)||this}return u(n,e),n.prototype.updateDelta=function(){var e=this.uniforms.end.x-this.uniforms.start.x,n=this.uniforms.end.y-this.uniforms.start.y,t=Math.sqrt(e*e+n*n);this.uniforms.delta.x=-n/t,this.uniforms.delta.y=e/t},n}(G),W=function(e){function n(n,t,r,o){void 0===n&&(n=100),void 0===t&&(t=600);var i=e.call(this)||this;return i.tiltShiftXFilter=new K(n,t,r,o),i.tiltShiftYFilter=new q(n,t,r,o),i}return u(n,e),n.prototype.apply=function(e,n,t,r){var o=e.getFilterTexture();this.tiltShiftXFilter.apply(e,n,o,1),this.tiltShiftYFilter.apply(e,o,t,r),e.returnFilterTexture(o)},Object.defineProperty(n.prototype,"blur",{get:function(){return this.tiltShiftXFilter.blur},set:function(e){this.tiltShiftXFilter.blur=this.tiltShiftYFilter.blur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"gradientBlur",{get:function(){return this.tiltShiftXFilter.gradientBlur},set:function(e){this.tiltShiftXFilter.gradientBlur=this.tiltShiftYFilter.gradientBlur=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"start",{get:function(){return this.tiltShiftXFilter.start},set:function(e){this.tiltShiftXFilter.start=this.tiltShiftYFilter.start=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"end",{get:function(){return this.tiltShiftXFilter.end},set:function(e){this.tiltShiftXFilter.end=this.tiltShiftYFilter.end=e},enumerable:!1,configurable:!0}),n}(n.Filter),Y=function(e){function n(t){var r=e.call(this,c,"varying vec2 vTextureCoord;\n\nuniform sampler2D uSampler;\nuniform float radius;\nuniform float angle;\nuniform vec2 offset;\nuniform vec4 filterArea;\n\nvec2 mapCoord( vec2 coord )\n{\n    coord *= filterArea.xy;\n    coord += filterArea.zw;\n\n    return coord;\n}\n\nvec2 unmapCoord( vec2 coord )\n{\n    coord -= filterArea.zw;\n    coord /= filterArea.xy;\n\n    return coord;\n}\n\nvec2 twist(vec2 coord)\n{\n    coord -= offset;\n\n    float dist = length(coord);\n\n    if (dist < radius)\n    {\n        float ratioDist = (radius - dist) / radius;\n        float angleMod = ratioDist * ratioDist * angle;\n        float s = sin(angleMod);\n        float c = cos(angleMod);\n        coord = vec2(coord.x * c - coord.y * s, coord.x * s + coord.y * c);\n    }\n\n    coord += offset;\n\n    return coord;\n}\n\nvoid main(void)\n{\n\n    vec2 coord = mapCoord(vTextureCoord);\n\n    coord = twist(coord);\n\n    coord = unmapCoord(coord);\n\n    gl_FragColor = texture2D(uSampler, coord );\n\n}\n")||this;return Object.assign(r,n.defaults,t),r}return u(n,e),Object.defineProperty(n.prototype,"offset",{get:function(){return this.uniforms.offset},set:function(e){this.uniforms.offset=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"radius",{get:function(){return this.uniforms.radius},set:function(e){this.uniforms.radius=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"angle",{get:function(){return this.uniforms.angle},set:function(e){this.uniforms.angle=e},enumerable:!1,configurable:!0}),n.defaults={radius:200,angle:4,padding:20,offset:new t.Point},n}(n.Filter),Z=function(e){function n(t){var r,o=Object.assign(n.defaults,t),i=o.maxKernelSize,l=function(e,n){var t={};for(var r in e)Object.prototype.hasOwnProperty.call(e,r)&&n.indexOf(r)<0&&(t[r]=e[r]);if(null!=e&&"function"==typeof Object.getOwnPropertySymbols){var o=0;for(r=Object.getOwnPropertySymbols(e);o<r.length;o++)n.indexOf(r[o])<0&&Object.prototype.propertyIsEnumerable.call(e,r[o])&&(t[r[o]]=e[r[o]])}return t}(o,["maxKernelSize"]);return r=e.call(this,c,"varying vec2 vTextureCoord;\nuniform sampler2D uSampler;\nuniform vec4 filterArea;\n\nuniform vec2 uCenter;\nuniform float uStrength;\nuniform float uInnerRadius;\nuniform float uRadius;\n\nconst float MAX_KERNEL_SIZE = ${maxKernelSize};\n\n// author: http://byteblacksmith.com/improvements-to-the-canonical-one-liner-glsl-rand-for-opengl-es-2-0/\nhighp float rand(vec2 co, float seed) {\n    const highp float a = 12.9898, b = 78.233, c = 43758.5453;\n    highp float dt = dot(co + seed, vec2(a, b)), sn = mod(dt, 3.14159);\n    return fract(sin(sn) * c + seed);\n}\n\nvoid main() {\n\n    float minGradient = uInnerRadius * 0.3;\n    float innerRadius = (uInnerRadius + minGradient * 0.5) / filterArea.x;\n\n    float gradient = uRadius * 0.3;\n    float radius = (uRadius - gradient * 0.5) / filterArea.x;\n\n    float countLimit = MAX_KERNEL_SIZE;\n\n    vec2 dir = vec2(uCenter.xy / filterArea.xy - vTextureCoord);\n    float dist = length(vec2(dir.x, dir.y * filterArea.y / filterArea.x));\n\n    float strength = uStrength;\n\n    float delta = 0.0;\n    float gap;\n    if (dist < innerRadius) {\n        delta = innerRadius - dist;\n        gap = minGradient;\n    } else if (radius >= 0.0 && dist > radius) { // radius < 0 means it's infinity\n        delta = dist - radius;\n        gap = gradient;\n    }\n\n    if (delta > 0.0) {\n        float normalCount = gap / filterArea.x;\n        delta = (normalCount - delta) / normalCount;\n        countLimit *= delta;\n        strength *= delta;\n        if (countLimit < 1.0)\n        {\n            gl_FragColor = texture2D(uSampler, vTextureCoord);\n            return;\n        }\n    }\n\n    // randomize the lookup values to hide the fixed number of samples\n    float offset = rand(vTextureCoord, 0.0);\n\n    float total = 0.0;\n    vec4 color = vec4(0.0);\n\n    dir *= strength;\n\n    for (float t = 0.0; t < MAX_KERNEL_SIZE; t++) {\n        float percent = (t + offset) / MAX_KERNEL_SIZE;\n        float weight = 4.0 * (percent - percent * percent);\n        vec2 p = vTextureCoord + dir * percent;\n        vec4 sample = texture2D(uSampler, p);\n\n        // switch to pre-multiplied alpha to correctly blur transparent images\n        // sample.rgb *= sample.a;\n\n        color += sample * weight;\n        total += weight;\n\n        if (t > countLimit){\n            break;\n        }\n    }\n\n    color /= total;\n    // switch back from pre-multiplied alpha\n    // color.rgb /= color.a + 0.00001;\n\n    gl_FragColor = color;\n}\n".replace("${maxKernelSize}",i.toFixed(1)))||this,Object.assign(r,l),r}return u(n,e),Object.defineProperty(n.prototype,"center",{get:function(){return this.uniforms.uCenter},set:function(e){this.uniforms.uCenter=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"strength",{get:function(){return this.uniforms.uStrength},set:function(e){this.uniforms.uStrength=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"innerRadius",{get:function(){return this.uniforms.uInnerRadius},set:function(e){this.uniforms.uInnerRadius=e},enumerable:!1,configurable:!0}),Object.defineProperty(n.prototype,"radius",{get:function(){return this.uniforms.uRadius},set:function(e){(e<0||e===1/0)&&(e=-1),this.uniforms.uRadius=e},enumerable:!1,configurable:!0}),n.defaults={strength:.1,center:[0,0],innerRadius:0,radius:-1,maxKernelSize:32},n}(n.Filter);return e.AdjustmentFilter=m,e.AdvancedBloomFilter=h,e.AsciiFilter=g,e.BevelFilter=v,e.BloomFilter=y,e.BulgePinchFilter=b,e.CRTFilter=z,e.ColorMapFilter=x,e.ColorOverlayFilter=_,e.ColorReplaceFilter=C,e.ConvolutionFilter=S,e.CrossHatchFilter=F,e.DotFilter=O,e.DropShadowFilter=P,e.EmbossFilter=A,e.GlitchFilter=T,e.GlowFilter=w,e.GodrayFilter=D,e.KawaseBlurFilter=d,e.MotionBlurFilter=j,e.MultiColorReplaceFilter=M,e.OldFilmFilter=R,e.OutlineFilter=E,e.PixelateFilter=I,e.RGBSplitFilter=N,e.RadialBlurFilter=k,e.ReflectionFilter=L,e.ShockwaveFilter=X,e.SimpleLightmapFilter=B,e.TiltShiftAxisFilter=G,e.TiltShiftFilter=W,e.TiltShiftXFilter=K,e.TiltShiftYFilter=q,e.TwistFilter=Y,e.ZoomBlurFilter=Z,Object.defineProperty(e,"__esModule",{value:!0}),e}({},PIXI,PIXI,PIXI,PIXI.utils,PIXI,PIXI.filters,PIXI.filters);Object.assign(PIXI.filters,__filters);
+//# sourceMappingURL=pixi-filters.js.map
+
+
 // Generated by CoffeeScript 2.6.1
 // ==========================================================================
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -2138,7 +2150,7 @@ ANET.w = (e) => KDCore.warning('', e);
 // * LIBRARY WITH MZ AND MZ SUPPORT
 //! {OUTER FILE}
 
-//?rev 21.06.22
+//?rev 22.05.24
 var KDCore;
 
 window.Imported = window.Imported || {};
@@ -2149,7 +2161,9 @@ KDCore = KDCore || {};
 
 // * Двузначные числа нельзя в версии, сравнение идёт по первой цифре поулчается (3.43 - нельзя, можно 3.4.3)
 //%[МЕНЯТЬ ПРИ ИЗМЕНЕНИИ]
-KDCore._fileVersion = '2.9.2';
+KDCore._fileVersion = '3.5.2';
+
+KDCore.nuiVersion = '1.0.1';
 
 // * Методы и библиотеки данной версии
 KDCore._loader = 'loader_' + KDCore._fileVersion;
@@ -2233,7 +2247,7 @@ KDCore.registerLibraryToLoad(function() {
     return this.getByField('id', id);
   };
   // * Ищет элемент, у которого поле FIELD (имя поля) == value
-  return Array.prototype.getByField = function(field, value) {
+  Array.prototype.getByField = function(field, value) {
     var e;
     try {
       return this.find(function(item) {
@@ -2245,6 +2259,39 @@ KDCore.registerLibraryToLoad(function() {
       return null;
     }
   };
+  Object.defineProperty(Array.prototype, "delete", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "max", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "min", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "sample", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "first", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "last", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "shuffle", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "count", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "isEmpty", {
+    enumerable: false
+  });
+  Object.defineProperty(Array.prototype, "getById", {
+    enumerable: false
+  });
+  return Object.defineProperty(Array.prototype, "getByField", {
+    enumerable: false
+  });
 });
 
 
@@ -2257,7 +2304,7 @@ KDCore.registerLibraryToLoad(function() {
     return Math.min(Math.max(this, min), max);
   };
   return Number.prototype.any = function(number) {
-    return (number != null) && number > 0;
+    return (number != null) && typeof number === 'number' && number > 0;
   };
 });
 
@@ -2440,7 +2487,7 @@ KDCore.registerLibraryToLoad(function() {
       __alias_Bitmap_blt_kdCore.call(this, ...arguments);
     }
   };
-  Bitmap.prototype.drawIcon = function(x, y, icon, size = 32) {
+  Bitmap.prototype.drawIcon = function(x, y, icon, size = 32, noSmoth = false) {
     var bitmap;
     bitmap = null;
     if (icon instanceof Bitmap) {
@@ -2448,7 +2495,9 @@ KDCore.registerLibraryToLoad(function() {
     } else {
       bitmap = KDCore.BitmapSrc.LoadFromIconIndex(icon).bitmap;
     }
-    return this.drawOnMe(bitmap, x, y, size, size);
+    this._context.imageSmoothingEnabled = !noSmoth;
+    this.drawOnMe(bitmap, x, y, size, size);
+    this._context.imageSmoothingEnabled = true;
   };
   Bitmap.prototype.drawOnMe = function(bitmap, x = 0, y = 0, sw = 0, sh = 0) {
     if (sw <= 0) {
@@ -2459,13 +2508,51 @@ KDCore.registerLibraryToLoad(function() {
     }
     this.blt(bitmap, 0, 0, bitmap.width, bitmap.height, x, y, sw, sh);
   };
-  //TODO: Не работает?
   Bitmap.prototype.drawInMe = function(bitmap) {
     return Bitmap.prototype.drawOnMe(bitmap, 0, 0, this.width, this.height);
   };
   return Bitmap.prototype.drawTextFull = function(text, position = 'center') {
     return this.drawText(text, 0, 0, this.width, this.height, position);
   };
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  KDCore.EasingFuncs = KDCore.EasingFuncs || {};
+  return (function() {
+    var _;
+    _ = KDCore.EasingFuncs;
+    _.linear = function(t, b, c, d) {
+      return c * t / d + b;
+    };
+    _.easeInQuad = function(t, b, c, d) {
+      return c * (t /= d) * t + b;
+    };
+    _.easeOutQuad = function(t, b, c, d) {
+      return -c * (t /= d) * (t - 2) + b;
+    };
+    _.easeInOutQuad = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t + b;
+      } else {
+        return -c / 2 * ((--t) * (t - 2) - 1) + b;
+      }
+    };
+    _.easeInCubic = function(t, b, c, d) {
+      return c * (t /= d) * t * t + b;
+    };
+    _.easeOutCubic = function(t, b, c, d) {
+      return c * ((t = t / d - 1) * t * t + 1) + b;
+    };
+    return _.easeInOutCubic = function(t, b, c, d) {
+      if ((t /= d / 2) < 1) {
+        return c / 2 * t * t * t + b;
+      } else {
+        return c / 2 * ((t -= 2) * t * t + 2) + b;
+      }
+    };
+  })();
 });
 
 
@@ -2502,6 +2589,23 @@ KDCore.registerLibraryToLoad(function() {
 
 // ■ END Game_CharacterBase.coffee
 //---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  // * В MZ нету данной функции, а она часто используется в моих плагинах
+  if (!KDCore.isMZ()) {
+    return;
+  }
+  //?[NEW] (from MV)
+  return ImageManager.loadEmptyBitmap = function() {
+    if (this._emptyBitmap != null) {
+      return this._emptyBitmap;
+    } else {
+      return new Bitmap();
+    }
+  };
+});
 
 
 // Generated by CoffeeScript 2.6.1
@@ -2671,7 +2775,7 @@ KDCore.registerLibraryToLoad(function() {
       return null;
     };
     _.hasMeta = function(symbol, obj) {
-      return (obj.meta != null) && (obj.meta[symbol] != null);
+      return (obj != null) && (obj.meta != null) && (obj.meta[symbol] != null);
     };
     _.getValueFromMeta = function(symbol, obj) {
       if (!_.hasMeta(symbol, obj)) {
@@ -2698,12 +2802,18 @@ KDCore.registerLibraryToLoad(function() {
         return false;
       }
     };
+    _.isMapScene = function() {
+      return this.isSceneMap();
+    };
     _.isSceneBattle = function() {
       try {
         return !SceneManager.isSceneChanging() && SceneManager._scene instanceof Scene_Battle;
       } catch (error) {
         return false;
       }
+    };
+    _.isBattleScene = function() {
+      return this.isSceneBattle();
     };
     _.getEventCommentValue = function(commentCode, list) {
       var comment, e, i, item;
@@ -2845,7 +2955,7 @@ KDCore.registerLibraryToLoad(function() {
       }
     };
     _.loadFont = function(name) {
-      if (!KDCore.isMZ()) {
+      if (typeof FontManager === "undefined" || FontManager === null) {
         return;
       }
       if (String.isNullOrEmpty(name)) {
@@ -3009,6 +3119,272 @@ KDCore.registerLibraryToLoad(function() {
         return null;
       }
     };
+    //@[3.2.1] since
+    _.isValidCE = function(commonEventId) {
+      var e;
+      try {
+        return commonEventId > 0 && ($dataCommonEvents[commonEventId] != null);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return false;
+      }
+    };
+    //@[3.2.1] since
+    _.startCE = function(commonEventId) {
+      var e;
+      try {
+        if (this.isValidCE(commonEventId)) {
+          return $gameTemp.reserveCommonEvent(commonEventId);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    //@[3.2.1] since
+    _.checkSwitch = function(value) {
+      if (value == null) {
+        return false;
+      }
+      if (isFinite(value)) {
+        return false;
+      }
+      return KDCore.SDK.checkSwitch(value);
+    };
+    //@[3.2.1] since
+    // * Вызвать с задержкой в time миллисекунд
+    // * Не забываем про bind
+    _.callDelayed = function(method, time = 1) {
+      var e;
+      try {
+        if (method == null) {
+          return;
+        }
+        setTimeout((function() {
+          var e;
+          try {
+            return method();
+          } catch (error) {
+            e = error;
+            return KDCore.warning(e);
+          }
+        }), time);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+    };
+    //@[3.2.1] since
+    //<meta:1,2,3,4> -> [1,2,3,4]
+    _.getArrayOfNumbersFromMeta = function(symbol, obj) {
+      var e, values;
+      try {
+        values = this.getArrayOfValuesFromMeta(symbol, obj);
+        return values.map(function(v) {
+          return Number(v);
+        });
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return [];
+      }
+    };
+    //@[3.2.1] since
+    //<meta:a,b,c> -> ["a", "b", "c"]
+    //<meta:a> -> ["a"]
+    _.getArrayOfValuesFromMeta = function(symbol, obj) {
+      var e, items, values;
+      try {
+        values = this.getValueFromMeta(symbol, obj);
+        if (String.any(values)) {
+          if (values.contains(',')) {
+            items = values.split(',');
+            return items || [];
+          } else {
+            return [values];
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return [];
+      }
+    };
+    //@[3.2.1] since
+    // * Когда содержит одинаковый набор ключей
+    //<meta:value1>
+    //<meta:value2>
+    //...
+    // -> [value1,value2,...]
+    _.getArrayOfValuesOfSameMeta = function(symbol, obj) {
+      var e, j, len, line, lines, result;
+      try {
+        if (!this.hasMeta(symbol, obj)) {
+          return [];
+        }
+        lines = obj.note.split("\n").filter(function(l) {
+          return l.contains(symbol);
+        });
+        result = [];
+        for (j = 0, len = lines.length; j < len; j++) {
+          line = lines[j];
+          try {
+            line = line.replace("<" + symbol + ":", "");
+            line = line.replace(">", "");
+            result.push(line);
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+          }
+        }
+        return result;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return [];
+    };
+    //@[3.2.7] since
+    _.getIndexIn2DArrayByIJ = function(row, col, cols) {
+      return row * cols + col;
+    };
+    //@[3.2.7] since
+    // * row - строка
+    // * col - столбец
+    _.getIJByIndexIn2DArray = function(index, cols) {
+      var col, e, row;
+      try {
+        row = Math.floor(index / cols);
+        col = index % cols;
+        return [row, col];
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return [0, 0];
+      }
+    };
+    //@[3.2.7] since
+    _.isSwitchIsTRUE = function(switchId) {
+      var e;
+      if (switchId == null) {
+        return true;
+      }
+      if (switchId <= 0) {
+        return true;
+      }
+      try {
+        return $gameSwitches.value(switchId) === true;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return false;
+    };
+    //@[3.5] since
+    _.convertBindingValue = function(sourceObj, bindingValue, element = null) {
+      var e;
+      try {
+        return KDCore.UI.Builder._convertBindingValue(...arguments);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return null;
+    };
+    //@[3.5] since
+    _.getRealSpriteSize = function(forField = 'x', sprite = null) {
+      var e, h, w;
+      try {
+        if (sprite == null) {
+          return 0;
+        }
+        if (forField === 'x' || forField === 'width') {
+          if (sprite.realWidth != null) {
+            w = sprite.realWidth();
+          } else {
+            w = sprite.width;
+          }
+          return w;
+        } else if (forField === 'y' || forField === 'height') {
+          if (sprite.realHeight != null) {
+            h = sprite.realHeight();
+          } else {
+            h = sprite.height;
+          }
+          return h;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return 0;
+    };
+    //@[3.5] since
+    _.string2hex = function(string) {
+      var e;
+      try {
+        if (typeof string === 'string' && string[0] === '#') {
+          string = string.substr(1);
+        }
+        return parseInt(string, 16);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return 0xffffff;
+    };
+    //@[3.5] since
+    _.convertDP = function(value = 0, isHalf = false) {
+      var d, e, mod, modX, modY;
+      try {
+        if (Graphics.width === 816 && Graphics.height === 624) {
+          return value;
+        }
+        modX = Graphics.width / 816;
+        modY = Graphics.height / 624;
+        // Aprox
+        mod = (modX + modY) / 2;
+        if (mod === 0) {
+          return 0;
+        }
+        if (isHalf === true) {
+          if (mod < 1) {
+            d = 1 - mod;
+            mod += d / 2;
+          } else if (mod > 1) {
+            d = mod - 1;
+            mod = 1 + (d / 2);
+          }
+        }
+        return Math.round(value * mod);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return 0;
+    };
+    //@[2.9.7] since
+    // * Shrink number 100000 to "100k" and ect, returns STRING
+    _.formatNumberToK = function(num) {
+      var e;
+      try {
+        if (num >= 1000000000) {
+          return (num / 1000000000).toFixed(1).replace(/\.0$/, '') + 'G';
+        }
+        if (num >= 1000000) {
+          return (num / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        }
+        if (num >= 1000) {
+          return (num / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+        }
+        return num;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return num;
+      }
+    };
   })();
 });
 
@@ -3020,6 +3396,67 @@ KDCore.registerLibraryToLoad(function() {
     this.drawFace(faceName, faceIndex, x, y);
   };
 });
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  return (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
+    // ■ Window_Selectable.coffee
+    //╒═════════════════════════════════════════════════════════════════════════╛
+    //---------------------------------------------------------------------------
+    var ALIAS__select, _;
+    //@[DEFINES]
+    _ = Window_Selectable.prototype;
+    //@[ALIAS]
+    ALIAS__select = _.select;
+    _.select = function(index) {
+      var e;
+      ALIAS__select.call(this, ...arguments);
+      try {
+        return this._pOnSelectionChanged(index);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._pOnSelectionChanged = function(newIndex) {
+      var e;
+      try {
+        if (this._pkdLastSelectedIndex == null) {
+          this._pkdLastSelectedIndex = newIndex;
+          return this.pOnSelectionChanged();
+        } else {
+          if (this._pkdLastSelectedIndex !== newIndex) {
+            this._pkdLastSelectedIndex = newIndex;
+            return this.pOnSelectionChanged();
+          }
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _.safeSelect = function(index = 0) {
+      var e;
+      try {
+        if (this.maxItems() > index) {
+          return this.select(index);
+        } else {
+          return this.select(-1);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    
+    // * Called only when new (different) index is selected
+    _.pOnSelectionChanged = function() {};
+  })();
+});
+
+// ■ END Window_Selectable.coffee
+//---------------------------------------------------------------------------
 
 
 // Generated by CoffeeScript 2.6.1
@@ -3383,7 +3820,7 @@ KDCore.registerLibraryToLoad(function() {
 
     // * Меняем прозрачность 4 раза, туда-сюда, затем выводим done в консоль
 
-    //@changer = new AA.Changer(someSprite)
+    //@changer = new KDCore.Changer(someSprite)
   //@changer.change('opacity').from(255)
   //            .to(0).step(5).speed(1).delay(30).repeat(4).reverse()
   //            .start().done(() -> console.log('done'))
@@ -3550,6 +3987,38 @@ KDCore.registerLibraryToLoad(function() {
       }
     }
 
+    static CreateForOpacityUp(sprite, step = 35, onDone = null, isAutoStart = true) {
+      var changer;
+      changer = new Changer(sprite);
+      changer.change('opacity').from(0).to(255).step(step);
+      changer.done(function() {
+        sprite.opacity = 255;
+        if (onDone != null) {
+          return onDone();
+        }
+      });
+      if (isAutoStart) {
+        changer.start();
+      }
+      return changer;
+    }
+
+    static CreateForOpacityDown(sprite, step = 35, onDone = null, isAutoStart = true) {
+      var changer;
+      changer = new Changer(sprite);
+      changer.change('opacity').from(sprite.opacity).to(0).step(step);
+      changer.done(function() {
+        sprite.opacity = 0;
+        if (onDone != null) {
+          return onDone();
+        }
+      });
+      if (isAutoStart) {
+        changer.start();
+      }
+      return changer;
+    }
+
   };
   (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
     // ■ Changer.coffee
@@ -3663,6 +4132,7 @@ KDCore.registerLibraryToLoad(function() {
 KDCore.registerLibraryToLoad(function() {
   var Color;
   Color = (function() {
+    //rev 29.04.2024
     class Color {
       constructor(r1 = 255, g1 = 255, b1 = 255, a1 = 255) {
         this.r = r1;
@@ -3752,7 +4222,12 @@ KDCore.registerLibraryToLoad(function() {
       }
 
       static FromHex(hexString) {
-        var color, result;
+        var color, result, shorthandRegex;
+        //Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+        shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+        hexString = hexString.replace(shorthandRegex, function(m, r, g, b) {
+          return r + r + g + g + b + b;
+        });
         result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hexString);
         color = null;
         if (result != null) {
@@ -4088,6 +4563,45 @@ KDCore.registerLibraryToLoad(function() {
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
   //@[AUTO EXTEND]
+  return KDCore.MapAnchorPoint = class MapAnchorPoint {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this._realX = this.x;
+      this._realY = this.y;
+    }
+
+    shiftY() {
+      return 0;
+    }
+
+    jumpHeight() {
+      return 0;
+    }
+
+    scrolledX() {
+      return Game_CharacterBase.prototype.scrolledX.call(this);
+    }
+
+    scrolledY() {
+      return Game_CharacterBase.prototype.scrolledY.call(this);
+    }
+
+    screenX() {
+      return Game_CharacterBase.prototype.screenX.call(this);
+    }
+
+    screenY() {
+      return Game_CharacterBase.prototype.screenY.call(this);
+    }
+
+  };
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  //@[AUTO EXTEND]
   //?[DEPRECATED]
   return KDCore.ParametersManager = class ParametersManager {
     constructor(pluginName) {
@@ -4251,6 +4765,7 @@ KDCore.registerLibraryToLoad(function() {
       params = {};
       for (key in paramSet) {
         value = paramSet[key];
+        KDCore.__ppNameToParseNext = key;
         clearKey = this.parseKey(key);
         typeKey = this.parseKeyType(key);
         params[clearKey] = this.parseParamItem(typeKey, value);
@@ -4266,6 +4781,19 @@ KDCore.registerLibraryToLoad(function() {
       return keyRaw.split(":")[1];
     }
 
+    writeDetailedError() {
+      var e;
+      try {
+        if (!String.any(KDCore.__ppNameToParseNext)) {
+          return;
+        }
+        return console.warn("Please, check Plugin Parameter " + KDCore.__ppNameToParseNext + " in plugin " + this.pluginName);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
     // * Проверка, загружены ли параметры плагина
     isLoaded() {
       return (this.paramsRaw != null) && this.paramsRaw.hasOwnProperty(this.pluginName);
@@ -4279,11 +4807,14 @@ KDCore.registerLibraryToLoad(function() {
     
       // * Возвращает значение параметра (def - по умолчанию, если не найден)
     getParam(paramName, def) {
+      var value;
       if (this.isHasParameter(paramName)) {
-        return this.params[paramName];
-      } else {
-        return def;
+        value = this.params[paramName];
+        if (value != null) {
+          return value;
+        }
       }
+      return def;
     }
 
     // * Данные ключи должны идти после названия параметра через :
@@ -4299,62 +4830,150 @@ KDCore.registerLibraryToLoad(function() {
           case "int":
           case "i":
             return Number(item);
-          case "intA": // * массив чисел
-            if (String.any(item)) {
-              return JsonEx.parse(item).map((e) => {
-                return this.parseParamItem("int", e);
-              });
-            } else {
-              return [];
-            }
-            break;
+          case "intA":
+            return this.parseArray(item, "int");
           case "bool":
           case "b":
           case "e":
             return eval(item);
           case "struct":
           case "s":
-            if (String.any(item)) {
-              return this.parseParameters(JsonEx.parse(item));
-            } else {
-              return null;
-            }
-            break;
-          case "structA": // * массив структур
-            return JsonEx.parse(item).map((e) => {
-              return this.parseParameters(JsonEx.parse(e));
-            });
+            return this.parseStruct(item);
+          case "structA":
+            return this.parseStructArray(item);
           case "str":
             return item;
           case "strA":
-            if (String.any(item)) {
-              return JsonEx.parse(item).map((e) => {
-                return this.parseParamItem("str", e);
-              });
-            } else {
-              return [];
-            }
-            break;
-          case "note": // * если несколько строк в тексте
-            try {
-              return JsonEx.parse(item);
-            } catch (error) {
-              e = error;
-              KDCore.warning(e);
-              return item;
-            }
-            break;
+            return this.parseArray(item, "str");
+          case "note":
+            return this.parseNote(item);
           case "css":
             return item.toCss();
           case "color":
             return KDCore.Color.FromHex(item);
+          case "json":
+          case "j":
+            return this.parseJson(item);
+          case "jA":
+            return this.parseArray(item, 'json');
           default:
             return item;
         }
       } catch (error) {
         e = error;
-        KDCore.warning(e);
+        console.warn(e);
+        this.writeDetailedError();
         return item;
+      }
+    }
+
+    parseArray(items, type) {
+      var e, elements, i, len, p, parsed;
+      try {
+        elements = [];
+        parsed = JsonEx.parse(items);
+        for (i = 0, len = parsed.length; i < len; i++) {
+          p = parsed[i];
+          try {
+            elements.push(this.parseParamItem(type, p));
+          } catch (error) {
+            e = error;
+            console.warn(e);
+          }
+        }
+      } catch (error) {
+        e = error;
+        console.warn(e);
+        this.writeDetailedError();
+      }
+      return elements;
+    }
+
+    parseStruct(item) {
+      var e, parsed;
+      try {
+        if (item == null) {
+          return null;
+        }
+        if (!String.any(item)) {
+          return null;
+        }
+        parsed = JsonEx.parse(item);
+        if (parsed != null) {
+          return this.parseParameters(parsed);
+        }
+      } catch (error) {
+        e = error;
+        console.warn(e);
+        this.writeDetailedError();
+      }
+      return null;
+    }
+
+    parseStructArray(items) {
+      var e, elements, i, len, p, parsed;
+      try {
+        elements = [];
+        parsed = JsonEx.parse(items);
+        for (i = 0, len = parsed.length; i < len; i++) {
+          p = parsed[i];
+          try {
+            elements.push(this.parseStruct(p));
+          } catch (error) {
+            e = error;
+            console.warn(e);
+            this.writeDetailedError();
+          }
+        }
+      } catch (error) {
+        e = error;
+        console.warn(e);
+        this.writeDetailedError();
+      }
+      return elements;
+    }
+
+    parseNote(item) {
+      var e, parsed;
+      try {
+        parsed = JsonEx.parse(item);
+        if (parsed != null) {
+          return parsed;
+        }
+      } catch (error) {
+        e = error;
+        console.warn(e);
+        this.writeDetailedError();
+      }
+      return item;
+    }
+
+    parseJson(item) {
+      var cx, e, element, elements, i, json, key, len, parsed, value;
+      try {
+        json = {};
+        parsed = JsonEx.parse(item);
+        elements = parsed.split('\n');
+        for (i = 0, len = elements.length; i < len; i++) {
+          element = elements[i];
+          cx = "{" + element + "}";
+          try {
+            item = JsonEx.parse(cx);
+            for (key in item) {
+              value = item[key];
+              json[key] = value;
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning("Parameter " + element + " have syntax errors, ignored");
+          }
+        }
+        return json;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        this.writeDetailedError();
+        return null; // * Чтобы default value был возвращён
       }
     }
 
@@ -4477,6 +5096,10 @@ KDCore.registerLibraryToLoad(function() {
       return new Point(this[0], this[1]);
     };
 
+    Object.defineProperty(Array.prototype, "toPoint", {
+      enumerable: false
+    });
+
     Sprite.prototype.toPoint = function() {
       return new Point(this.x, this.y);
     };
@@ -4496,11 +5119,617 @@ KDCore.registerLibraryToLoad(function() {
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
   return KDCore.Sprite = (function(superClass) {
-    //@[AUTO EXTEND]
+    //rev 07.05.22
+
+      //@[AUTO EXTEND]
     class Sprite extends superClass {
       constructor() {
         super(...arguments);
+        this.pHandledIndex = 0;
+        this._create2();
+        return;
       }
+
+      _create2() {} // * FOR CHILDRENS
+
+      pIsSupportKeyboardHandle() {
+        return false;
+      }
+
+      pIsVerticalKeyboardNavigation() {
+        return true;
+      }
+
+      // * For Childrens
+      isLoaded() {
+        return true;
+      }
+
+      realWidth() {
+        var child;
+        if (this.width === 0) {
+          child = this.zeroChild();
+          if (child != null) {
+            if (child.realWidth != null) {
+              return child.realWidth();
+            } else {
+              return child.width;
+            }
+          }
+        }
+        return this.width;
+      }
+
+      realHeight() {
+        var child;
+        if (this.height === 0) {
+          child = this.zeroChild();
+          if (child != null) {
+            if (child.realHeight != null) {
+              return child.realHeight();
+            } else {
+              return child.height;
+            }
+          }
+        }
+        return this.height;
+      }
+
+      dataBindings() {
+        return {
+          x: function(v) {
+            if (v != null) {
+              return this.setPosition(v, this.y);
+            }
+          },
+          y: function(v) {
+            if (v != null) {
+              return this.setPosition(this.x, v);
+            }
+          },
+          position: function(v) {
+            if (v != null) {
+              return this.setPosition(v);
+            }
+          },
+          anchor: function(v) {
+            if (v != null) {
+              return this.setCommonAnchor(v);
+            }
+          },
+          animation: function(v) {
+            if (v != null) {
+              return this.addAnimationRule(v);
+            }
+          },
+          opacity: function(v) {
+            if (v != null) {
+              return this.opacity = v;
+            }
+          },
+          visible: function(v) {
+            if (v != null) {
+              return this.visible = v;
+            }
+          },
+          scale: function(v) {
+            if (v != null) {
+              return this.scale.set(v);
+            }
+          },
+          rotation: function(v) {
+            if (v != null) {
+              return this.rotation = v;
+            }
+          }
+        };
+      }
+
+      callBinding(binding, value) {
+        var e, func;
+        try {
+          func = this.dataBindings()[binding];
+          if (func != null) {
+            return func.call(this, value);
+          } else {
+            return console.warn("Binding " + binding + " not found!");
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      refreshBindings(dataObject = null, recursive = true) {
+        var child, e, j, len, ref, results;
+        try {
+          if (dataObject == null) {
+            dataObject = this;
+          }
+          KDCore.UI.Builder.RefreshBindings(this, dataObject);
+          if (recursive === true) {
+            ref = this.children;
+            results = [];
+            for (j = 0, len = ref.length; j < len; j++) {
+              child = ref[j];
+              try {
+                if (child.refreshBindings != null) {
+                  results.push(child.refreshBindings(dataObject, true));
+                } else {
+                  results.push(void 0);
+                }
+              } catch (error) {
+                e = error;
+                results.push(KDCore.warning(e));
+              }
+            }
+            return results;
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      uiConstant(name) {
+        var e;
+        try {
+          if (this.uiConstants != null) {
+            return this.uiConstants[name];
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        return null;
+      }
+
+      addLoadListener(listener) {
+        var e;
+        try {
+          if (listener == null) {
+            return;
+          }
+          if (this.isLoaded()) {
+            try {
+              return listener();
+            } catch (error) {
+              e = error;
+              return KDCore.warning(e);
+            }
+          } else {
+            return this._addLoadListener(listener);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      setPosition(x = 0, y = null, bindedObj = null) {
+        var _x, _y, e;
+        try {
+          if (!this.isLoaded()) {
+            this._requireFunc('setPosition', arguments);
+            return;
+          }
+          // * Check first Argument as Object
+          if (typeof x === 'object') {
+            if (x.x != null) {
+              _x = x.x;
+              if (x.y != null) {
+                _y = x.y;
+              }
+              x = _x;
+              y = _y;
+            } else if (x.position != null) {
+              this.setPosition(x.position, null, bindedObj);
+              return;
+            } else if (x.margins != null) {
+              this.setPosition(x.margins, null, bindedObj);
+              return;
+            }
+          }
+          if (typeof x === 'string') {
+            this.x = this._getValueByStr(x, 'x', bindedObj);
+            if (y == null) {
+              y = x;
+            }
+          } else {
+            this.x = x; // * Number
+          }
+          if (typeof y === 'string') {
+            return this.y = this._getValueByStr(y, 'y', bindedObj);
+          } else {
+            if (y != null) {
+              return this.y = y;
+            }
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _getValueByStr(value = '0', forField = 'x', owner = null) {
+        var dpValue, e, exValue, parentRefSize, percentValue, r, result, resultValue, v;
+        try {
+          if (typeof value === 'number') {
+            return value;
+          }
+          if (isFinite(value)) {
+            return Number(value);
+          }
+          if (typeof value !== 'string') {
+            return 0;
+          }
+          // * NO REPLACEMENT
+          if (value[0] === '$' || value[0] === '@') {
+            v = KDCore.Utils.convertBindingValue(owner, value, this);
+            return this._getValueByStr(v, forField, owner);
+          }
+          if (value.contains("prevX")) {
+            value = value.replace("prevX", this._getPreviousChildData('x'));
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("prevY")) {
+            value = value.replace("prevY", this._getPreviousChildData('y'));
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("prevHeight")) {
+            value = value.replace("prevHeight", this._getPreviousChildData('height'));
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("prevWidth")) {
+            value = value.replace("prevWidth", this._getPreviousChildData('width'));
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("prevEndX")) {
+            value = value.replace("prevEndX", "prevX + prevWidth");
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("prevEndY")) {
+            value = value.replace("prevEndY", "prevY + prevHeight");
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("end")) {
+            value = value.replace("end", "100%");
+          }
+          if (value.contains("begin")) {
+            if (forField === 'y') {
+              value = value.replace("begin", "-height");
+            } else {
+              value = value.replace("begin", "-width");
+            }
+          }
+          if (value.contains("right")) {
+            value = value.replace("right", "100% - width");
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("left")) {
+            value = value.replace("left", "0");
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("top")) {
+            value = value.replace("top", "0");
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("bottom")) {
+            value = value.replace("bottom", "100% - height");
+            return this._getValueByStr(value, forField, owner);
+          }
+          // * Replace all X%
+          if (value.contains("%")) {
+            r = new RegExp("(\\d+)%", "g");
+            result = r.exec(value);
+            while ((result != null)) {
+              percentValue = Number(result[1]);
+              resultValue = 0;
+              if (this.parent != null) {
+                parentRefSize = KDCore.Utils.getRealSpriteSize(forField, this.parent);
+                resultValue = parentRefSize * (percentValue / 100.0);
+              }
+              value = value.replace(/(\d+)%/, resultValue);
+              result = r.exec(value);
+            }
+          }
+          // * Replace all HDP
+          if (value.contains("hdp")) {
+            r = new RegExp("(\\d+)hdp", "g");
+            result = r.exec(value);
+            while ((result != null)) {
+              dpValue = Number(result[1]);
+              resultValue = KDCore.Utils.convertDP(dpValue, true);
+              value = value.replace(/(\d+)hdp/, resultValue);
+              result = r.exec(value);
+            }
+          }
+          // * Replace all DP
+          if (value.contains("dp")) {
+            r = new RegExp("(\\d+)dp", "g");
+            result = r.exec(value);
+            while ((result != null)) {
+              dpValue = Number(result[1]);
+              resultValue = KDCore.Utils.convertDP(dpValue, false);
+              value = value.replace(/(\d+)dp/, resultValue);
+              result = r.exec(value);
+            }
+          }
+          if (value.contains('center')) {
+            v = this._getValueByStr('50%', forField, owner);
+            exValue = KDCore.Utils.getRealSpriteSize(forField, this);
+            exValue = v - (exValue / 2);
+            value = value.replace("center", exValue);
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("height")) {
+            exValue = KDCore.Utils.getRealSpriteSize("height", this);
+            value = value.replace("height", exValue);
+            return this._getValueByStr(value, forField, owner);
+          }
+          if (value.contains("width")) {
+            exValue = KDCore.Utils.getRealSpriteSize("width", this);
+            value = value.replace("width", exValue);
+            return this._getValueByStr(value, forField, owner);
+          }
+          v = eval(value);
+          return this._getValueByStr(v, forField, owner);
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        return 0;
+      }
+
+      _getPreviousChildData(forField) {
+        var e, myIndex, prevChild;
+        try {
+          if (this.parent == null) {
+            return 0;
+          }
+          if (this.parent.children.length <= 1) {
+            return 0;
+          }
+          myIndex = this.parent.children.indexOf(this);
+          prevChild = this.parent.children[myIndex - 1];
+          if (prevChild == null) {
+            return 0;
+          }
+          if (forField === "x") {
+            return prevChild.x;
+          } else if (forField === "y") {
+            return prevChild.y;
+          } else {
+            return KDCore.Utils.getRealSpriteSize(forField, prevChild);
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        return 0;
+      }
+
+      setCommonAnchor(x, y) {
+        var c, e, j, len, ref;
+        try {
+          if (y == null) {
+            y = x;
+          }
+          this.anchor.x = x;
+          this.anchor.y = y;
+          ref = this.children;
+          for (j = 0, len = ref.length; j < len; j++) {
+            c = ref[j];
+            if (c.setCommonAnchor != null) {
+              c.setCommonAnchor(x, y);
+            } else {
+              c.anchor.x = x;
+              c.anchor.y = y;
+            }
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+      }
+
+      zeroChild() {
+        return this.children[0];
+      }
+
+      appear(step, delay = 0) {
+        this.opacity = 0;
+        this._opChanger = KDCore.Changer.CreateForOpacityUp(this, step, () => {
+          this._opChanger = null;
+          return this._updateOpChanger = function() {}; // * EMPTY
+        }, false); // * Not autostart for Delay
+        if (delay > 0) {
+          this._opChanger.delay(delay);
+        }
+        this._opChanger.start();
+        this._updateOpChanger = () => {
+          var ref;
+          return (ref = this._opChanger) != null ? ref.update() : void 0;
+        };
+      }
+
+      disapper(step, delay = 0) {
+        this._opChanger = KDCore.Changer.CreateForOpacityDown(this, step, () => {
+          this._opChanger = null;
+          return this._updateOpChanger = function() {}; // * EMPTY
+        }, false); // * Not autostart for Delay
+        if (delay > 0) {
+          this._opChanger.delay(delay);
+        }
+        this._opChanger.start();
+        this._updateOpChanger = () => {
+          var ref;
+          return (ref = this._opChanger) != null ? ref.update() : void 0;
+        };
+      }
+
+      moveWithAnimation(dx, dy, duration = 30, easingType = 2) {
+        var e;
+        try {
+          this._moveAnimationItem = new Game_Picture();
+          this._moveAnimationItem._x = this.x;
+          this._moveAnimationItem._y = this.y;
+          this._moveAnimationItem.move(0, this.x + dx, this.y + dy, 1, 1, 255, 0, duration, easingType);
+          this.updateMovingAnimation = this.updateMovingAnimationBody;
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+      }
+
+      assignTooltip(content, params) {
+        if (this._tooltip != null) {
+          this.removeChild(this._tooltip);
+        }
+        this._tooltip = new KDCore.UI.Sprite_UITooltip(params);
+        this._tooltip.addContent(content);
+        this.updateTooltip = this.updateTooltipBody;
+      }
+
+      destroyTooltip() {
+        if (this._tooltip == null) {
+          return;
+        }
+        this.hideTooltip();
+        this.removeChild(this._tooltip);
+        this._tooltip = null;
+        return this.updateTooltip = function() {}; // * EMPTY
+      }
+
+      showTooltip() {
+        if (this._tooltip == null) {
+          return;
+        }
+        // * Position 0, 0, becouse cursorRelative by default
+        this._tooltip.activateTooltip(0, 0, this);
+      }
+
+      hideTooltip() {
+        if (this._tooltip == null) {
+          return;
+        }
+        this._tooltip.deactivateTooltip();
+      }
+
+      //@[DYNAMIC]
+      updateTooltip() {} // * EMPTY
+
+      updateTooltipBody() {
+        if (this.isUnderMouse()) {
+          if (this._tooltip.isTooltipActive()) {
+
+          } else {
+            if (this.isReady() && this.visible === true && this.opacity >= 255) {
+              return this.showTooltip();
+            }
+          }
+        } else {
+          if (this._tooltip.isTooltipActive()) {
+            return this.hideTooltip();
+          }
+        }
+      }
+
+      //@[DYNAMIC]
+      updateMovingAnimation() {} // * EMPTY
+
+      updateMovingAnimationBody() {
+        var e;
+        try {
+          if (this._moveAnimationItem == null) {
+            return;
+          }
+          this._moveAnimationItem.update();
+          this.x = this._moveAnimationItem._x;
+          this.y = this._moveAnimationItem._y;
+          if (this._moveAnimationItem._duration <= 0) {
+            this._moveAnimationItem = null;
+            this.updateMovingAnimation = function() {};
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+          this.updateMovingAnimation = function() {};
+        }
+      }
+
+      addAnimationRule(rule) {
+        var e, r;
+        try {
+          if (rule == null) {
+            return;
+          }
+          if (this._animationRules == null) {
+            this._animationRules = [];
+          }
+          if (typeof rule === KDCore.AnimationRule) {
+            r = rule;
+          } else {
+            r = new KDCore.AnimationRule(rule, this);
+          }
+          this._animationRules.push(r);
+          return r;
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        return null;
+      }
+
+      setAnimationRule(rule) {
+        var e;
+        try {
+          this._animationRules = [];
+          return this.addAnimationRule(rule);
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        return null;
+      }
+
+      update() {
+        super.update();
+        this._updateOpChanger();
+        this.updateTooltip();
+        if (this.updateMovingAnimation != null) {
+          this.updateMovingAnimation();
+        }
+        if (this.pIsHandlerActive()) {
+          this._pHandleKeyboardInputs();
+        }
+        if (this.devdrag === true) {
+          this._pUpdateDevDrag();
+        }
+        if (this._animationRules != null) {
+          this._pUpdateAnimationRules();
+        }
+      }
+
+      _pUpdateAnimationRules() {
+        var e, j, len, ref, results, rule;
+        try {
+          ref = this._animationRules;
+          results = [];
+          for (j = 0, len = ref.length; j < len; j++) {
+            rule = ref[j];
+            rule.update();
+            results.push(rule.applyAnimation(this));
+          }
+          return results;
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      //@[DYNAMIC]
+      _updateOpChanger() {} // * EMPTY
 
       b() {
         return this.bitmap;
@@ -4510,8 +5739,8 @@ KDCore.registerLibraryToLoad(function() {
         return this.bitmap.clear();
       }
 
-      add(child) {
-        return this.addChild(child);
+      add() {
+        return this.addChild(...arguments);
       }
 
       bNew(w, h) {
@@ -4602,8 +5831,27 @@ KDCore.registerLibraryToLoad(function() {
         return true;
       }
 
+      isCheckAlpha() {
+        return false;
+      }
+
       inPosition(point) {
-        return this.isContainsPoint(point);
+        var e, gx, gy, pixel, result, x, y;
+        result = this.isContainsPoint(point);
+        if (result && this.isCheckAlpha()) {
+          try {
+            ({x, y} = point);
+            gx = KDCore.SDK.toGlobalCoord(this, 'x');
+            gy = KDCore.SDK.toGlobalCoord(this, 'y');
+            pixel = this.bitmap.getAlphaPixel(x - gx, y - gy);
+            result = pixel > 100;
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            result = true; // * ignor Alpha if error
+          }
+        }
+        return result;
       }
 
       isUnderMouse() {
@@ -4642,6 +5890,378 @@ KDCore.registerLibraryToLoad(function() {
         }
       }
 
+      activateHandlerManagment() {
+        var e;
+        try {
+          this.handleUpAction = this.selectPreviousHandlerItem;
+          this.handleDownAction = this.selectNextHandlerItem;
+          return this._handleManagerActive = true;
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      deactivateHandlerManagment() {
+        var ref;
+        this._handleManagerActive = false;
+        this.handleUpAction = function() {}; // * EMPTY
+        this.handleDownAction = function() {}; // * EMPTY
+        if ((ref = $gameTemp.__pkdActiveKeyboardHandler) != null) {
+          ref.pDeactivateHandler();
+        }
+        $gameTemp.__pkdActiveKeyboardHandler = null;
+      }
+
+      addChild(item) {
+        var c, handlers;
+        c = super.addChild(...arguments);
+        if (item instanceof KDCore.Sprite && (item.pIsSupportKeyboardHandle != null) && item.pIsSupportKeyboardHandle()) {
+          handlers = this._pGetAllHandlers();
+          item.pHandledIndex = handlers.length - 1;
+        }
+        return c;
+      }
+
+      pIsAnyHandlerSelected() {
+        return $gameTemp.__pkdActiveKeyboardHandler != null;
+      }
+
+      selectPreviousHandlerItem() {
+        var e;
+        try {
+          if (!this.pIsAnyHandlerSelected()) {
+            return this._trySelectHandler(0);
+          } else {
+            return this._trySelectHandler(this._selectedHandlerIndex() - 1);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _selectedHandlerIndex() {
+        return $gameTemp.__pkdActiveKeyboardHandler.pHandledIndex;
+      }
+
+      _trySelectHandler(index) {
+        var e, handlerItemToSelect;
+        try {
+          handlerItemToSelect = this._pGetAllHandlers().find(function(i) {
+            return i.pHandledIndex === index;
+          });
+          if (handlerItemToSelect != null) {
+            handlerItemToSelect.pActivateHandler();
+          }
+          return this._pOnHandled();
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _pGetAllHandlers() {
+        return this.children.filter(function(i) {
+          return i instanceof KDCore.Sprite && (i.pIsSupportKeyboardHandle != null) && i.pIsSupportKeyboardHandle();
+        });
+      }
+
+      selectNextHandlerItem() {
+        var e;
+        try {
+          if (!this.pIsAnyHandlerSelected()) {
+            return this._trySelectHandler(0);
+          } else {
+            return this._trySelectHandler(this._selectedHandlerIndex() + 1);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      activeItemFilterOptions() {
+        return {
+          distance: 15,
+          outerStrength: 4
+        };
+      }
+
+      pIsHandlerActive() {
+        return this._handleManagerActive === true || this._handlerActive === true;
+      }
+
+      destroy() {
+        if ($gameTemp.__pkdActiveKeyboardHandler === this) {
+          $gameTemp.__pkdActiveKeyboardHandler = null;
+        }
+        return super.destroy();
+      }
+
+      _pOnHandled() {
+        return Input.clear();
+      }
+
+      _pHandleKeyL(ignoreNavigation = false) {
+        var e;
+        try {
+          if (this.pIsVerticalKeyboardNavigation() || ignoreNavigation) {
+            if (this.handleLeftAction != null) {
+              this.handleLeftAction();
+              return this._pOnHandled();
+            }
+          } else {
+            return this._pHandleKeyU(true);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _pHandleKeyR(ignoreNavigation = false) {
+        var e;
+        try {
+          if (this.pIsVerticalKeyboardNavigation() || ignoreNavigation) {
+            if (this.handleRightAction != null) {
+              this.handleRightAction();
+              return this._pOnHandled();
+            }
+          } else {
+            return this._pHandleKeyD(true);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _pHandleKeyU(ignoreNavigation = false) {
+        var e;
+        try {
+          if (this.pIsVerticalKeyboardNavigation() || ignoreNavigation) {
+            if (this.handleUpAction != null) {
+              this.handleUpAction();
+              return this._pOnHandled();
+            }
+          } else {
+            return this._pHandleKeyL(true);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _pHandleKeyD(ignoreNavigation = false) {
+        var e;
+        try {
+          if (this.pIsVerticalKeyboardNavigation() || ignoreNavigation) {
+            if (this.handleDownAction != null) {
+              this.handleDownAction();
+              return this._pOnHandled();
+            }
+          } else {
+            return this._pHandleKeyR(true);
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _pHandleKeyOK() {
+        var e;
+        try {
+          if (this.handleOKAction != null) {
+            this.handleOKAction();
+            return this._pOnHandled();
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      pActivateHandler() {
+        if (!this.pIsSupportKeyboardHandle()) {
+          return;
+        }
+        if (($gameTemp.__pkdActiveKeyboardHandler != null) && $gameTemp.__pkdActiveKeyboardHandler !== this) {
+          $gameTemp.__pkdActiveKeyboardHandler.pDeactivateHandler();
+        }
+        this._handlerActive = true;
+        this._activateHandlerVisually();
+        $gameTemp.__pkdActiveKeyboardHandler = this;
+      }
+
+      _activateHandlerVisually() {
+        var e;
+        try {
+          //@filters = [new PIXI.filters.OutlineFilter(0.8, 0x99ff99, 0.5)]
+          //@filters = [new PIXI.filters.GlowFilter(2, 0.8, 0, 0x09f9, 0.5)]
+          return this.filters = [new PIXI.filters.GlowFilter(this.activeItemFilterOptions())];
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      pDeactivateHandler() {
+        if ($gameTemp.__pkdActiveKeyboardHandler === this) {
+          $gameTemp.__pkdActiveKeyboardHandler = null;
+        }
+        this._handlerActive = false;
+        this.filters = [];
+      }
+
+      _pHandleKeyboardInputs() {
+        var e;
+        try {
+          if (Input.isTriggered('left')) {
+            return this._pHandleKeyL();
+          } else if (Input.isTriggered('right')) {
+            return this._pHandleKeyR();
+          } else if (Input.isTriggered('up')) {
+            return this._pHandleKeyU();
+          } else if (Input.isTriggered('down')) {
+            return this._pHandleKeyD();
+          } else if (Input.isTriggered('ok')) {
+            return this._pHandleKeyOK();
+          }
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _applyRequiredData() {
+        var _n, e, func, j, len, ref;
+        try {
+          if (this._requiredFuncs == null) {
+            return;
+          }
+          ref = this._requiredFuncs;
+          for (j = 0, len = ref.length; j < len; j++) {
+            func = ref[j];
+            try {
+              _n = func[0];
+              if ((_n != null) && (this[_n] != null)) {
+                this[_n](...func[1]);
+              }
+            } catch (error) {
+              e = error;
+              KDCore.warning(e);
+            }
+          }
+          return this._requiredFuncs = null;
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _requireFunc(name, args) {
+        var e;
+        try {
+          if (this._requiredFuncs == null) {
+            this._requiredFuncs = [];
+          }
+          return this._requiredFuncs.push([name, args]);
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _addLoadListener(listener) {
+        var e;
+        try {
+          if (this._loadListeners == null) {
+            this._loadListeners = [];
+          }
+          return this._loadListeners.push(listener);
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      _executeLoadListeners() {
+        var e, j, l, len, ref;
+        try {
+          if (!this._loadListeners) {
+            return;
+          }
+          ref = this._loadListeners;
+          for (j = 0, len = ref.length; j < len; j++) {
+            l = ref[j];
+            try {
+              l();
+            } catch (error) {
+              e = error;
+              KDCore.warning(e);
+            }
+          }
+          return this._loadListeners = null;
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      // * DEVELOPER TOOL ====================================
+      _pUpdateDevDrag() {
+        if (TouchInput.isLongPressed()) {
+          if (this.__ddIn === true) {
+            return this._pDD_moving();
+          } else {
+            if (this.isUnderMouse()) {
+              return this._pDD_startMove();
+            }
+          }
+        } else {
+          if (this.__ddIn === true) {
+            return this._pDD_stopMove();
+          }
+        }
+      }
+
+      _pDD_moving() {
+        this.x = TouchInput.x - this._pDDTDelta.x;
+        return this.y = TouchInput.y - this._pDDTDelta.y;
+      }
+
+      _pDD_startMove() {
+        var x, y;
+        ({x, y} = TouchInput);
+        this._pDDTDelta = {x, y};
+        this.__ddIn = true;
+      }
+
+      _pDD_stopMove() {
+        this.__ddIn = false;
+        console.log("DD DRAG POS: ");
+        return console.log(this.x, this.y);
+      }
+
+      // * STATIC ==================================================
+      static WhiteRect(w, h) {
+        return KDCore.Sprite.ColorRect(w, h, '#FFF');
+      }
+
+      static BlackRect(w, h) {
+        return KDCore.Sprite.ColorRect(w, h, '#000');
+      }
+
+      static ColorRect(w, h, color) {
+        var s;
+        s = KDCore.Sprite.FromBitmap(w, h);
+        s.b().fillAll(color);
+        return s;
+      }
+
       static FromImg(filename, sourceFolder) {
         var s;
         s = new KDCore.Sprite();
@@ -4666,10 +6286,64 @@ KDCore.registerLibraryToLoad(function() {
 
       // * Загрузчик из параметров плагина (безопасный)
       static FromParams(pluginParams) {
-        var e, margins, s, size;
+        var e, h, height, margins, s, size, w, width;
         try {
           size = pluginParams.size;
-          s = KDCore.Sprite.FromBitmap(size.w, size.h);
+          ({w, h} = size);
+          try {
+            if (String.any(w)) {
+              if (isFinite(w)) {
+                w = Number(w);
+              } else {
+                w = eval(w);
+              }
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            w = 100;
+          }
+          try {
+            if (String.any(h)) {
+              if (isFinite(h)) {
+                h = Number(h);
+              } else {
+                h = eval(h);
+              }
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            h = 100;
+          }
+          ({width, height} = size);
+          try {
+            if (String.any(width)) {
+              if (isFinite(width)) {
+                w = Number(width);
+              } else {
+                w = eval(width);
+              }
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            w = 100;
+          }
+          try {
+            if (String.any(height)) {
+              if (isFinite(height)) {
+                h = Number(height);
+              } else {
+                h = eval(height);
+              }
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            h = 100;
+          }
+          s = KDCore.Sprite.FromBitmap(w, h);
           s.textSettingsPosition = pluginParams.alignment;
           margins = pluginParams.margins;
           if (margins != null) {
@@ -4752,6 +6426,338 @@ KDCore.registerLibraryToLoad(function() {
     call() {
       if (this.method != null) {
         return this.method();
+      }
+    }
+
+  };
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  //@[AUTO EXTEND]
+  return KDCore.AnimationKeyFrame = class AnimationKeyFrame {
+    constructor(startValue, endValue, duration = 1, func = 'linear') {
+      this.startValue = startValue;
+      this.endValue = endValue;
+      this.func = func;
+      this._t = 0; // * Timer
+      this._d = duration * 60; // * Convert to Frames
+      this._c = this.endValue - this.startValue; // * Change
+      if (this.func == null) {
+        this.func = 'linear';
+      }
+      return;
+    }
+
+    reset() {
+      return this._t = 0;
+    }
+
+    update() {
+      if (this._t < this._d) {
+        return this._t += 1;
+      }
+    }
+
+    isEnd() {
+      return this._t >= this._d || this._d <= 0;
+    }
+
+    getValue() {
+      if (this._d <= 0) {
+        return this.endValue;
+      } else {
+        return this.easingFunc()(this._t, this.startValue, this._c, this._d);
+      }
+    }
+
+    easingFunc() {
+      if ((this.func != null) && (KDCore.EasingFuncs[this.func] != null)) {
+        return KDCore.EasingFuncs[this.func];
+      } else {
+        console.warn("Easing func " + this.func + " not found!");
+        return this.linear;
+      }
+    }
+
+    // * Default one
+    linear(t, b, c, d) {
+      return c * t / d + b;
+    }
+
+  };
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  //@[AUTO EXTEND]
+  return KDCore.AnimationKeyLine = class AnimationKeyLine {
+    constructor(keyFramesList, totalDuration = 1, func = 'linear') {
+      this.totalDuration = totalDuration;
+      this.keyFrames = this._parseKeyFrames(keyFramesList, func);
+      this.repeatsLeftBase = 0;
+      this.repeatsLeft = 0;
+      this.keyIndex = 0;
+      this._relativeValue = 0;
+      this._isStarted = false;
+      return;
+    }
+
+    setRelativeValue(_relativeValue) {
+      this._relativeValue = _relativeValue;
+    }
+
+    setRepeatsCount(repeatsLeftBase) {
+      this.repeatsLeftBase = repeatsLeftBase;
+      return this.repeatsLeft = this.repeatsLeftBase;
+    }
+
+    setLoop() {
+      return this.setRepeatsCount(-1);
+    }
+
+    start(startDelay = 0) {
+      this.startDelay = startDelay;
+      if (this.startDelay === 0) {
+        return this._isStarted = true;
+      } else {
+        return this._startTimer = this.startDelay * 60;
+      }
+    }
+
+    pause() {
+      this._isStarted = false;
+      this._startTimer = null;
+    }
+
+    isStarted() {
+      return this._isStarted === true;
+    }
+
+    complete() {
+      this.keyIndex = this.keyFrames.length;
+      this.repeatsLeft = 0;
+    }
+
+    reset() {
+      this.repeatsLeft = this.repeatsLeftBase;
+      this._resetKeyframes();
+    }
+
+    update() {
+      if (this._startTimer != null) {
+        this._updateStartTimer();
+      }
+      if (!this.isStarted()) {
+        return;
+      }
+      if (this.isEnd()) {
+        if (this.repeatsLeft === 0) { // * No repeats at all
+          return;
+        } else if (this.repeatsLeft < 0) { // * Infinite Loop
+          this._resetKeyframes();
+        } else {
+          this.repeatsLeft -= 1;
+          this._resetKeyframes();
+        }
+      }
+      this.keyFrames[this.keyIndex].update();
+      if (this.keyFrames[this.keyIndex].isEnd()) {
+        //console.log("NEXT")
+        this.keyIndex++;
+      }
+    }
+
+    isEnd() {
+      return this.keyIndex > this.keyFrames.length - 1;
+    }
+
+    getValue() {
+      var value;
+      if (this.isEnd()) {
+        value = this.keyFrames.last().getValue();
+      } else {
+        value = this.keyFrames[this.keyIndex].getValue();
+      }
+      return value + this._relativeValue;
+    }
+
+    _parseKeyFrames(keyframes, func) {
+      var duration, e, endValue, endValues, index, key, keyframesOutput, keys, kf, prevKey, startValue, value;
+      try {
+        keyframesOutput = [];
+        endValues = [];
+        keys = [];
+        index = 0;
+        for (key in keyframes) {
+          value = keyframes[key];
+          if (endValues.length > 0) {
+            startValue = endValues[index - 1];
+          } else {
+            startValue = 0;
+          }
+          endValue = value;
+          if (key === "0") {
+            duration = 0;
+          } else {
+            prevKey = keys[index - 1];
+            duration = this._calculateDuration(prevKey, key);
+          }
+          kf = new KDCore.AnimationKeyFrame(startValue, endValue, duration, func);
+          keys[index] = key;
+          endValues[index] = value;
+          keyframesOutput.push(kf);
+          index++;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return keyframesOutput;
+    }
+
+    _calculateDuration(rateA, rateB) {
+      var d, e, timeA, timeB;
+      try {
+        rateA = Number(rateA) / 100.0;
+        rateB = Number(rateB) / 100.0;
+        timeA = this.totalDuration * rateA;
+        timeB = this.totalDuration * rateB;
+        d = timeB - timeA;
+        return d;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return 0;
+    }
+
+    _resetKeyframes() {
+      var e, f, i, len, ref, results;
+      try {
+        this.keyIndex = 0;
+        ref = this.keyFrames;
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          f = ref[i];
+          results.push(f.reset());
+        }
+        return results;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _updateStartTimer() {
+      var e;
+      try {
+        if (this._startTimer == null) {
+          return;
+        }
+        this._startTimer -= 1;
+        if (this._startTimer <= 0) {
+          this._isStarted = true;
+          return this._startTimer = null;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  //@[AUTO EXTEND]
+  return KDCore.AnimationRule = class AnimationRule {
+    constructor(animationConfig, obj) {
+      var delay, duration, func, keyframes, repeats;
+      if (typeof animationConfig === "string") {
+        animationConfig = KDCore.UI.Builder.ConvertShortcut(animationConfig);
+      }
+      this.animationConfig = Object.assign(this.defaultConfig(), animationConfig);
+      ({keyframes, duration, func, repeats, delay} = this.animationConfig);
+      this.keyLine = new KDCore.AnimationKeyLine(keyframes, duration, func);
+      if (repeats == null) {
+        repeats = 0;
+      }
+      this.keyLine.setRepeatsCount(repeats);
+      if (this.animationConfig.relative === true && (obj != null)) {
+        this.keyLine.setRelativeValue(obj[this.animationConfig.field]);
+      }
+      this.keyLine.start(delay);
+      if ((obj != null) && delay <= 0) {
+        this.applyAnimation(obj);
+      }
+      return;
+    }
+
+    setEndCallback(onEndCallback) {
+      this.onEndCallback = onEndCallback;
+    }
+
+    isHaveEndCallback() {
+      var e;
+      try {
+        if (this.animationConfig.repeats !== 0) {
+          // * Callback works only for single-shot animations
+          return false;
+        }
+        return this.onEndCallback != null;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return false;
+    }
+
+    defaultConfig() {
+      return {
+        field: "opacity",
+        duration: 1,
+        func: "linear",
+        delay: 0,
+        repeats: 0,
+        relative: false,
+        keyFrames: {
+          "0": 0,
+          "100": 255
+        }
+      };
+    }
+
+    update() {
+      var e;
+      this.keyLine.update();
+      if (this.isHaveEndCallback()) {
+        if (this.keyLine.isEnd()) {
+          try {
+            this.onEndCallback();
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+          }
+          this.onEndCallback = null;
+        }
+      }
+    }
+
+    applyAnimation(obj) {
+      var e;
+      try {
+        if (obj == null) {
+          return;
+        }
+        return obj[this.animationConfig.field] = this.keyLine.getValue();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
       }
     }
 
@@ -5302,6 +7308,740 @@ KDCore.registerLibraryToLoad(function() {
 
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
+  var Sprite_BaseCircle;
+  //NUI 1.0
+  //rev 28.04.24
+
+    //"type": "circle"
+  Sprite_BaseCircle = class Sprite_BaseCircle extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._create();
+      this._applySettings();
+      this._onResize();
+      return;
+    }
+
+    defaultSettings() {
+      return {
+        width: 100,
+        height: 100,
+        fillGradient: null, // { gradient stops }
+        gradientStart: {
+          x: 0,
+          y: 100,
+          r: 30
+        },
+        gradientEnd: {
+          x: 100,
+          y: 100,
+          r: 70
+        },
+        fillColor: 0xffffff,
+        fillAlpha: 1,
+        strokeWidth: 4,
+        strokeColor: 0x000000,
+        strokeAlpha: 1
+      };
+    }
+
+    defaultGradientSettings() {
+      return {
+        "0": "#9ff",
+        "1": "#033"
+      };
+    }
+
+    isHaveGradient() {
+      return false; //@settings.fillGradient?
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        stroke: function(v) {
+          if (v != null) {
+            return this.setStroke(v.width, v.color, v.alpha);
+          }
+        },
+        fill: function(v) {
+          if (v != null) {
+            return this.setFill(v.color, v.alpha);
+          }
+        }
+      });
+    }
+
+    setFill(color = "#FFF", alpha = 1) {
+      var e;
+      try {
+        this.settings.fillColor = color;
+        this.settings.fillAlpha = alpha;
+        this.settings.fillGradient = null;
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setStroke(color = "#FFF", width = 0, alpha = 1) {
+      var e;
+      try {
+        this.settings.strokeColor = color;
+        this.settings.strokeAlpha = alpha;
+        this.settings.strokeWidth = width;
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setSize(width = 100, height = 100) {
+      var e, h, w;
+      try {
+        w = this._getValueByStr(width, 'width', this);
+        h = this._getValueByStr(height, 'height', this);
+        if (w != null) {
+          this.settings.width = w;
+        }
+        if (h != null) {
+          this.settings.height = h;
+        }
+        this._applySettings();
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _create() {
+      var e;
+      try {
+        this.graphics = new PIXI.Graphics();
+        return this.addChild(this.graphics);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applySettings() {
+      var e, gradientSettings;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        this.graphics.clear();
+        if (this.settings.fillGradient != null) {
+          gradientSettings = Object.assign(this.defaultGradientSettings(), this.settings.fillGradient);
+        }
+        this._applyGradientTexture(gradientSettings);
+        return this._drawBaseCircle();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applyGradientTexture(fillGradient) {
+      var e;
+      try {
+
+      } catch (error) {
+        /*{ width, height } = @settings
+        c = document.createElement("canvas")
+        ctx = c.getContext("2d")*/
+        /*grd = ctx.createRadialGradient(
+            @settings.gradientStart.x,
+            @settings.gradientStart.y,
+            @settings.gradientStart.r,
+            @settings.gradientEnd.x,
+            @settings.gradientEnd.y,
+            @settings.gradientEnd.r
+        )*/
+        //grd = ctx.createRadialGradient(110, 90, 30, 100, 100, 70)
+        /*for key, value of fillGradient
+        try
+            grd.addColorStop(Number(key), value)
+        catch e
+            KDCore.warning e*/
+        /*grd.addColorStop(0, "pink")
+        grd.addColorStop(0.9, "white")
+        grd.addColorStop(1, "green")
+
+        ctx.fillStyle = grd
+        ctx.fillRect(0, 0, 400, 400)
+        texture = new PIXI.Texture.from(c)
+        @graphics.beginTextureFill(texture)*/
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawBaseCircle() {
+      var colorData, d, e, fillAlpha, fillColor, height, strokeAlpha, strokeColor, strokeColorData, width;
+      try {
+        ({width, height} = this.settings);
+        ({fillColor, fillAlpha} = this.settings);
+        colorData = this._buildColorData(fillColor, fillAlpha);
+        if (this.settings.strokeWidth > 0) {
+          ({strokeColor, strokeAlpha} = this.settings);
+          strokeColorData = this._buildColorData(strokeColor, strokeAlpha);
+          d = this.settings.strokeWidth;
+          // * Base Fill
+          this._drawElipse(0, 0, width, height, colorData);
+          // * Stroke
+          return this._drawStroke(0, 0, width, height, d, strokeColorData);
+        } else {
+          // * Base Fill only
+          return this._drawElipse(0, 0, width, height, colorData);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _buildColorData(c = 0xfff, a = 1) {
+      var e;
+      try {
+        if (typeof c === 'string') {
+          c = KDCore.Utils.string2hex(c);
+        }
+        return [c, a];
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return [0xfff, 1];
+      }
+    }
+
+    _drawElipse(x, y, w, h, colorData) {
+      var e, g;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        g = this.graphics;
+        if (!this.isHaveGradient()) {
+          g.beginFill(...colorData);
+        }
+        g.drawEllipse(x, y, w / 2, h / 2);
+        if (!this.isHaveGradient()) {
+          return g.endFill();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawStroke(x, y, w, h, d, colorData) {
+      var e, g;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        g = this.graphics;
+        g.lineStyle(d, ...colorData);
+        return g.drawEllipse(x, y, w / 2, h / 2);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var e;
+      try {
+        this.width = this.settings.width;
+        this.height = this.settings.height;
+        // * Круг (элипс) рисуется от центра, что не удобно
+        // при расчёте координат, поэтому сдвигаем в левый вверхний угол
+        this.graphics.x = this.settings.width * 0.5;
+        return this.graphics.y = this.settings.height * 0.5;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_BaseCircle = Sprite_BaseCircle;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_BaseRect;
+  //NUI 1.0
+  //rev 28.04.24
+
+    //"type": "rect"
+  Sprite_BaseRect = class Sprite_BaseRect extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._create();
+      this._applySettings();
+      this._onResize();
+      return;
+    }
+
+    defaultSettings() {
+      return {
+        width: 100,
+        height: 100,
+        corners: 0, // {  topLeft, topRight, bottomRight, bottomLeft }
+        fillGradient: null, // { gradient stops }
+        gradientStart: {
+          x: 0,
+          y: 0
+        },
+        gradientEnd: {
+          x: 0,
+          y: 100
+        },
+        fillColor: 0xffffff,
+        fillAlpha: 1,
+        strokeWidth: 4,
+        strokeColor: 0x000000,
+        strokeAlpha: 1
+      };
+    }
+
+    defaultGradientSettings() {
+      return {
+        "0": "#9ff",
+        "1": "#033"
+      };
+    }
+
+    defaultCornersSettings() {
+      return {
+        topLeft: 0,
+        topRight: 0,
+        bottomRight: 0,
+        bottomLeft: 0
+      };
+    }
+
+    isHaveGradient() {
+      return this.settings.fillGradient != null;
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        stroke: function(v) {
+          if (v != null) {
+            return this.setStroke(v.width, v.color, v.alpha);
+          }
+        },
+        fill: function(v) {
+          if (v != null) {
+            return this.setFill(v.color, v.alpha);
+          }
+        },
+        gradientStart: function(v) {
+          if (v != null) {
+            return this.setGradientStartEnd(v, this.settings.gradientEnd);
+          }
+        },
+        gradientEnd: function(v) {
+          if (v != null) {
+            return this.setGradientStartEnd(this.settings.gradientStart, v);
+          }
+        }
+      });
+    }
+
+    setGradientStartEnd(start, end) {
+      var e;
+      try {
+        if (start != null) {
+          start.x = this._getValueByStr(start.x, 'width', this);
+          start.y = this._getValueByStr(start.y, 'height', this);
+        }
+        if (end != null) {
+          end.x = this._getValueByStr(end.x, 'width', this);
+          end.y = this._getValueByStr(end.y, 'height', this);
+        }
+        if (start != null) {
+          this.settings.gradientStart = start;
+        }
+        if (end != null) {
+          this.settings.gradientEnd = end;
+        }
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setFill(color = "#FFF", alpha = 1) {
+      var e;
+      try {
+        this.settings.fillColor = color;
+        this.settings.fillAlpha = alpha;
+        this.settings.fillGradient = null;
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setStroke(color = "#FFF", width = 0, alpha = 1) {
+      var e;
+      try {
+        this.settings.strokeColor = color;
+        this.settings.strokeAlpha = alpha;
+        this.settings.strokeWidth = width;
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setSize(width = 100, height = 100) {
+      var e, h, w;
+      try {
+        w = this._getValueByStr(width, 'width', this);
+        h = this._getValueByStr(height, 'height', this);
+        if (w != null) {
+          this.settings.width = w;
+        }
+        if (h != null) {
+          this.settings.height = h;
+        }
+        this._applySettings();
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _create() {
+      var e;
+      try {
+        this.graphics = new PIXI.Graphics();
+        return this.addChild(this.graphics);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applySettings() {
+      var cornersSettings, e, gradientSettings;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        this.graphics.clear();
+        if (this.settings.fillGradient != null) {
+          gradientSettings = Object.assign(this.defaultGradientSettings(), this.settings.fillGradient);
+        }
+        this._applyGradientTexture(gradientSettings);
+        if (typeof this.settings.corners === "number") {
+          return this._drawBaseRoundedRect();
+        } else if (this.settings.corners != null) {
+          cornersSettings = Object.assign(this.defaultCornersSettings(), this.settings.corners);
+          return this._drawComplexRoundedRect(cornersSettings);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applyGradientTexture(fillGradient) {
+      var c, convertedValue, ctx, e, grd, height, key, texture, value, width;
+      try {
+        if (KDCore.isMV()) {
+          return;
+        }
+        ({width, height} = this.settings);
+        c = document.createElement("canvas");
+        ctx = c.getContext("2d");
+        grd = ctx.createLinearGradient(this.settings.gradientStart.x, this.settings.gradientStart.y, this.settings.gradientEnd.x, this.settings.gradientEnd.y);
+        for (key in fillGradient) {
+          value = fillGradient[key];
+          try {
+            convertedValue = this._convertGradientStopColor(value);
+            grd.addColorStop(Number(key), convertedValue);
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+          }
+        }
+        ctx.fillStyle = grd;
+        ctx.fillRect(0, 0, width, height);
+        texture = new PIXI.Texture.from(c);
+        return this.graphics.beginTextureFill(texture);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _convertGradientStopColor(color) {
+      var alpha, c, e, parts;
+      try {
+        if (color == null) {
+          return "#FFF";
+        }
+        if (!String.any(color)) {
+          return "#FFF";
+        }
+        if (color.contains("%")) {
+          parts = color.split("%");
+          color = parts[0];
+          alpha = Number(parts[1]);
+          c = KDCore.Color.FromHex(color);
+          c = c.reAlpha(alpha * 255);
+          return c.CSS;
+        } else {
+          return color;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return "#FFF";
+      }
+    }
+
+    _drawBaseRoundedRect() {
+      var colorData, corners, d, e, fillAlpha, fillColor, height, strokeAlpha, strokeColor, strokeColorData, width;
+      try {
+        ({width, height, corners} = this.settings);
+        ({fillColor, fillAlpha} = this.settings);
+        colorData = this._buildColorData(fillColor, fillAlpha);
+        if (this.settings.strokeWidth > 0) {
+          ({strokeColor, strokeAlpha} = this.settings);
+          strokeColorData = this._buildColorData(strokeColor, strokeAlpha);
+          d = this.settings.strokeWidth;
+          // * Base Fill
+          this._drawRect(0, 0, width, height, corners, colorData);
+          // * Stroke
+          return this._drawStroke(-d / 2, -d / 2, width + d / 2, height + d / 2, corners, d, strokeColorData);
+        } else {
+          // * Base Fill only
+          return this._drawRect(0, 0, width, height, corners, colorData);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _buildColorData(c = 0xfff, a = 1) {
+      var e;
+      try {
+        if (typeof c === 'string') {
+          c = KDCore.Utils.string2hex(c);
+        }
+        return [c, a];
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return [0xfff, 1];
+      }
+    }
+
+    _drawRect(x, y, w, h, r, colorData) {
+      var e, g;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        g = this.graphics;
+        if (!this.isHaveGradient()) {
+          g.beginFill(...colorData);
+        }
+        if (r > 0) {
+          g.drawRoundedRect(x, y, w, h, r);
+        } else {
+          g.drawRect(x, y, w, h);
+        }
+        if (!this.isHaveGradient()) {
+          return g.endFill();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawStroke(x, y, w, h, r, d, colorData) {
+      var e, g;
+      try {
+        if (this.graphics == null) {
+          return;
+        }
+        g = this.graphics;
+        g.lineStyle(d, ...colorData);
+        if (r > 0) {
+          return g.drawRoundedRect(x, y, w, h, r);
+        } else {
+          return g.drawRect(x, y, w, h);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawComplexRoundedRect(cornersSettings) {
+      var bottomLeft, bottomRight, colorData, d, e, fillAlpha, fillColor, height, strokeAlpha, strokeColor, strokeColorData, topLeft, topRight, width;
+      try {
+        if (cornersSettings == null) {
+          return;
+        }
+        ({width, height} = this.settings);
+        ({fillColor, fillAlpha} = this.settings);
+        colorData = this._buildColorData(fillColor, fillAlpha);
+        ({topLeft, topRight, bottomRight, bottomLeft} = cornersSettings);
+        if (this.settings.strokeWidth > 0) {
+          ({strokeColor, strokeAlpha} = this.settings);
+          strokeColorData = this._buildColorData(strokeColor, strokeAlpha);
+          d = this.settings.strokeWidth;
+          this._drawComplexRect(0, 0, width, height, colorData, topLeft, topRight, bottomRight, bottomLeft);
+          return this._drawComplexStroke(-d / 2, -d / 2, width + (d / 2), height + (d / 2), strokeColorData, d, topLeft, topRight, bottomRight, bottomLeft);
+        } else {
+          return this._drawComplexRect(0, 0, width, height, colorData, topLeft, topRight, bottomRight, bottomLeft);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawComplexRect(x, y, width, height, colorData, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius) {
+      var e;
+      try {
+        if (!this.isHaveGradient()) {
+          this.graphics.beginFill(...colorData);
+        }
+        // Starting from the top left corner.
+        this.graphics.moveTo(x + topLeftRadius, y);
+        // Drawing the top line with top right corner.
+        this.graphics.lineTo(x + width - topRightRadius, y);
+        if (topRightRadius > 0) {
+          this.graphics.quadraticCurveTo(x + width, y, x + width, y + topRightRadius);
+        }
+        // Drawing the right line with bottom right corner.
+        this.graphics.lineTo(x + width, y + height - bottomRightRadius);
+        if (bottomRightRadius > 0) {
+          this.graphics.quadraticCurveTo(x + width, y + height, x + width - bottomRightRadius, y + height);
+        }
+        // Drawing the bottom line with bottom left corner.
+        this.graphics.lineTo(x + bottomLeftRadius, y + height);
+        if (bottomLeftRadius > 0) {
+          this.graphics.quadraticCurveTo(x, y + height, x, y + height - bottomLeftRadius);
+        }
+        // Drawing the left line with top left corner and closing the shape.
+        this.graphics.lineTo(x, y + topLeftRadius);
+        if (topLeftRadius > 0) {
+          this.graphics.quadraticCurveTo(x, y, x + topLeftRadius, y);
+        }
+        if (!this.isHaveGradient()) {
+          return this.graphics.endFill();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawComplexStroke(x, y, width, height, colorData, d, topLeftRadius, topRightRadius, bottomRightRadius, bottomLeftRadius) {
+      var e, graphics;
+      try {
+        graphics = this.graphics;
+        graphics.lineStyle(d, ...colorData);
+        // Starting from the top left corner.
+        graphics.moveTo(x + topLeftRadius, y);
+        // Drawing the top line with top right corner.
+        graphics.lineTo(x + width - topRightRadius, y);
+        if (topRightRadius > 0) {
+          graphics.quadraticCurveTo(x + width, y, x + width, y + topRightRadius);
+        }
+        // Drawing the right line with bottom right corner.
+        graphics.lineTo(x + width, y + height - bottomRightRadius);
+        if (bottomRightRadius > 0) {
+          graphics.quadraticCurveTo(x + width, y + height, x + width - bottomRightRadius, y + height);
+        }
+        // Drawing the bottom line with bottom left corner.
+        graphics.lineTo(x + bottomLeftRadius, y + height);
+        if (bottomLeftRadius > 0) {
+          graphics.quadraticCurveTo(x, y + height, x, y + height - bottomLeftRadius);
+        }
+        // Drawing the left line with top left corner and closing the shape.
+        graphics.lineTo(x, y + topLeftRadius);
+        if (topLeftRadius > 0) {
+          graphics.quadraticCurveTo(x, y, x + topLeftRadius, y);
+        }
+        return graphics.closePath();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var e;
+      try {
+        this.width = this.settings.width;
+        return this.height = this.settings.height;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_BaseRect = Sprite_BaseRect;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
   var Sprite_ButtonsGroup;
   // * Класс для реализации набора кнопок переключателей (Tabs)
   // * Когда только одна кнопка может быть нажата (выбрана)
@@ -5358,7 +8098,7 @@ KDCore.registerLibraryToLoad(function() {
         ref.disable(); // * Нажата
       }
       if (this.clickCallback != null) {
-        this.clickCallback();
+        this.clickCallback(index);
       }
     };
     _._resetAllButtons = function() {
@@ -5375,6 +8115,2825 @@ KDCore.registerLibraryToLoad(function() {
   // ■ END PRIVATE
   //---------------------------------------------------------------------------
   return KDCore.Sprite_ButtonsGroup = Sprite_ButtonsGroup;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_ButtonsGroupHandler;
+  // * Класс для реализации набора кнопок переключателей (Tabs)
+  // * Когда только одна кнопка может быть нажата (выбрана)
+  // * В отличии от Sprite_ButtonsGroup, принимает массив
+  // * уже созданных кнопок
+
+    //rev 10.07.22
+  Sprite_ButtonsGroupHandler = class Sprite_ButtonsGroupHandler extends KDCore.Sprite {
+    // _buttons = [Button object with enable, disable, isEnable, addClickHandler methods]
+    constructor(_buttons, clickCallback, activeIndex = 0) {
+      var button, i, index, len, ref;
+      super();
+      this._buttons = _buttons;
+      this.clickCallback = clickCallback;
+      ref = this._buttons;
+      for (index = i = 0, len = ref.length; i < len; index = ++i) {
+        button = ref[index];
+        this._processButton(button, index);
+      }
+      this._onButtonClick(activeIndex);
+      return;
+    }
+
+    getSelectedIndex() {
+      return this._buttons.findIndex(function(btn) {
+        return !btn.isEnabled();
+      });
+    }
+
+  };
+  (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
+    // ■ PRIVATE
+    //╒═════════════════════════════════════════════════════════════════════════╛
+    //---------------------------------------------------------------------------
+    var _;
+    //@[DEFINES]
+    _ = Sprite_ButtonsGroupHandler.prototype;
+    _._processButton = function(btn, index) {
+      var method;
+      // * Так как кнопки работают как переключатели, то 03 должен быть всегда
+      method = () => {
+        return this._onButtonClick(index);
+      };
+      btn.addClickHandler(method);
+      this.add(btn);
+    };
+    _._onButtonClick = function(index = 0) {
+      var ref;
+      this._resetAllButtons();
+      if ((ref = this._buttons[index]) != null) {
+        ref.disable(); // * Нажата
+      }
+      if (this.clickCallback != null) {
+        this.clickCallback(index);
+      }
+    };
+    _._resetAllButtons = function() {
+      var btn, i, len, ref;
+      ref = this._buttons;
+      for (i = 0, len = ref.length; i < len; i++) {
+        btn = ref[i];
+        if (btn != null) {
+          btn.enable();
+        }
+      }
+    };
+  })();
+  // ■ END PRIVATE
+  //---------------------------------------------------------------------------
+  return KDCore.Sprite_ButtonsGroupHandler = Sprite_ButtonsGroupHandler;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_Gauge;
+  //TODO: NOT USED IN NUI 1.0
+  //NUI 1.X !#!
+  //rev 30.04.24
+
+    //"type": "gauge"
+  Sprite_Gauge = class Sprite_Gauge extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._loaded = false;
+      this._lastValue = 1;
+      this._applySettings();
+      return;
+    }
+
+    defaultSettings() {
+      return {
+        fillMode: "color", //image, plane, color
+        fillColor: "#ffffff",
+        fillOpacity: 255,
+        imageName: "", // * for fill, if fillMode is image, for plane if fillMode is plane
+        folderName: "pictures",
+        margins: 2, // * For plane image
+        width: "auto",
+        height: "auto",
+        mask: "",
+        backColor: "#000000",
+        backImage: "",
+        backOpacity: 255,
+        vertical: false
+      };
+    }
+
+    isLoaded() {
+      var e;
+      try {
+        return this._loaded === true;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return false;
+    }
+
+    realWidth() {
+      var e;
+      try {
+        if (this.settings.width !== "auto") {
+          return this.settings.width;
+        } else if (this._gaugeSpr != null) {
+          return this._gaugeSpr.realWidth(); //TODO: Gauge Modes
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.width;
+    }
+
+    realHeight() {
+      var e;
+      try {
+        if (this.settings.height !== "auto") {
+          return this.settings.height;
+        } else if (this._gaugeSpr != null) {
+          return this._gaugeSpr.realHeight(); //TODO: Gauge Modes
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.height;
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        rate: function(v) {
+          if (v != null) {
+            return this.draw(v);
+          }
+        },
+        fillImage: function(v) {
+          if (v != null) {
+            return this.setFillImage(v);
+          }
+        },
+        fillColor: function(v) {
+          if (v != null) {
+            return this.setFillColor(v);
+          }
+        },
+        fillOpacity: function(v) {
+          if (v != null) {
+            return this.setFillOpacity(v);
+          }
+        }
+      });
+    }
+
+    //TODO:!
+    //backImage: (v) ->
+    //backColor: (v) ->
+    //backOpacity: (v) ->
+    draw(percent = 1) {
+      var e;
+      try {
+        if (!this.isLoaded()) {
+          this._requireFunc('draw', arguments);
+          return;
+        }
+        this._lastValue = percent;
+        return this._drawGauge(percent);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setFillOpacity(opacity) {
+      var e, ref;
+      try {
+        this.settings.fillOpacity = opacity;
+        return (ref = this.fillLayer) != null ? ref.opacity = opacity : void 0;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setFillColor(color) {
+      var e;
+      try {
+        this.settings.fillColor = color;
+        if (this.fillColorBitmap != null) {
+          this._createColorGaugeFillColorBitmap();
+          return this._drawGauge(this._lastValue);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setFillImage(imageName) {
+      var e;
+      try {
+
+      } catch (error) {
+        //TODO:
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setSize(width = "auto", height = "auto") {
+      var e;
+      try {
+        if (width !== "auto") {
+          width = this._getValueByStr(width, 'width', this);
+        }
+        if (height !== "auto") {
+          height = this._getValueByStr(height, 'height', this);
+        }
+        if (width != null) {
+          this.settings.width = width;
+        }
+        if (height != null) {
+          this.settings.height = height;
+        }
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applySettings() {
+      var e;
+      try {
+        this._loaded = false;
+        this._destroyExistGauge();
+        this._createGaugeFromSettings();
+        return this.draw(this._lastValue);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _destroyExistGauge() {
+      var e;
+      try {
+        if (this._gaugeSpr == null) {
+          return;
+        }
+        this._gaugeSpr.removeFromParent();
+        return this._gaugeSpr = null;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createGaugeFromSettings() {
+      var e;
+      try {
+        this._gaugeSpr = new KDCore.Sprite();
+        this.add(this._gaugeSpr);
+        switch (this.settings.fillMode) {
+          case "image":
+            return this._createImageGauge();
+          case "plane":
+            return this._createPlaneGauge();
+          case "color":
+            return this._createColorGauge();
+          default:
+            return console.warn("Unknown Gauge fillMode: " + this.settings.fillMode);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createImageGauge() {
+      var e;
+      try {
+        this._gaugeSourceImage = new KDCore.Sprite_Image({
+          imageName: this.settings.imageName,
+          folderName: this.settings.folderName,
+          width: this.settings.width,
+          height: this.settings.height
+        });
+        return this._gaugeSourceImage.addLoadListener(this._onGaugeFillImageLoaded.bind(this));
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onGaugeFillImageLoaded() {
+      var e;
+      try {
+        this._addBackground(this._gaugeSourceImage.realWidth(), this._gaugeSourceImage.realHeight());
+        this.fillLayer = KDCore.Sprite.FromBitmap(this._gaugeSourceImage.realWidth(), this._gaugeSourceImage.realHeight());
+        this.fillLayer.opacity = this.settings.fillOpacity;
+        this._gaugeSpr.add(this.fillLayer);
+        this._addMask();
+        return this._onGaugeLoadedAndReady();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onGaugeLoadedAndReady() {
+      var e;
+      try {
+        this._loaded = true;
+        this.width = this.realWidth();
+        this.height = this.realHeight();
+        this._applyRequiredData();
+        return this._executeLoadListeners();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createPlaneGauge() {
+      var e;
+      try {
+        if (this.settings.width === "auto") {
+          // * Нельзя создать Plane Gauge с auto размером, поэтому задаём стандартные значения
+          this.settings.width = 80;
+        }
+        if (this.settings.height === "auto") {
+          this.settings.height = 20;
+        }
+        this._addBackground(this.settings.width, this.settings.height);
+        this.fillLayer = new KDCore.Sprite_Plane({
+          imageName: this.settings.imageName,
+          folderName: this.settings.folderName,
+          width: this.settings.width,
+          height: this.settings.height,
+          margins: this.settings.margins
+        });
+        this.fillLayer.opacity = this.settings.fillOpacity;
+        this._gaugeSpr.add(this.fillLayer);
+        this._addMask();
+        return this._onGaugeLoadedAndReady();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createColorGauge() {
+      var e;
+      try {
+        if (this.settings.width === "auto") {
+          // * Нельзя создать цветную Gauge с auto размером, поэтому задаём стандартные значения
+          this.settings.width = 80;
+        }
+        if (this.settings.height === "auto") {
+          this.settings.height = 20;
+        }
+        this._addBackground(this.settings.width, this.settings.height);
+        this.fillLayer = KDCore.Sprite.FromBitmap(this.settings.width, this.settings.height);
+        this.fillLayer.opacity = this.settings.fillOpacity;
+        this._createColorGaugeFillColorBitmap();
+        this._gaugeSpr.add(this.fillLayer);
+        this._addMask();
+        return this._onGaugeLoadedAndReady();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createColorGaugeFillColorBitmap() {
+      var e;
+      try {
+        this.fillColorBitmap = new Bitmap(this.settings.width, this.settings.height);
+        return this.fillColorBitmap.fillAll(this.settings.fillColor);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _addBackground(width, height) {
+      var background, e;
+      try {
+        if (this._gaugeSpr == null) {
+          return;
+        }
+        background = null;
+        if (String.any(this.settings.backImage)) {
+          background = this._createGaugeBackgroundImage();
+        } else if (String.any(this.settings.backColor)) {
+          background = this._createGaugeBackgroundColor(width, height, this.settings.backColor);
+        }
+        if (background != null) {
+          if (this.settings.backOpacity != null) {
+            background.opacity = this.settings.backOpacity;
+          }
+          return this._gaugeSpr.add(background);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _addMask() {
+      var e, gaugeMask;
+      try {
+        if (this._gaugeSpr == null) {
+          return;
+        }
+        if (String.isNullOrEmpty(this.settings.mask)) {
+          return;
+        }
+        gaugeMask = new KDCore.Sprite_Image({
+          imageName: this.settings.mask,
+          folderName: this.settings.folderName,
+          width: this.settings.width,
+          height: this.settings.height
+        });
+        this._gaugeSpr.mask = gaugeMask.image;
+        this._gaugeSpr.add(gaugeMask);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        this._gaugeSpr.mask = null;
+      }
+    }
+
+    _createGaugeBackgroundColor(width, height, color) {
+      var background, e;
+      try {
+        background = KDCore.Sprite.FromBitmap(width, height);
+        background.b().fillAll(color);
+        return background;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return new KDCore.Sprite();
+      }
+    }
+
+    _createGaugeBackgroundImage() {
+      var e;
+      try {
+        return new KDCore.Sprite_Image({
+          imageName: this.settings.backImage,
+          folderName: this.settings.folderName,
+          width: this.settings.width,
+          height: this.settings.height
+        });
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return new KDCore.Sprite();
+      }
+    }
+
+    _drawGauge(percent) {
+      var e;
+      try {
+        if (this.fillLayer == null) {
+          return;
+        }
+        // * See COE, Fill Indicator
+        //if @settings.vertical is true
+        //TODO: VERTICAL
+        //else
+        return this._drawHorizontal(percent);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawHorizontal(percent) {
+      var e;
+      try {
+        switch (this.settings.fillMode) {
+          case "image":
+            return this._drawImageGauge(percent);
+          case "plane":
+            return this._drawPlaneGauge(percent);
+          case "color":
+            return this._drawColorGauge(percent);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawImageGauge(percent) {
+      var e, fillBitmap;
+      try {
+        this.fillLayer.clear();
+        fillBitmap = this._gaugeSourceImage.image.bitmap;
+        return this._drawGaugeBitmapBased(percent, fillBitmap);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawGaugeBitmapBased(percent, fillBitmap) {
+      var e, h, w;
+      try {
+        w = this.realWidth() * percent;
+        h = this.realHeight();
+        return this.fillLayer.b().blt(fillBitmap, 0, 0, w, h, 0, 0);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawColorGauge(percent) {
+      var e, fillBitmap;
+      try {
+        this.fillLayer.clear();
+        fillBitmap = this.fillColorBitmap;
+        return this._drawGaugeBitmapBased(percent, fillBitmap);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawPlaneGauge(percent) {
+      var e, h, w;
+      try {
+        w = this.realWidth() * percent;
+        h = this.realHeight();
+        return this.fillLayer.setSize(w, h);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_Gauge = Sprite_Gauge;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_Group;
+  //NUI 1.0
+  //rev 30.04.24
+  Sprite_Group = class Sprite_Group extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      if (this.settings.horizontalNavigation === true) {
+        this.pIsVerticalKeyboardNavigation = function() {
+          return false;
+        };
+      }
+      this._applySettings();
+      this._onResize();
+      return;
+    }
+
+    update() {
+      var e;
+      super.update();
+      try {
+        if (this._isNeedWaitLoadingChild === true) {
+          //console.log("REFRESH BY LOAD")
+          return this.refreshBindings(this._dataObjectRef, true);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    refreshBindings(dataObject, recursive) {
+      var c, i, len, ref;
+      super.refreshBindings(...arguments);
+      ref = this.children;
+      for (i = 0, len = ref.length; i < len; i++) {
+        c = ref[i];
+        if ((c.isLoaded != null) && !c.isLoaded()) {
+          this._startWaitLoading(dataObject);
+          return;
+        }
+      }
+      this._isNeedWaitLoadingChild = false;
+    }
+
+    _startWaitLoading(_dataObjectRef) {
+      var e;
+      this._dataObjectRef = _dataObjectRef;
+      try {
+        return this._isNeedWaitLoadingChild = true;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    defaultSettings() {
+      return {
+        keyboardHandling: false,
+        horizontalNavigation: false,
+        width: "auto",
+        height: "auto"
+      };
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        }
+      });
+    }
+
+    setSize(width = "auto", height = "auto") {
+      var e;
+      try {
+        if (width !== "auto") {
+          width = this._getValueByStr(width, 'width', this);
+        }
+        if (height !== "auto") {
+          height = this._getValueByStr(height, 'height', this);
+        }
+        if (width != null) {
+          this.settings.width = width;
+        }
+        if (height != null) {
+          this.settings.height = height;
+        }
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    realWidth() {
+      var e;
+      try {
+        if (this.settings.width === "auto") {
+          return this._calculateMax("x", "width");
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.settings.width;
+    }
+
+    realHeight() {
+      var e;
+      try {
+        if (this.settings.height === "auto") {
+          return this._calculateMax("y", "height");
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.settings.height;
+    }
+
+    _calculateMax(a, b) {
+      var child, e, i, len, ref, size, value;
+      try {
+        value = 0;
+        ref = this.children;
+        for (i = 0, len = ref.length; i < len; i++) {
+          child = ref[i];
+          size = child[a] + KDCore.Utils.getRealSpriteSize(b, child);
+          if (size > value) {
+            value = size;
+          }
+        }
+        if (value < 0) {
+          value = 0;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return 0;
+      }
+      return value;
+    }
+
+    _applySettings() {
+      var e;
+      try {
+        if (this.settings.keyboardHandling === true) {
+          return this.activateHandlerManagment();
+        } else {
+          return this.deactivateHandlerManagment();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var e;
+      try {
+        this.width = this.realWidth();
+        return this.height = this.realHeight();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_Group = Sprite_Group;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_Image;
+  //NUI 1.0
+  //rev 29.04.24
+
+    //"type": "image"
+  Sprite_Image = class Sprite_Image extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._loaded = false;
+      this._create();
+      this._onResize();
+      this.draw(this.settings.imageName);
+      return;
+    }
+
+    isLoaded() {
+      var e;
+      try {
+        if (this.settings.width !== "auto" && this.settings.height !== "auto") {
+          return true;
+        } else {
+          return this._loaded === true;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return false;
+    }
+
+    defaultSettings() {
+      return {
+        imageName: "",
+        folderName: "pictures",
+        width: "auto",
+        height: "auto",
+        keepAspect: false
+      };
+    }
+
+    realWidth() {
+      var e;
+      try {
+        if (this.settings.width === "auto") {
+          if (this._srcBitmap != null) {
+            return this._srcBitmap.width;
+          } else {
+            if ((this.image.bitmap != null) && this.image.bitmap.isReady()) {
+              return this.image.bitmap.width;
+            }
+          }
+        } else {
+          return this.settings.width;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.width;
+    }
+
+    realHeight() {
+      var e;
+      try {
+        if (this.settings.height === "auto") {
+          if (this._srcBitmap != null) {
+            return this._srcBitmap.height;
+          } else {
+            if ((this.image.bitmap != null) && this.image.bitmap.isReady()) {
+              return this.image.bitmap.height;
+            }
+          }
+        } else {
+          return this.settings.height;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.height;
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        image: function(v) {
+          return this.draw(v);
+        },
+        icon: function(v) {
+          return this.drawIcon(v);
+        }
+      });
+    }
+
+    setSize(width = "auto", height = "auto") {
+      var e;
+      try {
+        if (width !== "auto") {
+          width = this._getValueByStr(width, 'width', this);
+        }
+        if (height !== "auto") {
+          height = this._getValueByStr(height, 'height', this);
+        }
+        if (width != null) {
+          this.settings.width = width;
+        }
+        if (height != null) {
+          this.settings.height = height;
+        }
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setImage(imageName, folderName = null) {
+      var e;
+      try {
+        if (String.any(folderName)) {
+          this.settings.folderName = folderName;
+        }
+        return this.draw(imageName);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    // * Если не иконка (число), то ничего не рисует (защита)
+    drawIcon(iconIndex) {
+      var e;
+      try {
+        if (isFinite(iconIndex)) {
+          return this.draw(iconIndex);
+        } else {
+          return this.draw("");
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    draw(imageName = "") {
+      var e;
+      try {
+        if (isFinite(imageName)) {
+          return this._drawIcon(imageName);
+        } else if (String.any(imageName)) {
+          return this._drawImage(imageName);
+        } else {
+          this._srcBitmap = null;
+          return this._onResize();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _create() {
+      var e;
+      try {
+        this.image = new KDCore.Sprite(new Bitmap(1, 1));
+        return this.addChild(this.image);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawIcon(iconIndex) {
+      var e, w;
+      try {
+        w = this.settings.width;
+        if (w === "auto") {
+          w = 32;
+        }
+        this.settings.height = w;
+        this._srcBitmap = new Bitmap(w, w);
+        this._srcBitmap.drawIcon(0, 0, iconIndex, w, true);
+        this._loaded = true;
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _drawImage(imageName) {
+      var e, folderName;
+      try {
+        ({folderName} = this.settings);
+        this._loaded = false;
+        this._srcBitmap = ImageManager.loadBitmap('img/' + folderName + "/", imageName);
+        return this._srcBitmap.addLoadListener(this._onBitmapLoaded.bind(this));
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onBitmapLoaded() {
+      var e;
+      try {
+        this._loaded = true;
+        this._onResize();
+        this._applyRequiredData();
+        return this._executeLoadListeners();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var b, e, fh, fw, height, width;
+      try {
+        this.image.bitmap = new Bitmap(this.realWidth(), this.realHeight());
+        if (this._srcBitmap == null) {
+          return;
+        }
+        b = this._srcBitmap;
+        if (this.settings.keepAspect === true) {
+          ({width, height} = this._calculateAspectRatio(this.image.bitmap.width, this.image.bitmap.height, this._srcBitmap.width, this._srcBitmap.height));
+          fw = width;
+          fh = height;
+        } else {
+          fw = this.realWidth();
+          fh = this.realHeight();
+        }
+        return this.image.bitmap.blt(b, 0, 0, b.width, b.height, 0, 0, fw, fh);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _calculateAspectRatio(containerWidth, containerHeight, width, height) {
+      var aspectRatio, containerAspectRatio, e;
+      try {
+        aspectRatio = width / height;
+        containerAspectRatio = containerWidth / containerHeight;
+        if (aspectRatio > containerAspectRatio) {
+          width = containerWidth;
+          height = width / aspectRatio;
+        } else {
+          height = containerHeight;
+          width = height * aspectRatio;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return {width, height};
+    }
+
+  };
+  return KDCore.Sprite_Image = Sprite_Image;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_ImgButton;
+  //NUI 1.0
+  //rev 25.04.24
+
+    //"type": "legacyButton"
+  Sprite_ImgButton = class Sprite_ImgButton extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._create();
+      return;
+    }
+
+    defaultSettings() {
+      return {
+        width: "auto",
+        height: "auto",
+        imageName: "",
+        isFull: false,
+        folderName: "pictures",
+        isCheckAlpha: false,
+        handler: null
+      };
+    }
+
+    isLoaded() {
+      var e;
+      try {
+        if (this.settings.width !== "auto" && this.settings.height !== "auto") {
+          return true;
+        } else {
+          return this._loaded === true;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    realWidth() {
+      var e;
+      try {
+        if (this.settings.width === "auto") {
+          return this.button.realWidth();
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.settings.width;
+    }
+
+    realHeight() {
+      var e;
+      try {
+        if (this.settings.height === "auto") {
+          return this.button.realHeight();
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return this.settings.height;
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        image: function(v) {
+          return this.setImage(v);
+        },
+        enable: function(v) {
+          if (v != null) {
+            return this.setEnabledState(v);
+          }
+        },
+        handler: function(v) {
+          return this.setClickHandler(v);
+        }
+      });
+    }
+
+    setSize(width = "auto", height = "auto") {
+      var e;
+      try {
+        if (width !== "auto") {
+          width = this._getValueByStr(width, 'width', this);
+        }
+        if (height !== "auto") {
+          height = this._getValueByStr(height, 'height', this);
+        }
+        if (width != null) {
+          this.settings.width = width;
+        }
+        if (height != null) {
+          this.settings.height = height;
+        }
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setImage(imageName = "") {
+      var e;
+      try {
+        if (this.button != null) {
+          this._lastButtonState = this.button.isEnabled();
+          this._lastButtonHandler = this.button._handler;
+        }
+        this.settings.imageName = imageName;
+        this._create();
+        // * Может не быть кнопки, если imageName == ""
+        if (this.button == null) {
+          return;
+        }
+        if (this._lastButtonState != null) {
+          this.setEnabledState(this._lastButtonState);
+          this._lastButtonState = null;
+        }
+        if (this._lastButtonHandler != null) {
+          this.setClickHandler(this._lastButtonHandler);
+          return this._lastButtonHandler = null;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setEnabledState(state = true) {
+      var e;
+      try {
+        if (this.button == null) {
+          return;
+        }
+        if (state === true) {
+          return this.button.enable();
+        } else {
+          return this.button.disable();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    // * В отличии от AddClickHandler, удаляет все предидущие
+    setClickHandler(handler) {
+      var e;
+      try {
+        if (this.button == null) {
+          return;
+        }
+        this.button.clearClickHandler();
+        if ((handler != null) && typeof handler === "function") {
+          return this.button.addClickHandler(handler);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    // * EXPAND FIELDS
+    click() {
+      var ref;
+      return (ref = this.button) != null ? ref.click() : void 0;
+    }
+
+    setManualHover() {
+      var ref;
+      return (ref = this.button) != null ? ref.setManualHover() : void 0;
+    }
+
+    disableManualHover() {
+      var ref;
+      return (ref = this.button) != null ? ref.disableManualHover() : void 0;
+    }
+
+    setManualSelected() {
+      var ref;
+      return (ref = this.button) != null ? ref.setManualSelected(...arguments) : void 0;
+    }
+
+    enableClick() {
+      var ref;
+      return (ref = this.button) != null ? ref.enableClick() : void 0;
+    }
+
+    disableClick() {
+      var ref;
+      return (ref = this.button) != null ? ref.disableClick() : void 0;
+    }
+
+    desaturate() {
+      var ref;
+      return (ref = this.button) != null ? ref.desaturate() : void 0;
+    }
+
+    isMouseIn() {
+      return (this.button != null) && this.button.isMouseIn();
+    }
+
+    isActive() {
+      return (this.button != null) && this.button.isActive();
+    }
+
+    isDisabled() {
+      return this.isEnabled();
+    }
+
+    isEnabled() {
+      return (this.button != null) && this.button.isEnabled();
+    }
+
+    addClickHandler() {
+      return this.setClickHandler(...arguments);
+    }
+
+    clearClickHandler() {
+      var ref;
+      return (ref = this.button) != null ? ref.clearClickHandler() : void 0;
+    }
+
+    simulateClick() {
+      var ref;
+      return (ref = this.button) != null ? ref.simulateClick() : void 0;
+    }
+
+    refreshState() {
+      var ref;
+      return (ref = this.button) != null ? ref.refreshState(...arguments) : void 0;
+    }
+
+    disable() {
+      var ref;
+      return (ref = this.button) != null ? ref.disable() : void 0;
+    }
+
+    enable() {
+      var ref;
+      return (ref = this.button) != null ? ref.disable() : void 0;
+    }
+
+    // * ==============
+    _create() {
+      var e;
+      try {
+        this._loaded = false;
+        if (this.button != null) {
+          this._destroyButton();
+        }
+        if (!String.any(this.settings.imageName)) {
+          return;
+        }
+        this.button = new KDCore.ButtonM(this.settings.imageName, this.settings.isFull, this.settings.folderName);
+        if (this.settings.isCheckAlpha === true) {
+          this.button.isCheckAlpha = function() {
+            return true;
+          };
+        }
+        if (this.settings.handler != null) {
+          this.setClickHandler(this.settings.handler);
+        }
+        this.button.addLoadListener(this._onLoaded.bind(this));
+        return this.addChild(this.button);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onLoaded() {
+      var e;
+      try {
+        this._loaded = true;
+        this._onResize();
+        this._applyRequiredData();
+        return this._executeLoadListeners();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _destroyButton() {
+      var e;
+      try {
+        if (this.button == null) {
+          return;
+        }
+        this.button.removeFromParent();
+        this._loaded = false;
+        if ($gameTemp.kdButtonUnderMouse === this.button) {
+          return $gameTemp.kdButtonUnderMouse = null;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var e;
+      try {
+        this.width = this.realWidth();
+        return this.height = this.realHeight();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_ImgButton = Sprite_ImgButton;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_ItemsList;
+  // * Класс который позволяет сделать список (на основе Window_Selectable), но из Sprite элементов, а не Draw на Bitmap
+
+    //rev 02.05.24
+
+    //TODO: Dynamic items height, controls handlers support
+  Sprite_ItemsList = class Sprite_ItemsList extends Window_Selectable {
+    constructor(r, settings = {}) {
+      if (KDCore.isMV()) {
+        super(r.x, r.y, r.width, r.height);
+      } else {
+        super(r);
+      }
+      this.settings = Object.assign(this.defaultSetting(), settings);
+      this.padding = this.settings.itemsPadding;
+      this._prevSelectedIndex = -1;
+      this._createItemsContainer();
+      this._createWindowContentMask();
+      this._setupBackgroundType();
+      return;
+    }
+
+    defaultSetting() {
+      return {
+        maxCols: 1,
+        isHaveSelectionEffect: false,
+        selectionEffects: ["glow;distance:12;outerStrength:3"],
+        scaleItemsWidth: false,
+        scaleItemsHeight: false,
+        defautItemHeight: 36,
+        isDrawDefaultItemBack: false,
+        backgroundType: 2,
+        itemsPadding: 12,
+        isHaveInOutAnimation: false,
+        inAnimation: "field:x;duration:0.15;keyframes:0=0,100=4",
+        outAnimation: "field:x;duration:0.15;keyframes:0=4,100=0"
+      };
+    }
+
+    activate(index) {
+      var e;
+      try {
+        this.refresh();
+        if (index != null) {
+          this.safeSelect(index);
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return super.activate();
+    }
+
+    maxItems() {
+      return this.getAllItems().length;
+    }
+
+    maxCols() {
+      if (this.settings != null) {
+        return this.settings.maxCols || 1;
+      } else {
+        return 1;
+      }
+    }
+
+    getAllItems() {
+      return this.itemsSet || [];
+    }
+
+    setItems(itemsSet, singleItemHeight = null) {
+      this.itemsSet = itemsSet;
+      this.singleItemHeight = singleItemHeight;
+      this._prevSelectedIndex = -1;
+      this.setTopRow(0);
+      this._clearPreviousItems();
+      if (this.singleItemHeight == null) {
+        this._adjustAutoItemsHeight(this.itemsSet[0]);
+      }
+      this.refresh();
+      this._drawNewItems();
+    }
+
+    selectedItem() {
+      return this.itemAt(this.index());
+    }
+
+    setOkHandler(handler) {
+      return this.setHandler('ok', handler);
+    }
+
+    setCancelHandler(handler) {
+      return this.setHandler('cancel', handler);
+    }
+
+    setSelectionHandler(handler) {
+      return this.pOnSelectionChanged = handler;
+    }
+
+    itemAt(index) {
+      return this.getAllItems()[index];
+    }
+
+    isNeedScaleItemsW() {
+      return this.settings.scaleItemsWidth === true;
+    }
+
+    isNeedScaleItemsH() {
+      return this.settings.scaleItemsHeight === true;
+    }
+
+    // * NOT WORKS!!!
+    isUseDynamicHeight() {
+      return false;
+    }
+
+    lineHeight(index) {
+      if (this.settings != null) {
+        return this.singleItemHeight || this.settings.defautItemHeight;
+      } else {
+        return this.singleItemHeight || 36;
+      }
+    }
+
+    isDrawWindowDefaultItemsBack() {
+      return this.settings.isDrawDefaultItemBack === true;
+    }
+
+    //$[OVER]
+    _updateCursor() {
+      if (KDCore.isMV()) {
+        return this.setCursorRect(0, 0, 0, 0);
+      } else {
+        return this._cursorSprite.visible = false;
+      }
+    }
+
+    update() {
+      super.update();
+      this._itemsContainer.y = -this._scrollY;
+      return this._updateItemsSelectionState();
+    }
+
+  };
+  (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
+    // ■ PRIVATE
+    //╒═════════════════════════════════════════════════════════════════════════╛
+    //---------------------------------------------------------------------------
+    var _;
+    //@[DEFINES]
+    _ = Sprite_ItemsList.prototype;
+    _._createItemsContainer = function() {
+      var ref;
+      if (!this.isDrawWindowDefaultItemsBack()) {
+        if ((ref = this._contentsBackSprite) != null) {
+          ref.visible = false;
+        }
+      }
+      this._windowItemsContentLayer = new Sprite();
+      this._windowItemsContentLayer.move(this._padding, this._padding);
+      this.addChild(this._windowItemsContentLayer);
+      this._itemsContainer = new KDCore.Sprite();
+      this._windowItemsContentLayer.addChild(this._itemsContainer);
+      this.addChild(this._downArrowSprite);
+      return this.addChild(this._upArrowSprite);
+    };
+    _._setupBackgroundType = function() {
+      return this.setBackgroundType(this.settings.backgroundType);
+    };
+    _._createWindowContentMask = function() {
+      var e, m, maskBitmap;
+      try {
+        maskBitmap = new Bitmap(this.width - this._padding * 2, this.height - this._padding * 2);
+        maskBitmap.fillAll("#FFF");
+        m = new Sprite(maskBitmap);
+        this._windowItemsContentLayer.mask = m;
+        return this._windowItemsContentLayer.addChild(m);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._adjustAutoItemsHeight = function(item) {
+      var e;
+      try {
+        if (item == null) {
+          this.singleItemHeight = 36;
+          return;
+        }
+        if (item.realHeight != null) {
+          this.singleItemHeight = item.realHeight();
+        } else {
+          if (item.height > 0) {
+            this.singleItemHeight = item.height;
+          }
+        }
+        if (this.singleItemHeight === 0 || !this.singleItemHeight) {
+          return this.singleItemHeight = 36;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._clearPreviousItems = function() {
+      var c, e, i, j, len, len1, ref, results, toRemove;
+      try {
+        toRemove = [];
+        ref = this._itemsContainer.children;
+        for (i = 0, len = ref.length; i < len; i++) {
+          c = ref[i];
+          toRemove.push(c);
+        }
+        results = [];
+        for (j = 0, len1 = toRemove.length; j < len1; j++) {
+          c = toRemove[j];
+          results.push(c.removeFromParent());
+        }
+        return results;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._drawNewItems = function() {
+      var e, i, index, item, len, ref, results;
+      try {
+        ref = this.getAllItems();
+        results = [];
+        for (index = i = 0, len = ref.length; i < len; index = ++i) {
+          item = ref[index];
+          results.push(this._addNewItemToList(item, index));
+        }
+        return results;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._addNewItemToList = function(item, index) {
+      var e, rect;
+      try {
+        if (item == null) {
+          return;
+        }
+        rect = this.itemRect(index);
+        item.x = rect.x;
+        item.y = rect.y;
+        this._adjustItemWidthAndHeight(item);
+        return this._itemsContainer.addChild(item);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._adjustItemWidthAndHeight = function(item) {
+      var e, scaleFactor;
+      try {
+        if (item == null) {
+          return;
+        }
+        if (this.isNeedScaleItemsW()) {
+          scaleFactor = this._defaultItemWidth() / this._getItemWidth(item);
+          item.scale.x = scaleFactor;
+        }
+        if (this.isNeedScaleItemsH()) {
+          scaleFactor = this.lineHeight() / this._getItemHeight(item);
+          return item.scale.y = scaleFactor;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._getItemWidth = function(item) {
+      var e, v;
+      v = this._defaultItemWidth();
+      try {
+        if (item == null) {
+          return v;
+        }
+        if (item.realWidth != null) {
+          v = item.realWidth();
+        } else {
+          if (item.width > 0) {
+            v = item.width;
+          }
+        }
+        if (v === 0 || !v) {
+          v = this._defaultItemWidth();
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return v;
+    };
+    _._defaultItemWidth = function() {
+      return this.width - this._padding * 2;
+    };
+    _._getItemHeight = function(item) {
+      var e, v;
+      v = 36;
+      try {
+        if (item == null) {
+          return v;
+        }
+        if (item.realHeight != null) {
+          v = item.realHeight();
+        } else {
+          if (item.height > 0) {
+            v = item.height;
+          }
+        }
+        if (v === 0 || !v) {
+          v = 36;
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return v;
+    };
+    _._updateItemsSelectionState = function() {
+      var e;
+      try {
+        if (KDCore.isMZ()) {
+          if (!this.active || this.index() < 0 || !this.cursorVisible) {
+            this._disableSelectionForAll();
+            return;
+          }
+        } else {
+          if (!this.active || this.index() < 0 || !this.isCursorVisible()) {
+            this._disableSelectionForAll();
+            return;
+          }
+        }
+        return this._selectItemAtIndex(this.index());
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._disableSelectionForAll = function() {
+      var e, i, item, len, ref, results;
+      try {
+        this._prevSelectedIndex = -1;
+        ref = this.getAllItems();
+        results = [];
+        for (i = 0, len = ref.length; i < len; i++) {
+          item = ref[i];
+          results.push(this._deselectItem(item));
+        }
+        return results;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._selectItem = function(item) {
+      var e;
+      try {
+        if (item == null) {
+          return;
+        }
+        if ((this._prevSelectedIndex != null) && this._prevSelectedIndex >= 0) {
+          this._deselectItem(this.itemAt(this._prevSelectedIndex));
+        }
+        this._playItemInAnimation(item);
+        if (item.activateInList != null) {
+          return item.activateInList();
+        } else {
+          return this._selectItemVisually(item);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._playItemInAnimation = function(item) {
+      var e;
+      try {
+        if (!this.settings.isHaveInOutAnimation) {
+          return;
+        }
+        if (this.settings.inAnimation == null) {
+          return;
+        }
+        if (item == null) {
+          return;
+        }
+        this._playItemAnimation(item, this.settings.inAnimation);
+        return this._isHaveInAnimation = true;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._selectItemVisually = function(item) {
+      var e;
+      try {
+        if (item == null) {
+          return;
+        }
+        if (!this.settings.isHaveSelectionEffect) {
+          return;
+        }
+        //item.filters = [new PIXI.filters.GlowFilter({ distance: 15, outerStrength: 4 })]
+        if (this.settings.selectionEffects == null) {
+          return;
+        }
+        if (this.settings.selectionEffects.length === 0) {
+          return;
+        }
+        KDCore.UI.Builder.ApplyEffects(item, this.settings.selectionEffects);
+        return this._isSelectionEffectBeenAdded = true;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._deselectItem = function(item) {
+      var e;
+      try {
+        if (item == null) {
+          return;
+        }
+        this._playItemOutAnimation(item);
+        if (item.deactivateInList != null) {
+          return item.deactivateInList();
+        } else {
+          return this._deselectItemVisually(item);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._playItemOutAnimation = function(item) {
+      var e;
+      try {
+        if (!this.settings.isHaveInOutAnimation) {
+          return;
+        }
+        if (!this._isHaveInAnimation) {
+          return;
+        }
+        if (this.settings.outAnimation == null) {
+          return;
+        }
+        if (item == null) {
+          return;
+        }
+        this._playItemAnimation(item, this.settings.outAnimation);
+        return this._isHaveInAnimation = false;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._playItemAnimation = function(item, animation) {
+      var e, root;
+      try {
+        if (item == null) {
+          return;
+        }
+        root = item.children[0];
+        if (root == null) {
+          return;
+        }
+        if (typeof animation === "string") {
+          animation = KDCore.UI.Builder.ConvertShortcut(animation);
+        }
+        return root.setAnimationRule(animation);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._deselectItemVisually = function(item) {
+      var e;
+      try {
+        if (item == null) {
+          return;
+        }
+        if (this._isSelectionEffectBeenAdded === true) {
+          item.filters = [];
+          return this._isSelectionEffectBeenAdded = false;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._selectItemAtIndex = function(index) {
+      var e, item;
+      try {
+        if (this._prevSelectedIndex !== index) {
+          item = this.itemAt(index);
+          if (item == null) {
+            return;
+          }
+          this._selectItem(item);
+          return this._prevSelectedIndex = index;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+  })();
+  // ■ END PRIVATE
+  //---------------------------------------------------------------------------
+  return KDCore.Sprite_ItemsList = Sprite_ItemsList;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_ItemsListN;
+  //NUI 1.0
+  //rev 03.05.24
+
+    //type: "list"
+  // * Этот класс служит только как Wrapper, чтобы можно было задавать настроки List через NUI схему
+  Sprite_ItemsListN = class Sprite_ItemsListN extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign(this.defaultSettings(), settings);
+      this._applySettings();
+      return;
+    }
+
+    defaultSettings() {
+      return Object.assign({
+        width: 240,
+        height: 420
+      }, KDCore.Sprite_ItemsList.prototype.defaultSetting());
+    }
+
+    /* (See parent class, this is just for reference)
+           defaultSetting: -> {
+               maxCols: 1,
+               isHaveSelectionEffect: false,
+               selectionEffects: ["glow;distance:12;outerStrength:3"],
+               scaleItemsWidth: false,
+               scaleItemsHeight: false,
+               defautItemHeight: 36,
+               isDrawDefaultItemBack: false,
+               backgroundType: 2,
+               itemsPadding: 12,
+               isHaveInOutAnimation: false,
+               inAnimation: "field:x;duration:0.15;keyframes:0=0,100=4",
+               outAnimation: "field:x;duration:0.15;keyframes:0=4,100=0"
+           }*/
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        maxCols: function(v) {
+          if (v != null) {
+            return this.setMaxCols(v);
+          }
+        }
+      });
+    }
+
+    realWidth() {
+      return this.settings.width;
+    }
+
+    realHeight() {
+      return this.settings.height;
+    }
+
+    setSize(width, height) {
+      var e;
+      try {
+        width = this._getValueByStr(width, 'width', this);
+        height = this._getValueByStr(height, 'height', this);
+        if (width != null) {
+          this.settings.width = width;
+        }
+        if (height != null) {
+          this.settings.height = height;
+        }
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setMaxCols(maxCols) {
+      var e;
+      try {
+        this.settings.maxCols = maxCols;
+        return this._applySettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    clear() {
+      var ref;
+      return (ref = this.list) != null ? ref.setItems([]) : void 0;
+    }
+
+    // * WRAPPED
+    setItems() {
+      var ref;
+      return (ref = this.list) != null ? ref.setItems(...arguments) : void 0;
+    }
+
+    activate() {
+      var ref;
+      return (ref = this.list) != null ? ref.activate(...arguments) : void 0;
+    }
+
+    deactivate() {
+      var ref;
+      return (ref = this.list) != null ? ref.deactivate(...arguments) : void 0;
+    }
+
+    setOkHandler() {
+      var ref;
+      return (ref = this.list) != null ? ref.setOkHandler(...arguments) : void 0;
+    }
+
+    setCancelHandler() {
+      var ref;
+      return (ref = this.list) != null ? ref.setCancelHandler(...arguments) : void 0;
+    }
+
+    setSelectionHandler() {
+      var ref;
+      return (ref = this.list) != null ? ref.setSelectionHandler(...arguments) : void 0;
+    }
+
+    refresh() {
+      var ref;
+      return (ref = this.list) != null ? ref.refresh(...arguments) : void 0;
+    }
+
+    selectedItem() {
+      var ref;
+      return (ref = this.list) != null ? ref.selectedItem() : void 0;
+    }
+
+    itemAt() {
+      var ref;
+      return (ref = this.list) != null ? ref.itemAt(...arguments) : void 0;
+    }
+
+    maxItems() {
+      var ref;
+      return (ref = this.list) != null ? ref.maxItems() : void 0;
+    }
+
+    getAllItems() {
+      var ref;
+      return (ref = this.list) != null ? ref.getAllItems() : void 0;
+    }
+
+    maxCols() {
+      var ref;
+      return (ref = this.list) != null ? ref.maxCols() : void 0;
+    }
+
+    // * END WRAPPED
+
+      // * Dev, (not use settings) , чтобы визуально видеть размеры окна при подгонке
+    setBackgroundType() {
+      var ref;
+      return (ref = this.list) != null ? ref.setBackgroundType(...arguments) : void 0;
+    }
+
+    // * Shortcut
+    showBack() {
+      return this.setBackgroundType(0);
+    }
+
+    _applySettings() {
+      var e;
+      try {
+        this._destroyList();
+        this._createListWithSettings(this.settings);
+        if (this._isHaveStoredData === true) {
+          return this._restoreData();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _destroyList() {
+      var e;
+      try {
+        if (this.list == null) {
+          return;
+        }
+        this._isHaveStoredData = true;
+        this._lastItems = this.list.getAllItems();
+        this._isBeenActive = this.list.active === true;
+        this._lastSelectedIndex = this.list.index();
+        this._lastHandlers = this.list._handlers;
+        this.removeChild(this.list);
+        return this.list = null;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _createListWithSettings(settings) {
+      var e;
+      try {
+        this.list = new KDCore.Sprite_ItemsList({
+          x: 0,
+          y: 0,
+          width: settings.width,
+          height: settings.height
+        }, settings);
+        return this.addChild(this.list);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _restoreData() {
+      var e;
+      try {
+        if (this.list == null) {
+          return;
+        }
+        if (this._lastHandlers != null) {
+          this.list._handlers = this._lastHandlers;
+        }
+        if (this._lastItems == null) {
+          return;
+        }
+        this.list.setItems(this._lastItems);
+        if (this._lastSelectedIndex != null) {
+          this.list.safeSelect(this._lastSelectedIndex);
+        }
+        if (this._isBeenActive === true) {
+          this.list.activate();
+        }
+        return this._isHaveStoredData = false;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_ItemsListN = Sprite_ItemsListN;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_NUI;
+  //NUI 1.0
+  //rev 06.05.24
+  Sprite_NUI = class Sprite_NUI extends KDCore.Sprite {
+    constructor(nuiScheme, owner = null) {
+      super();
+      this.nuiScheme = nuiScheme;
+      if (this.nuiScheme != null) {
+        this.loadNuiScheme(this.nuiScheme, owner);
+      }
+      return;
+    }
+
+    // * DIRECT nuiElement,без Sprite_NUI (надо присоединять к OWNER)
+    static FromScheme(scheme, owner) {
+      var e, spr;
+      try {
+        spr = new Sprite_NUI(scheme, owner);
+        if (owner != null) {
+          owner.addChild(spr.nuiElement);
+        }
+        return spr.nuiElement;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return new KDCore.Sprite_NUI();
+      }
+    }
+
+    _afterLoadNuiAutoRefreshTime() {
+      return 100;
+    }
+
+    loadNuiScheme(scheme, owner = null) {
+      var e;
+      try {
+        if (this.nuiElement != null) {
+          this.destroyNuiElement();
+        }
+        if (scheme == null) {
+          return;
+        }
+        if (owner == null) {
+          owner = this;
+        }
+        if (scheme["type"] != null) {
+          this.nuiElement = KDCore.UI.Builder.Make(scheme, owner, this);
+        } else {
+          this.nuiElement = KDCore.UI.Builder.Factory(scheme, owner, this._afterLoadNuiAutoRefreshTime())[0];
+        }
+        this.addChild(this.nuiElement);
+        return this.refreshBindings(owner, true);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    destroyNuiElement() {
+      var e;
+      try {
+        if (this.nuiElement == null) {
+          return;
+        }
+        this.nuiElement.removeFromParent();
+        return this.nuiElement = null;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_NUI = Sprite_NUI;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_Plane;
+  //NUI 1.0
+  //rev 25.04.24
+
+    //type: "plane"
+  Sprite_Plane = class Sprite_Plane extends KDCore.Sprite {
+    constructor(settings) {
+      var bottom, folderName, imageName, left, margins, right, textureSource, top;
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this.plane = null;
+      this.planeContainer = new KDCore.Sprite();
+      this.addChild(this.planeContainer);
+      ({imageName, margins, folderName} = this.settings);
+      if (isFinite(margins)) {
+        left = top = right = bottom = margins;
+      } else {
+        ({left, top, right, bottom} = margins);
+      }
+      textureSource = ImageManager.loadBitmap('img/' + folderName + '/', imageName);
+      textureSource.addLoadListener(() => {
+        var texture;
+        texture = new PIXI.Texture(textureSource._baseTexture);
+        if (KDCore.isMV()) {
+          this.plane = new PIXI.mesh.NineSlicePlane(texture, left, top, right, bottom);
+        } else {
+          this.plane = new PIXI.NineSlicePlane(texture, left, top, right, bottom);
+        }
+        this.planeContainer.addChild(this.plane);
+        return this._onResize();
+      });
+      this._onResize();
+      return;
+    }
+
+    realWidth() {
+      return this.settings.width;
+    }
+
+    realHeight() {
+      return this.settings.height;
+    }
+
+    defaultSettings() {
+      return {
+        imageName: "",
+        width: 100,
+        height: 100,
+        margins: 20,
+        folderName: "pictures"
+      };
+    }
+
+    setSize(w = 100, h = 100) {
+      var e;
+      try {
+        w = this._getValueByStr(w, 'width', this);
+        h = this._getValueByStr(h, 'height', this);
+        if (w != null) {
+          this.settings.width = w;
+        }
+        if (h != null) {
+          this.settings.height = h;
+        }
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.plane.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.plane.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        }
+      });
+    }
+
+    _onResize() {
+      var e;
+      try {
+        this.width = this.settings.width;
+        this.height = this.settings.height;
+        if (this.plane == null) {
+          return;
+        }
+        this.plane.width = this.settings.width;
+        return this.plane.height = this.settings.height;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_Plane = Sprite_Plane;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_SButton;
+  //NUI 1.0
+  //rev 30.04.24
+  //"type": "button"
+  Sprite_SButton = class Sprite_SButton extends KDCore.Sprite {
+    constructor(settings) {
+      super();
+      this.settings = Object.assign({}, this.defaultSettings(), settings);
+      this._isEnabled = true;
+      this._isUnderMouse = false;
+      this._isPressActive = false;
+      this._isMouseOver = false;
+      this._create();
+      this._refreshSettings();
+      return;
+    }
+
+    realWidth() {
+      return this.settings.width;
+    }
+
+    realHeight() {
+      return this.settings.height;
+    }
+
+    isDisabled() {
+      return !this.isEnabled();
+    }
+
+    isEnabled() {
+      return this._isEnabled === true;
+    }
+
+    _enable() {
+      var e;
+      try {
+        if (this._desaturated === true) {
+          this.filters = [];
+          this._desaturated = false;
+        }
+        if ((this.settings.disabledTint != null) && this._isEnabled === false) { // * Return to normal Tint
+          this.applyTint(this.settings.activeTint, this.settings.tintAlpha);
+        }
+        this._isEnabled = true;
+        return this._refreshTint();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _disable() {
+      var e;
+      try {
+        this._applyDisabledEffect();
+        return this._isEnabled = false;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _applyDisabledEffect() {
+      var e;
+      try {
+        if (this.settings.desaturateWhenDisabled === true) {
+          return this.desaturate();
+        } else if (this.settings.disabledTint != null) {
+          return this.applyTint(this.settings.disabledTint, this.settings.disabledTintAlpha);
+        } else {
+          return this.applyTint(this.settings.tint, this.settings.tintAlpha);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    isActive() {
+      return this._isEnabled === true && this.visible === true && this.opacity !== 0;
+    }
+
+    pIsSupportKeyboardHandle() {
+      return this.settings.keyboardHandled === true;
+    }
+
+    desaturate() {
+      this.filters = [new PIXI.filters.ColorMatrixFilter()];
+      this.filters[0].desaturate();
+      this._desaturated = true;
+    }
+
+    defaultSettings() {
+      return {
+        imageName: '',
+        folderName: 'pictures',
+        imageMargins: 20,
+        width: 160,
+        height: 60,
+        clickSe: "Cursor1",
+        desaturateWhenDisabled: false,
+        tint: "",
+        overTint: 0xFFFFDD,
+        activeTint: 0xAAAAAA,
+        tintAlpha: 0.5,
+        disabledTint: 0xAAAAAA,
+        disabledTintAlpha: 0.5,
+        keyboardKey: "",
+        keyboardHandled: true,
+        enabled: true
+      };
+    }
+
+    dataBindings() {
+      return Object.assign(super.dataBindings(), {
+        width: function(v) {
+          if (v != null) {
+            return this.setSize(v, this.settings.height);
+          }
+        },
+        height: function(v) {
+          if (v != null) {
+            return this.setSize(this.settings.width, v);
+          }
+        },
+        size: function(v) {
+          if (v != null) {
+            return this.setSize(v.width, v.height);
+          }
+        },
+        style: function(v) {
+          if (v != null) {
+            return this.updateStyle(v);
+          }
+        },
+        handler: function(v) {
+          return this.setClickHandler(v);
+        },
+        enable: function(v) {
+          if (v != null) {
+            return this.setEnabledState(v);
+          }
+        }
+      });
+    }
+
+    setEnabledState(state = true) {
+      var e;
+      try {
+        this.settings.enabled = state;
+        if (state === true) {
+          return this._enable();
+        } else {
+          return this._disable();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    enable() {
+      return this.setEnabledState(true);
+    }
+
+    disable() {
+      return this.setEnabledState(false);
+    }
+
+    updateStyle(style) {
+      var e;
+      try {
+        this.settings = Object.assign(this.settings, style);
+        return this._refreshSettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    addClickHandler() {
+      return this.setClickHandler(...arguments);
+    }
+
+    setClickHandler(handler = null) {
+      var e;
+      try {
+        this.settings.onClick = null;
+        if ((handler != null) && typeof handler === 'function') {
+          return this.settings.onClick = handler;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    setSize(width = 160, height = 60) {
+      var e, h, w;
+      try {
+        w = this._getValueByStr(width, 'width', this);
+        h = this._getValueByStr(height, 'height', this);
+        if (w != null) {
+          this.settings.width = w;
+        }
+        if (h != null) {
+          this.settings.height = h;
+        }
+        return this._refreshSettings();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    executeAction() {
+      var e;
+      try {
+        KDCore.Utils.playSE(this.settings.clickSe);
+        if (this.settings.onClick != null) {
+          return this.settings.onClick();
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onTap() {
+      var e;
+      try {
+        return this.executeAction();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    //console.log("TAP")
+    _onOver() {
+      this._isMouseOver = true;
+      return this._refreshSettings();
+    }
+
+    //console.log("OVER")
+    _onOut() {
+      this._isMouseOver = false;
+      return this._refreshSettings();
+    }
+
+    //console.log("OUT")
+    _onDown() {
+      this._isPressActive = true;
+      return this._refreshSettings();
+    }
+
+    //console.log("DOWN")
+    _onUp() {
+      this._isPressActive = false;
+      return this._refreshSettings();
+    }
+
+    //console.log("UP")
+    _create() {
+      var e, height, width;
+      try {
+        this.buttonPlane = new KDCore.Sprite_Plane({
+          imageName: this.settings.imageName,
+          margins: this.settings.imageMargins,
+          folderName: this.settings.folderName
+        });
+        ({width, height} = this.settings);
+        this.buttonPlane.setSize(width, height);
+        return this.addChild(this.buttonPlane);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _refreshSettings() {
+      var e;
+      try {
+        this._refreshTint();
+        if (this.settings.keyboardHandled === true) {
+          this.handleOKAction = this._onTap;
+        } else {
+          this.handleOKAction = null;
+        }
+        this.setEnabledState(this.settings.enabled);
+        return this._onResize();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _refreshTint() {
+      var e;
+      try {
+        if (this._isPressActive === true) {
+          return this.applyTint(this.settings.activeTint, this.settings.tintAlpha);
+        } else if (this._isMouseOver === true) {
+          return this.applyTint(this.settings.overTint, this.settings.tintAlpha);
+        } else {
+          return this.applyTint(this.settings.tint, this.settings.tintAlpha);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    applyTint(tintValue, tintAlpha = 0.5) {
+      var e;
+      try {
+        if (tintValue == null) {
+          this._resetTintFilter();
+          return;
+        }
+        if (typeof tintValue === "string") {
+          if (!String.any(tintValue)) {
+            this._resetTintFilter();
+            return;
+          }
+          tintValue = KDCore.Utils.string2hex(tintValue);
+        }
+        return this.buttonPlane.filters = [new PIXI.filters.ColorOverlayFilter(tintValue, tintAlpha)];
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _resetTintFilter() {
+      var e;
+      try {
+        return this.buttonPlane.filters = [];
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _activateHandlerVisually() {
+      var e;
+      try {
+        return this.applyTint(this.settings.overTint);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    pDeactivateHandler() {
+      super.pDeactivateHandler();
+      return this.applyTint(this.settings.tint);
+    }
+
+    update() {
+      super.update();
+      if (this.isActive()) {
+        this._updateKeyboardHandling();
+        this._updateMouseHandling();
+      } else {
+        if (this._isUnderMouse === true) {
+          this._onOut();
+        }
+        if ($gameTemp.kdButtonUnderMouse === this) {
+          $gameTemp.kdButtonUnderMouse = null;
+        }
+      }
+    }
+
+    _updateKeyboardHandling() {
+      var e;
+      try {
+        if (String.any(this.settings.keyboardKey)) {
+          if (Input.isTriggered(this.settings.keyboardKey)) {
+            Input.clear();
+            return this._onTap();
+          }
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _updateMouseHandling() {
+      var e;
+      try {
+        if (this.isUnderMouse()) {
+          if (!this._isUnderMouse) {
+            this._onOver();
+            $gameTemp.kdButtonUnderMouse = this;
+            try {
+              if ($gameTemp.__pkdActiveKeyboardHandler != null) {
+                $gameTemp.__pkdActiveKeyboardHandler.pDeactivateHandler();
+              }
+            } catch (error) {
+              e = error;
+              KDCore.warning(e);
+            }
+            this._isUnderMouse = true;
+          }
+        } else {
+          if (this._isUnderMouse === true) {
+            this._onOut();
+            if ($gameTemp.kdButtonUnderMouse === this) {
+              $gameTemp.kdButtonUnderMouse = null;
+            }
+            this._isUnderMouse = false;
+          }
+        }
+        if (TouchInput.isPressed()) {
+          if (this._isUnderMouse === true) {
+            if (!this._isMousePressed) {
+              this._onDown();
+              this._isMousePressed = true;
+            }
+          }
+        }
+        if (TouchInput.isReleased()) {
+          if (this._isMousePressed === true) {
+            this._onUp();
+            if (this._isUnderMouse === true) {
+              this._onTap();
+            }
+            return this._isMousePressed = false;
+          }
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    _onResize() {
+      var e, ref;
+      try {
+        this.width = this.settings.width;
+        this.height = this.settings.height;
+        return (ref = this.buttonPlane) != null ? ref.setSize(this.width, this.height) : void 0;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_SButton = Sprite_SButton;
 });
 
 
@@ -5620,6 +11179,8 @@ KDCore.registerLibraryToLoad(function() {
 
     // * Класс использует глобальную временную переменную для определения находится ли мышь в зоне кнопки
 
+    //TODO: ADD ALPHA CHECK!
+
     // * Если isFull - true, значит нужен _03
   KDCore.ButtonM = class ButtonM extends KDCore.Sprite {
     constructor(filename, isFull = false, sourceFolder = null) {
@@ -5635,6 +11196,14 @@ KDCore.registerLibraryToLoad(function() {
       this._loadBitmaps(filename, isFull, sourceFolder);
       this._setImageState(0);
       this._createThread();
+    }
+
+    realWidth() {
+      return this._bitmaps[0].width;
+    }
+
+    realHeight() {
+      return this._bitmaps[0].height;
     }
 
     setManualHover() {
@@ -5660,6 +11229,11 @@ KDCore.registerLibraryToLoad(function() {
     desaturate() {
       this.filters = [new PIXI.filters.ColorMatrixFilter()];
       this.filters[0].desaturate();
+    }
+
+    isLoaded() {
+      var ref;
+      return (ref = this._bitmaps[0]) != null ? ref.isReady() : void 0;
     }
 
     isMouseIn() {
@@ -5757,9 +11331,19 @@ KDCore.registerLibraryToLoad(function() {
       var getterFunc;
       getterFunc = this._getGetter(sourceFolder);
       this._bitmaps.push(getterFunc(filename + '_00'));
+      this._bitmaps[0].addLoadListener(this._onBitmapLoaded.bind(this));
       this._bitmaps.push(getterFunc(filename + '_01'));
       if (isFull) {
         this._bitmaps.push(getterFunc(filename + '_03'));
+      }
+    };
+    _._onBitmapLoaded = function() {
+      var e;
+      try {
+        return this._executeLoadListeners();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
       }
     };
     _._getGetter = function(sourceFolder = null) {
@@ -5800,6 +11384,7 @@ KDCore.registerLibraryToLoad(function() {
       return this._updateMouseClick();
     };
     _._updateHover = function() {
+      var e;
       if (!this.isActive()) {
         return;
       }
@@ -5813,6 +11398,14 @@ KDCore.registerLibraryToLoad(function() {
             this._setImageState(1);
           }
           $gameTemp.kdButtonUnderMouse = this;
+          try {
+            if ($gameTemp.__pkdActiveKeyboardHandler != null) {
+              $gameTemp.__pkdActiveKeyboardHandler.pDeactivateHandler();
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+          }
         }
       } else {
         if (this._lastState !== 0) {
@@ -5834,7 +11427,7 @@ KDCore.registerLibraryToLoad(function() {
       if (this.isDisabled()) {
         return;
       }
-      if (TouchInput.isTriggered() && this.isMouseIn()) {
+      if (TouchInput.isTriggered() && this.isUnderMouse()) {
         this._isTriggered = true;
         this._setImageState(0);
       }
@@ -5949,7 +11542,7 @@ KDCore.registerLibraryToLoad(function() {
   // * Пространство имён для всех UIElements
   KDCore.UI = KDCore.UI || {};
   (function() {    // * Общий класс для всех UI элементов
-    //?rev 13.10.20
+    //?rev 07.02.2024
     var Sprite_UIElement;
     Sprite_UIElement = (function() {
       // * ABSTRACT значит что класс сам по себе ничего не создаёт, не хранит данные
@@ -5984,13 +11577,21 @@ KDCore.registerLibraryToLoad(function() {
         }
 
         rootImageFolder() {
-          return Sprite_UIElement.RootImageFolder;
+          if (String.any(this.params.rootImageFolder)) {
+            return this.params.rootImageFolder;
+          } else {
+            return Sprite_UIElement.RootImageFolder;
+          }
         }
 
         // * Сделать чёрно белым
         desaturate() {
           this.filters = [new PIXI.filters.ColorMatrixFilter()];
           this.filters[0].desaturate();
+        }
+
+        clearFilters() {
+          return this.filters = [];
         }
 
         // * Общий метод (можно ли редактировать визуально)
@@ -6006,7 +11607,39 @@ KDCore.registerLibraryToLoad(function() {
         // * Общий метод (находится ли объект под мышкой)
         isUnderMouse() {
           var ref;
-          return (ref = this.zeroChild()) != null ? ref.isUnderMouse() : void 0;
+          return ((ref = this.zeroChild()) != null ? ref.isUnderMouse() : void 0) && this.isFullVisible();
+        }
+
+        // * Полностью ли виден объект? (включае всех его родителей)
+        isFullVisible() {
+          return this.visible === true && this.allParentsIsVisible();
+        }
+
+        // * Все ли родители объекта видимы
+        allParentsIsVisible() {
+          var e, p;
+          if (!this.visible) {
+            return false;
+          }
+          try {
+            if (this.parent != null) {
+              p = this.parent;
+              while (p != null) {
+                if (p.visible === true) {
+                  p = p.parent;
+                } else {
+                  return false;
+                }
+              }
+              return true;
+            } else {
+              return this.visible === true;
+            }
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            return true;
+          }
         }
 
         // * Параметры первого элемента (если он есть)
@@ -6034,11 +11667,6 @@ KDCore.registerLibraryToLoad(function() {
             }
           }
           return 0;
-        }
-
-        // * Первый "физический" элемент (спрайт)
-        zeroChild() {
-          return this.children[0];
         }
 
         // * Метод восстановления значения на стандартные настройки
@@ -6092,10 +11720,11 @@ KDCore.registerLibraryToLoad(function() {
     
     // * Подготовка элемента (проверка параметров)
     _._prepare = function() {
-      if (this.params == null) {
-        this.params = this.defaultParams();
+      //@params = @defaultParams() unless @params?
+      this.params = Object.assign({}, this.defaultParams(), this.params);
+      if (this.params.visible != null) {
+        this.visible = this.params.visible;
       }
-      return this.visible = this.params.visible;
     };
     // * Наследники создают свои элементы в этом методе
     _._createContent = function() {}; // * EMPTY
@@ -6108,10 +11737,18 @@ KDCore.registerLibraryToLoad(function() {
       }
       try {
         ({x, y} = this.params.position);
+        if (isFinite(x) && isFinite(y)) {
+          x = Number(x);
+          y = Number(y);
+        } else {
+          x = Number(eval(x));
+          y = Number(eval(y));
+        }
         this.move(x, y);
       } catch (error) {
         e = error;
         KDCore.warning(e);
+        this.move(0, 0);
       }
     };
   })();
@@ -6119,6 +11756,123 @@ KDCore.registerLibraryToLoad(function() {
 
 // ■ END PRIVATE.coffee
 //---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_ItemsListNHor;
+  //TODO: NOT USED IN NUI 1.0
+  //NUI 1.X !#!
+  //rev 03.05.24
+
+    //"type": "horList"
+  Sprite_ItemsListNHor = class Sprite_ItemsListNHor extends KDCore.Sprite_ItemsListN {
+    constructor() {
+      super(...arguments);
+    }
+
+    //$[OVER]
+    defaultSettings() {
+      var settings;
+      settings = super.defaultSettings();
+      settings.width = 420;
+      settings.height = 120;
+      settings.maxCols = 4;
+      return settings;
+    }
+
+    //$[OVER]
+    setMaxCols(maxCols) {} // * AUTO
+
+    setItems(items) {
+      var e, l;
+      try {
+        if (items != null) {
+          l = this.maxItems();
+          if (l !== items.length) {
+            this.settings.maxCols = items.length;
+            this.clear();
+            this._applySettings();
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return super.setItems(items);
+    }
+
+  };
+  return KDCore.Sprite_ItemsListNHor = Sprite_ItemsListNHor;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  var Sprite_Screen;
+  //NUI 1.0
+  //rev 04.05.24
+
+    //"type": "screen"
+  Sprite_Screen = class Sprite_Screen extends KDCore.Sprite_Group {
+    constructor(settings) {
+      super(settings);
+      this._applyExtraSettings();
+    }
+
+    //TODO: В режиме linkToMap, должен иметь width и height карты (size * tileSize)
+    realWidth() {
+      return Graphics.width;
+    }
+
+    realHeight() {
+      return Graphics.height;
+    }
+
+    defaultSettings() {
+      var defaultSettings;
+      defaultSettings = super.defaultSettings();
+      return Object.assign(defaultSettings, {
+        width: Graphics.width,
+        height: Graphics.height,
+        linkToMap: false //TODO: NOT USED IN NUI 1.0
+      });
+    }
+
+    _applyExtraSettings() {
+      var e;
+      try {
+        if (this.settings.linkToMap === true) {
+          return this.anchorPoint = new KDCore.MapAnchorPoint(0, 0);
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+    update() {
+      super.update();
+      return this._refreshScreenPosition();
+    }
+
+    _refreshScreenPosition() {
+      var e;
+      try {
+        if (this.anchorPoint == null) {
+          return;
+        }
+        this.x = this.anchorPoint.screenX();
+        return this.y = this.anchorPoint.screenY();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    }
+
+  };
+  return KDCore.Sprite_Screen = Sprite_Screen;
+});
 
 
 // Generated by CoffeeScript 2.6.1
@@ -6137,6 +11891,7 @@ KDCore.registerLibraryToLoad(function() {
           visible: true,
           image: "Button_Inventory",
           isHaveDisabled: true,
+          rootImageFolder: null, //?optional
           click: "console.log('click')" // * число или код
         };
       }
@@ -6313,8 +12068,13 @@ KDCore.registerLibraryToLoad(function() {
       if (!String.any(this._drawOnReady.name)) {
         return;
       }
-      fw = ImageManager.faceWidth;
-      fh = ImageManager.faceHeight;
+      if (KDCore.isMZ()) {
+        fw = ImageManager.faceWidth;
+        fh = ImageManager.faceHeight;
+      } else {
+        fw = Window_Base._faceWidth;
+        fh = Window_Base._faceHeight;
+      }
       size = this.params.size;
       sx = (this._drawOnReady.index % 4) * fw;
       sy = Math.floor(this._drawOnReady.index / 4) * fh;
@@ -6345,7 +12105,8 @@ KDCore.registerLibraryToLoad(function() {
           mask: "",
           backColor: "#000000".toCss(),
           backOpacity: 255,
-          vertical: false
+          vertical: false,
+          rootImageFolder: null //?optional
         };
       }
 
@@ -6468,7 +12229,8 @@ KDCore.registerLibraryToLoad(function() {
         return {
           visible: true,
           index: 0,
-          size: 32
+          size: 32,
+          rootImageFolder: null //?optional
         };
       }
 
@@ -6476,9 +12238,9 @@ KDCore.registerLibraryToLoad(function() {
         return this.drawIcon(...arguments);
       }
 
-      drawIcon(index = 0) {
+      drawIcon(index = 0, noSmoth = false) {
         this._lastValue = index;
-        return this._drawIcon(index);
+        return this._drawIcon(index, noSmoth);
       }
 
     };
@@ -6504,20 +12266,20 @@ KDCore.registerLibraryToLoad(function() {
     _._onReady = function() {
       return this.drawIcon(this._lastValue);
     };
-    _._drawIcon = function(index) {
+    _._drawIcon = function(index, noSmoth = false) {
       this._icon.clear();
       if (KDCore.SDK.isString(index)) {
-        this._drawImageIcon(index);
+        this._drawImageIcon(index, noSmoth);
       } else {
         if (index <= 0) {
           return;
         }
-        this._icon.drawIcon(0, 0, index, this.params.size);
+        this._icon.drawIcon(0, 0, index, this.params.size, noSmoth);
       }
     };
-    _._drawImageIcon = function(imageName) {
+    _._drawImageIcon = function(imageName, noSmoth = false) {
       return KDCore.Utils.loadImageAsync(this.rootImageFolder(), imageName).then((bitmap) => {
-        return this._icon.drawIcon(0, 0, bitmap, this.params.size);
+        return this._icon.drawIcon(0, 0, bitmap, this.params.size, noSmoth);
       });
     };
   })();
@@ -6540,7 +12302,8 @@ KDCore.registerLibraryToLoad(function() {
       defaultParams() {
         return {
           visible: true,
-          image: ""
+          image: "",
+          rootImageFolder: null //?optional
         };
       }
 
@@ -6687,11 +12450,17 @@ KDCore.registerLibraryToLoad(function() {
 
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
-  (function() {    //rev 30.12.21
+  (function() {    //NUI 1.0
+    //rev 11.05.22
+
+    //"type": "legacyText"
     var Sprite_UIText;
     Sprite_UIText = class Sprite_UIText extends KDCore.UI.Sprite_UIElement {
       constructor() {
         super(...arguments);
+        if (String.any(this.params.text)) {
+          this.drawText(this.params.text);
+        }
       }
 
       // * Стандартный набор настроек
@@ -6699,8 +12468,8 @@ KDCore.registerLibraryToLoad(function() {
         return {
           visible: true,
           size: {
-            w: 60,
-            h: 20
+            width: 60,
+            height: 20
           },
           alignment: "center",
           font: {
@@ -6716,17 +12485,154 @@ KDCore.registerLibraryToLoad(function() {
             color: null,
             width: 2
           },
-          textColor: "#FFFFFF".toCss()
+          textColor: "#ffffff",
+          shadow: {
+            color: "#000",
+            opacity: 0,
+            margins: {
+              x: 1,
+              y: 1
+            }
+          },
+          text: ""
         };
+      }
+
+      // * For compatibility with old style configurations
+      sizeWidth() {
+        if (this.params.size.w != null) {
+          return this.params.size.w;
+        } else {
+          if (this.params.size.width != null) {
+            this.params.size.w = this.params.size.width;
+            return this.params.size.width;
+          }
+        }
+        return 0;
+      }
+
+      // * For compatibility with old style configurations
+      sizeHeight() {
+        if (this.params.size.h != null) {
+          return this.params.size.h;
+        } else {
+          if (this.params.size.height != null) {
+            this.params.size.h = this.params.size.height;
+            return this.params.size.height;
+          }
+        }
+        return 0;
+      }
+
+      realWidth() {
+        return this.sizeWidth();
+      }
+
+      realHeight() {
+        return this.sizeHeight();
+      }
+
+      dataBindings() {
+        return Object.assign(super.dataBindings(), {
+          text: function(v) {
+            return this.drawText(v);
+          },
+          style: function(v) {
+            return this.updateStyle(v);
+          },
+          width: function(v) {
+            if (v != null) {
+              return this.setSize(v, this.sizeHeight());
+            }
+          },
+          height: function(v) {
+            if (v != null) {
+              return this.setSize(this.sizeWidth(), v);
+            }
+          },
+          size: function(v) {
+            if (v != null) {
+              return this.setSize(v.width, v.height);
+            }
+          },
+          textColor: function(v) {
+            if (v != null) {
+              return this.updateStyle({
+                textColor: v
+              });
+            }
+          },
+          fontSize: function(v) {
+            if (v != null) {
+              return this.updateFontSize(v);
+            }
+          }
+        });
+      }
+
+      setSize(w = 60, h = 20) {
+        var e;
+        try {
+          w = this._getValueByStr(w, 'width', this);
+          h = this._getValueByStr(h, 'height', this);
+          return this.updateStyle({
+            size: {
+              w: w,
+              h: h,
+              width: w,
+              height: h
+            }
+          });
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      updateStyle(newStyle) {
+        var e;
+        try {
+          this.params = Object.assign({}, this.params, newStyle);
+          this._destroyOldContent();
+          this._createContent();
+          // * Redraw Text
+          return this.drawText(this._lastText || "");
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      updateFontSize(fontSize) {
+        var e, font;
+        try {
+          font = Object.assign({}, this.params.font);
+          if (typeof fontSize === "string") {
+            fontSize = this._getValueByStr(fontSize, 'height', this);
+          }
+          font.size = fontSize;
+          return this.updateStyle({font});
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
       }
 
       //?DYNAMIC
       // * Сперва рисуем по готовности, а как загрузился спрайт, меняем
       drawText(text) {
-        return this._drawTextWhenReady(text);
+        var e;
+        try {
+          this.params.text = text;
+          return this._drawTextWhenReady(text);
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
       }
 
       // * Сборка текста с учётом формата
+      // * Заменить вхождения %1, %2 на значения параметров
       drawTextWithFormat(/*format string, arguments parameters... */) {
         var text;
         text = this._convertFormatedString(...arguments);
@@ -6753,8 +12659,23 @@ KDCore.registerLibraryToLoad(function() {
     var _;
     //@[DEFINES]
     _ = KDCore.UI.Sprite_UIText.prototype;
+    _._destroyOldContent = function() {
+      var e, ref, ref1;
+      try {
+        if ((ref = this._shadowSpr) != null) {
+          ref.removeFromParent();
+        }
+        return (ref1 = this._textSpr) != null ? ref1.removeFromParent() : void 0;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
     //$[OVER]
     _._createContent = function() {
+      if (this.params.shadow != null) {
+        this._createShadow();
+      }
       return this._createTextSprite();
     };
     _._createTextSprite = function() {
@@ -6774,12 +12695,19 @@ KDCore.registerLibraryToLoad(function() {
       this._drawOnReady = null;
     };
     _._drawText = function(text) {
+      this._lastText = text;
       if (this._textSpr == null) {
         return;
       }
       this._textSpr.clear();
       if (text != null) {
         this._textSpr.drawTextFull(text);
+      }
+      if (this._shadowSpr != null) {
+        this._shadowSpr.clear();
+        if (text != null) {
+          this._shadowSpr.drawTextFull(text);
+        }
       }
     };
     // * Написать текст когда будет готов
@@ -6788,6 +12716,364 @@ KDCore.registerLibraryToLoad(function() {
       return this._drawText(text);
     };
     
+    // * Заменить вхождения %1, %2 на значения параметров
+    _._convertFormatedString = function(/*text, args...*/) {
+      var e, i, j, ref, text;
+      try {
+        text = arguments[0];
+        for (i = j = 1, ref = arguments.length; (1 <= ref ? j < ref : j > ref); i = 1 <= ref ? ++j : --j) {
+          try {
+            if (arguments[i] == null) {
+              continue;
+            }
+            text = text.replace("%" + i, arguments[i]);
+          } catch (error) {
+            e = error;
+            KDCore.warning(e);
+            text = "[wrong format text input]";
+          }
+        }
+        return text;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return "[wrong format text input]";
+      }
+    };
+    _._createShadow = function() {
+      this._shadowSpr = KDCore.Sprite.FromParams(this.params);
+      this._shadowSpr.bitmap.textColor = this.params.shadow.color;
+      this._shadowSpr.opacity = this.params.shadow.opacity;
+      this._shadowSpr.x += this.params.shadow.margins.x;
+      this._shadowSpr.y += this.params.shadow.margins.y;
+      return this.add(this._shadowSpr);
+    };
+  })();
+});
+
+// ■ END PRIVATE.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  (function() {    //NUI 1.0
+    //rev 11.05.22
+    var Sprite_UIText2;
+    
+      //"type": "text"
+    Sprite_UIText2 = class Sprite_UIText2 extends KDCore.UI.Sprite_UIElement {
+      constructor(params, userTextStyle) {
+        super(params);
+        this.userTextStyle = userTextStyle;
+        this._applyParameters(params);
+        this._createTextSprite();
+        if (String.any(this.params.text)) {
+          this.drawText(this.params.text);
+        }
+        return;
+      }
+
+      // * Стандартный набор настроек
+      defaultParams() {
+        return {
+          visible: true,
+          size: {
+            width: 60,
+            height: 20
+          },
+          alignment: "center",
+          font: {
+            face: null,
+            size: 18,
+            italic: false,
+            bold: false,
+            weight: 0 // * 0 - not used
+          },
+          margins: {
+            x: 0,
+            y: 0
+          },
+          outline: {
+            color: null,
+            width: 2
+          },
+          textColor: "#FFFFFF",
+          shadow: {
+            color: "#000",
+            opacity: 0,
+            margins: {
+              x: 1,
+              y: 1
+            }
+          },
+          text: "",
+          multiline: false,
+          verticalCentered: true
+        };
+      }
+
+      // * For compatibility with old style configurations
+      sizeWidth() {
+        if (this.params.size.w != null) {
+          return this.params.size.w;
+        } else {
+          if (this.params.size.width != null) {
+            this.params.size.w = this.params.size.width;
+            return this.params.size.width;
+          }
+        }
+        return 0;
+      }
+
+      // * For compatibility with old style configurations
+      sizeHeight() {
+        if (this.params.size.h != null) {
+          return this.params.size.h;
+        } else {
+          if (this.params.size.height != null) {
+            this.params.size.h = this.params.size.height;
+            return this.params.size.height;
+          }
+        }
+        return 0;
+      }
+
+      dataBindings() {
+        return Object.assign(super.dataBindings(), {
+          text: function(v) {
+            return this.drawText(v);
+          },
+          style: function(v) {
+            if (v != null) {
+              return this.updateStyle(v);
+            }
+          },
+          width: function(v) {
+            if (v != null) {
+              return this.setSize(v, this.sizeHeight());
+            }
+          },
+          height: function(v) {
+            if (v != null) {
+              return this.setSize(this.sizeWidth(), v);
+            }
+          },
+          size: function(v) {
+            if (v != null) {
+              return this.setSize(v.width, v.height);
+            }
+          },
+          textColor: function(v) {
+            if (v != null) {
+              return this.updateStyle({
+                textColor: v
+              });
+            }
+          },
+          fontSize: function(v) {
+            if (v != null) {
+              return this.updateFontSize(v);
+            }
+          }
+        });
+      }
+
+      realWidth() {
+        return this.sizeWidth();
+      }
+
+      realHeight() {
+        return this.sizeHeight();
+      }
+
+      setSize(w = 60, h = 20) {
+        var e;
+        try {
+          w = this._getValueByStr(w, 'width', this);
+          h = this._getValueByStr(h, 'height', this);
+          return this.updateStyle({
+            size: {
+              w: w,
+              h: h
+            }
+          });
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      defaultStyle() {
+        return {};
+      }
+
+      drawText(text) {
+        if (text == null) {
+          text = "";
+        }
+        this.params.text = text;
+        this._drawText(text);
+      }
+
+      // * Сборка текста с учётом формата
+      // * Заменить вхождения %1, %2 на значения параметров
+      drawTextWithFormat(/*format string, arguments parameters... */) {
+        var text;
+        text = this._convertFormatedString(...arguments);
+        this.drawText(text);
+      }
+
+      // * Пишет текст с определённым цветом (один раз)
+      drawTextColor(text, colorCss = "#FFF") {
+        if (this._textSpr == null) {
+          return;
+        }
+        this.updateStyle({
+          textColor: colorCss
+        });
+        this.drawText(text);
+      }
+
+      updateFontSize(fontSize) {
+        var e, font;
+        try {
+          font = Object.assign({}, this.params.font);
+          if (typeof fontSize === "string") {
+            fontSize = this._getValueByStr(fontSize, 'height', this);
+          }
+          font.size = fontSize;
+          return this.updateStyle({font});
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      updateStyle(newStyleInOldFormat = {}, newStyleInNewFormat = {}) {
+        var e;
+        try {
+          this.textStyle = this._convertOldStyle(newStyleInOldFormat, newStyleInNewFormat);
+          this._textSpr.style = this.textStyle;
+          // * Redraw Text
+          return this.drawText(this._textSpr.text);
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }
+
+      getMetrics() {
+        return PIXI.TextMetrics.measureText(this._textSpr.text, this._textSpr.style);
+      }
+
+    };
+    KDCore.UI.Sprite_UIText2 = Sprite_UIText2;
+  })();
+  return (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
+    // ■ PRIVATE.coffee
+    //╒═════════════════════════════════════════════════════════════════════════╛
+    //---------------------------------------------------------------------------
+    var _;
+    //@[DEFINES]
+    _ = KDCore.UI.Sprite_UIText2.prototype;
+    _._applyParameters = function(params) {
+      var e;
+      try {
+        return this.textStyle = this._convertOldStyle(params, {});
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._convertOldStyle = function(params = {}, style = {}) {
+      var _textStyle, color, e, margins, opacity;
+      try {
+        this.params = Object.assign({}, this.params, params);
+        _textStyle = Object.assign({}, this.defaultStyle(), this.userTextStyle, style);
+        if (String.any(this.params.font.face)) {
+          _textStyle.fontFamily = this.params.font.face;
+        }
+        _textStyle.fontSize = this.params.font.size;
+        if (this.params.font.italic === true) {
+          _textStyle.fontStyle = 'italic';
+        }
+        if (this.params.font.bold === true) {
+          _textStyle.fontWeight = 'bold';
+        }
+        if ((this.params.font.weight != null) && this.params.font.weight > 0) {
+          _textStyle.fontWeight = this.params.font.weight;
+        }
+        if (String.any(this.params.outline.color) && this.params.outline.width > 0) {
+          _textStyle.stroke = this.params.outline.color;
+          _textStyle.strokeThickness = this.params.outline.width;
+        }
+        _textStyle.fill = this.params.textColor;
+        if ((this.params.shadow != null) && this.params.shadow.opacity > 0) {
+          ({color, opacity, margins} = this.params.shadow);
+          _textStyle.dropShadow = true;
+          _textStyle.dropShadowAngle = margins.y;
+          _textStyle.dropShadowColor = color;
+          _textStyle.dropShadowDistance = margins.x;
+          _textStyle.dropShadowAlpha = opacity / 255.0;
+        }
+        if (this.params.multiline === true) {
+          _textStyle.align = this.params.alignment || 'left';
+          _textStyle.wordWrap = true;
+          if (this.params.font.size != null) {
+            _textStyle.lineHeight = this.params.font.size + 2;
+          }
+          if (this.sizeWidth() > 0) {
+            _textStyle.wordWrapWidth = this.sizeWidth();
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return _textStyle;
+    };
+    _._createTextSprite = function() {
+      var style;
+      style = new PIXI.TextStyle(this.textStyle);
+      this._textSpr = new PIXI.Text('', style);
+      this.add(this._textSpr);
+      if (this._needToDrawText != null) {
+        this.draw(this._needToDrawText);
+        this._needToDrawText = null;
+      }
+    };
+    _._drawText = function(text) {
+      var h, height, maxLineWidth, textMetrics, w;
+      if (this._textSpr == null) {
+        this._needToDrawText = text;
+        return;
+      }
+      this._textSpr.text = text;
+      if (this.params.size.height != null) {
+        this.params.size.h = this.params.size.height;
+      }
+      if (this.params.size.width != null) {
+        this.params.size.w = this.params.size.width;
+      }
+      ({w, h} = this.params.size);
+      textMetrics = PIXI.TextMetrics.measureText(text, this._textSpr.style);
+      ({height, maxLineWidth} = textMetrics);
+      if (this.params.verticalCentered === true) {
+        this._textSpr.y = (h - height) / 2;
+      } else {
+        this._textSpr.y = 0;
+      }
+      if (this.params.alignment === 'center') {
+        this._textSpr.x = (w - maxLineWidth) / 2;
+      } else if (this.params.alignment === 'right') {
+        this._textSpr.x = w - maxLineWidth;
+      } else {
+        this._textSpr.x = 0;
+      }
+      this._textSpr.x += this.params.margins.x;
+      this._textSpr.y += this.params.margins.y;
+    };
     // * Заменить вхождения %1, %2 на значения параметров
     _._convertFormatedString = function(/*text, args...*/) {
       var e, i, j, ref, text;
@@ -6821,7 +13107,11 @@ KDCore.registerLibraryToLoad(function() {
 
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
-  (function() {    //rev 30.12.21
+  (function() {    //TODO: NOT USED IN NUI 1.0
+    //NUI 1.X !#!
+    //rev 03.05.22
+
+    //"type": "textExt"
     var Sprite_UITextExt;
     Sprite_UITextExt = class Sprite_UITextExt extends KDCore.UI.Sprite_UIText {
       constructor() {
@@ -6833,8 +13123,8 @@ KDCore.registerLibraryToLoad(function() {
         return {
           visible: true,
           size: {
-            w: 200,
-            h: 60
+            width: 200,
+            height: 60
           },
           font: {
             face: null,
@@ -6869,20 +13159,42 @@ KDCore.registerLibraryToLoad(function() {
     //@[DEFINES]
     _ = KDCore.UI.Sprite_UITextExt.prototype;
     //$[OVER]
+    _._destroyOldContent = function() {
+      var e;
+      try {
+        if (this._textSpr == null) {
+          return;
+        }
+        return this.removeChild(this._textSpr);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    //$[OVER]
     _._createTextSprite = function() {
       var rect;
-      rect = new Rectangle(0, 0, this.params.size.w, this.params.size.h);
+      rect = new Rectangle(0, 0, this.sizeWidth(), this.sizeHeight());
       this._textSpr = new KDCore.Window_ExtTextLineBase(rect, this.params.font);
       this._textSpr.x = this.params.margins.x || 0;
       this._textSpr.y = this.params.margins.y || 0;
       this.add(this._textSpr);
       // * На следующий кадр, чтобы не было потери текста (опасно)
-      //setTimeout (=> @_onReady() ), 10
+      setTimeout((() => {
+        var e;
+        try {
+          return this._onReady();
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }), 10);
       this._onReady(); // * Сразу
     };
     
     //$[OVER]
     _._drawText = function(text) {
+      this._lastText = text;
       if (this._textSpr == null) {
         return;
       }
@@ -7041,7 +13353,8 @@ KDCore.registerLibraryToLoad(function() {
           mask: "", // картинка
           backColor: "#000000".toCss(),
           backOpacity: 255,
-          vertical: false
+          vertical: false,
+          rootImageFolder: null //?optional
         };
       }
 
@@ -7063,6 +13376,107 @@ KDCore.registerLibraryToLoad(function() {
       fillBitmap.fillAll(this.params.fill);
       this._createParts(fillBitmap);
     };
+  })();
+});
+
+// ■ END PRIVATE.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
+  (function() {    // * Данный UI Элемент является только контейнером
+    // * Он ничего не рисует, нужно добавлять в него
+    // * контент методом addContent
+
+    //rev 17.11.22
+    var Sprite_UITooltip;
+    Sprite_UITooltip = class Sprite_UITooltip extends KDCore.UI.Sprite_UIElement {
+      constructor() {
+        super(...arguments);
+        this.opacity = 0;
+      }
+
+      isTooltipActive() {
+        return (this._opThread != null) || (this._opChanger != null) || this.opacity > 0;
+      }
+
+      activateTooltip(x, y, parent) {
+        if (this.isTooltipActive()) {
+          return;
+        }
+        this.deactivateTooltip();
+        this.move(x, y);
+        this._opThread = new KDCore.TimedUpdate(this.params.delay, this.showTooltip.bind(this));
+        if (!this.params.isGlobal && (parent != null)) {
+          parent.addChild(this);
+        } else {
+          // * Always on Top on Scene  (if Global)
+          SceneManager._scene.addChild(this);
+        }
+      }
+
+      deactivateTooltip() {
+        this._opThread = null;
+        this._opChanger = null;
+        return this.opacity = 0;
+      }
+
+      showTooltip() {
+        this._opThread = null;
+        this.appear(this.params.opacityChangeStep);
+        if (this.params.cursorRelative === true) {
+          return this.toCursor();
+        }
+      }
+
+      update() {
+        var ref;
+        super.update();
+        if ((ref = this._opThread) != null) {
+          ref.update();
+        }
+        if (this.isTooltipActive() && this.params.cursorRelative === true) {
+          return this.toCursor();
+        }
+      }
+
+      // * Стандартный набор настроек
+      defaultParams() {
+        return {
+          visible: true,
+          delay: 30,
+          opacityChangeStep: 35,
+          margins: {
+            x: 8,
+            y: 8
+          },
+          isGlobal: true,
+          cursorRelative: true
+        };
+      }
+
+      toCursor() {
+        var x, y;
+        ({x, y} = this.params.margins);
+        return this.move(TouchInput.x + x, TouchInput.y + y);
+      }
+
+      // * Основной метод, нужно добавить контент
+      addContent(content) {
+        return this.add(content);
+      }
+
+    };
+    KDCore.UI.Sprite_UITooltip = Sprite_UITooltip;
+  })();
+  return (function() {    //╒═════════════════════════════════════════════════════════════════════════╛
+    // ■ PRIVATE.coffee
+    //╒═════════════════════════════════════════════════════════════════════════╛
+    //---------------------------------------------------------------------------
+    var _;
+    //@[DEFINES]
+    _ = KDCore.UI.Sprite_UITooltip.prototype;
   })();
 });
 
@@ -7170,7 +13584,11 @@ KDCore.registerLibraryToLoad(function() {
       }
       size = params[1];
       if (params[1] == null) {
-        size = ImageManager.iconWidth;
+        if (KDCore.isMZ()) {
+          size = ImageManager.iconWidth;
+        } else {
+          size = Window_Base._iconWidth;
+        }
       }
       if (params[2] == null) {
         params[2] = 0;
@@ -7184,8 +13602,12 @@ KDCore.registerLibraryToLoad(function() {
       staticMargin = 2;
       x = textState.x + staticMargin + dx;
       y = textState.y + staticMargin + dy;
-      // * Только в режиме рисования
-      if (textState.drawing === true) {
+      if (KDCore.isMZ()) {
+        if (textState.drawing === true) {
+          // * Только в режиме рисования
+          this.contents.drawIcon(x, y, iconIndex, size);
+        }
+      } else {
         this.contents.drawIcon(x, y, iconIndex, size);
       }
       textState.x += size + (staticMargin * 2) + dx;
@@ -7221,7 +13643,7 @@ KDCore.registerLibraryToLoad(function() {
       y = textState.y + 2 + params[4];
       drawBitmap = this.contents;
       source = this.pGetSourceImageForDrawPictureSized(name);
-      if (textState.drawing === true) {
+      if ((KDCore.isMZ() && textState.drawing === true) || KDCore.isMV()) {
         drawProcess = function() {
           var e;
           try {
@@ -7640,6 +14062,7 @@ KDCore.registerLibraryToLoad(function() {
         this._closeButton.move(this.closeButtonPosition());
         this._closeButton.addClickHandler(this._closeButtonClick.bind(this));
       };
+      //%[FOR CHILDRENS]
       // * Наследники создают свои элементы в этом методе
       // * Есть специальный метод addContent()
       _._createCustomElements = function() {}; // * EMPTY
@@ -7697,13 +14120,15 @@ KDCore.registerLibraryToLoad(function() {
       // * OPEN OR CLOSE
       // -----------------------------------------------------------------------
       _._open = function() {
-        var ref;
+        var ref, ref1;
         this.visible = true;
-        $gameTemp._floatingWindows.push(this);
+        if ((ref = $gameTemp._floatingWindows) != null) {
+          ref.push(this);
+        }
         if (this._isAlwaysOnTop === true) {
           // * Окно, которое открывается, всегда снова выше остальных (опция)
-          if ((ref = this.mainParent) != null) {
-            ref.addChild(this);
+          if ((ref1 = this.mainParent) != null) {
+            ref1.addChild(this);
           }
         }
         return this._createMouseCheckThread();
@@ -7800,6 +14225,163 @@ KDCore.registerLibraryToLoad(function() {
       this._parent.style.width = Graphics._canvas.style.width;
       this._parent.style.height = Graphics._canvas.style.height;
     };
+    _.initReactComponents = function(withBabel = true) {
+      var e;
+      try {
+        if (withBabel) {
+          this._loadBabel();
+        }
+        return this._loadReact();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._loadBabel = function() {
+      var e;
+      try {
+        return this._loadScript('https://unpkg.com/babel-standalone@6/babel.min.js');
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._loadReact = function() {
+      var e;
+      try {
+        this._loadScript('https://unpkg.com/react@18/umd/react.production.min.js');
+        return this._loadScript('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js');
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._loadScript = function(src, isReact = false) {
+      var e, script;
+      try {
+        script = document.createElement("script");
+        if (isReact === true) {
+          script.type = "text/babel";
+        } else {
+          script.type = "text/javascript";
+          script.crossorigin = true;
+        }
+        script.src = src;
+        script.async = false;
+        script.defer = true;
+        script.onerror = function(e) {
+          KDCore.warning('HUI: Failed to load script');
+          return KDCore.warning(e);
+        };
+        document.body.appendChild(script);
+        if (isReact === true) {
+          return window.dispatchEvent(new Event('DOMContentLoaded'));
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _.loadReactComponent = function(componentName, folder = 'data/uiComponents') {
+      var e, src;
+      try {
+        src = folder + "/" + componentName + ".js";
+        return this._loadScript(src, true);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _.addReactComponent = function(componentName, props, uniqueId = null) {
+      var e, element, reactElement, root;
+      try {
+        if (window[componentName] == null) {
+          KDCore.warning("Cant find " + componentName + ", make sure to load it first");
+          return null;
+        }
+        if (uniqueId == null) {
+          uniqueId = componentName;
+        }
+        // * Создаём отдельный DIV для каждого элемента (чтобы можно было удалять)
+        element = this._getElementForReactComponent(uniqueId);
+        root = ReactDOM.createRoot(element);
+        reactElement = React.createElement(window[componentName], props);
+        root.render(reactElement);
+        return KDCore.HUI.getElement(uniqueId);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+        return null;
+      }
+    };
+    // * Simple React Component (without JSX!)
+    _.loadReactComponentFromFile = function(filename, props, uniqueId, handler, folder = "data/uiComponents") {
+      var e, url, xhr;
+      try {
+        xhr = new XMLHttpRequest();
+        url = folder + "/" + filename + ".js";
+        xhr.open("GET", url);
+        xhr.overrideMimeType("plain/text");
+        xhr.onload = function() {
+          var e, element;
+          eval(xhr.responseText);
+          element = KDCore.HUI.addReactComponent(filename, props, uniqueId);
+          try {
+            if (handler != null) {
+              return handler(element, filename);
+            }
+          } catch (error) {
+            e = error;
+            return KDCore.warning(e);
+          }
+        };
+        return xhr.send();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._getElementForReactComponent = function(componentId) {
+      var e, element;
+      try {
+        this.removeElementById(componentId);
+        element = this.addElement(componentId, '', null);
+        return element;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return null;
+    };
+    _.loadElementFromFile = function(filename, handler, folder = "data/uiComponents") {
+      var e, url, xhr;
+      try {
+        xhr = new XMLHttpRequest();
+        url = folder + "/" + filename + ".html";
+        xhr.open("GET", url);
+        xhr.overrideMimeType("plain/text");
+        xhr.onload = function() {
+          var e, element, htmlElementText;
+          // * Хотел отдельные данные передавать и заменять в HTML текст
+          // * Но если у нас есть React компоненты, то это не надо
+          //htmlElementText = @convertDataKeys(xhr.responseText, dataKeys)
+          htmlElementText = xhr.responseText;
+          element = KDCore.HUI.addElement(filename, htmlElementText, null);
+          try {
+            if (handler != null) {
+              return handler(element, filename);
+            }
+          } catch (error) {
+            e = error;
+            return KDCore.warning(e);
+          }
+        };
+        return xhr.send();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
     _.addCSS = function(name, folder = "css") {
       var head;
       if (!this.isInited()) {
@@ -7826,6 +14408,15 @@ KDCore.registerLibraryToLoad(function() {
       }
       this._parent.appendChild(element);
       return element;
+    };
+    _.appendElement = function(element) {
+      var e;
+      try {
+        return this._parent.appendChild(element);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
     };
     // * Может быть NULL
     _.getElement = function(id) {
@@ -8135,6 +14726,552 @@ KDCore.registerLibraryToLoad(function() {
 
 // Generated by CoffeeScript 2.6.1
 KDCore.registerLibraryToLoad(function() {
+  var Builder;
+  Builder = {};
+  (function() {    //NUI 1.0
+    //rev 30.04.24
+    var _;
+    //@[DEFINES]
+    _ = Builder;
+    _.Factory = function(jsonCollection, owner, exRefresh = 0) {
+      var e, item, items, j, key, len, value;
+      try {
+        if (jsonCollection == null) {
+          return;
+        }
+        items = [];
+        for (key in jsonCollection) {
+          value = jsonCollection[key];
+          item = KDCore.UI.Builder.Make(value, owner);
+          if (item != null) {
+            items.push(item); // * Skip not UI elements definitions
+          }
+        }
+//owner[key] = item if owner?
+        for (j = 0, len = items.length; j < len; j++) {
+          item = items[j];
+          item.refreshBindings(owner, true);
+        }
+        // * Обновить привязки через MS ещё раз
+        if (exRefresh > 0) {
+          setTimeout((function() {
+            var e, k, len1, results;
+            try {
+              results = [];
+              for (k = 0, len1 = items.length; k < len1; k++) {
+                item = items[k];
+                results.push(item.refreshBindings(owner, true));
+              }
+              return results;
+            } catch (error) {
+              e = error;
+              return KDCore.warning(e);
+            }
+          }), exRefresh);
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return items;
+    };
+    _.Make = function(jsonStructure, owner = null, parent = null) {
+      var bindings, child, childrens, dataObject, e, item, j, len, parameters, shortcutData, subItem, type, value;
+      try {
+        if (jsonStructure == null) {
+          return null;
+        }
+        if (jsonStructure.type == null) {
+          return null;
+        }
+        if (jsonStructure.shortcut != null) {
+          shortcutData = KDCore.UI.Builder.ConvertShortcut(jsonStructure.shortcut);
+          ({type, parameters} = shortcutData);
+        } else {
+          ({type, parameters} = jsonStructure);
+        }
+        if (typeof parameters === "string") {
+          parameters = KDCore.UI.Builder.ConvertShortcut(parameters);
+        }
+        if (jsonStructure.createIf != null) {
+          value = this._convertBindingValue(owner, jsonStructure.createIf);
+          if (value !== true) {
+            return null;
+          }
+        }
+        item = KDCore.UI.Builder.CreateItemByType(type, parameters);
+        if (item == null) {
+          return null;
+        }
+        ({dataObject, bindings, childrens} = jsonStructure);
+        // * Parent нужен чтобы работали настройки положения (center, %) и т.д.
+        if (parent != null) {
+          parent.addChild(item);
+        } else {
+          // * Owner - это не только главный родитель, но и к кому мы
+          // * прописываем все поля по ID
+          if (owner != null) {
+            owner.addChild(item);
+          }
+        }
+        // * Сохраняем схему (но только этого элемента, без "детей")
+        item.uiJsonScheme = Object.assign({}, jsonStructure, {
+          childrens: []
+        });
+        // * Константы доступны не только у каждого элемента в схеме, но и у общего родителя
+        if ((jsonStructure.constants != null) && (owner != null)) {
+          if (owner.uiConstants == null) {
+            owner.uiConstants = {};
+          }
+          owner.uiConstants = Object.assign(owner.uiConstants, jsonStructure.constants);
+        }
+        if (bindings != null) {
+          if (dataObject == null) {
+            dataObject = owner;
+          }
+          KDCore.UI.Builder.ApplyBindings(item, bindings, dataObject);
+        }
+        try {
+          if (jsonStructure.effects != null) {
+            KDCore.UI.Builder.ApplyEffects(item, jsonStructure.effects);
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        try {
+          if (jsonStructure.animations != null) {
+            KDCore.UI.Builder.ApplyAnimations(item, jsonStructure.animations);
+          }
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+        if ((childrens != null) && childrens.length > 0) {
+          for (j = 0, len = childrens.length; j < len; j++) {
+            child = childrens[j];
+            // * Дети всегда имеют родителя - этот элемент (а не owner)
+            subItem = KDCore.UI.Builder.Make(child, owner, item);
+          }
+        }
+        if (jsonStructure.id != null) {
+          item.id = jsonStructure.id;
+          if (owner != null) {
+            owner[jsonStructure.id] = item;
+          }
+        }
+        if (jsonStructure.parent != null) {
+          parent = jsonStructure.parent;
+          if ((owner != null) && (owner[parent] != null)) {
+            owner[parent].addChild(item);
+          }
+        }
+        // * Update bindings for recalculate Positions and Sizes
+        if (bindings != null) {
+          KDCore.UI.Builder.RefreshBindings(item, dataObject);
+        }
+        if (jsonStructure.position != null) {
+          item.setPosition(jsonStructure.position);
+        }
+        return item;
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return null;
+    };
+    // * dataObject может быть Null, если нет binding c $
+    _.ApplyBindings = function(uiElement, bindings, dataObject) {
+      var dataBindings, e, field, value;
+      try {
+        if (uiElement == null) {
+          return;
+        }
+        if (bindings == null) {
+          return;
+        }
+        if (uiElement.dataBindings == null) {
+          return;
+        }
+        dataBindings = uiElement.dataBindings();
+        if (dataBindings == null) {
+          return;
+        }
+        for (field in dataBindings) {
+          if (bindings[field] != null) {
+            value = this.ConvertBindingValue(dataObject, bindings[field], uiElement);
+            dataBindings[field].call(uiElement, value);
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+    };
+    _.RefreshBindings = function(uiElement, dataObject) {
+      var bindings, e;
+      try {
+        if (uiElement == null) {
+          return;
+        }
+        if (uiElement.uiJsonScheme == null) {
+          return;
+        }
+        ({bindings} = uiElement.uiJsonScheme);
+        if (bindings == null) {
+          return;
+        }
+        KDCore.UI.Builder.ApplyBindings(uiElement, bindings, dataObject);
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+    };
+    _.ApplyEffects = function(uiElement, effects) {
+      var alpha, color, e, ef, efData, effectsArray, j, len, quality, thickness;
+      try {
+        if (uiElement == null) {
+          return;
+        }
+        if (effects == null) {
+          return;
+        }
+        //TODO: Преобразование цвета!
+        effectsArray = [];
+        for (j = 0, len = effects.length; j < len; j++) {
+          ef = effects[j];
+          if (ef == null) {
+            continue;
+          }
+          efData = KDCore.UI.Builder.ConvertShortcut(ef);
+          if ((efData.shadow != null) && KDCore.isMZ()) {
+            effectsArray.push(new PIXI.filters.DropShadowFilter(efData));
+          }
+          if ((efData.outline != null) && KDCore.isMZ()) {
+            ({thickness, color, quality} = efData);
+            if (thickness == null) {
+              thickness = 1;
+            }
+            if (color == null) {
+              color = 0xffffff;
+            }
+            effectsArray.push(new PIXI.filters.OutlineFilter(thickness, color, quality));
+          }
+          if (efData.glow != null) {
+            effectsArray.push(new PIXI.filters.GlowFilter(efData));
+          }
+          if (efData.tint != null) {
+            ({color, alpha} = efData);
+            if (alpha == null) {
+              alpha = 0.5;
+            }
+            effectsArray.push(new PIXI.filters.ColorOverlayFilter(color, alpha));
+          }
+        }
+        if (effectsArray.length > 0) {
+          return uiElement.filters = effectsArray;
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _.ApplyAnimations = function(uiElement, animations) {
+      var a, e, j, len;
+      try {
+        if (uiElement == null) {
+          return;
+        }
+        if (animations == null) {
+          return;
+        }
+        if (uiElement.addAnimationRule == null) {
+          return;
+        }
+        if (animations.length === 0) {
+          return;
+        }
+        for (j = 0, len = animations.length; j < len; j++) {
+          a = animations[j];
+          if (typeof a === 'string') {
+            a = KDCore.UI.Builder.ConvertShortcut(a);
+          }
+          if (a != null) {
+            uiElement.addAnimationRule(a);
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+    };
+    _.ConvertBindingValue = function(sourceObj, bindingValue, element = null) {
+      var e, i, j, ref, text, value;
+      try {
+        if (bindingValue instanceof Array) {
+          text = bindingValue[0];
+          for (i = j = 1, ref = bindingValue.length; (1 <= ref ? j < ref : j > ref); i = 1 <= ref ? ++j : --j) {
+            if (bindingValue[i] == null) {
+              continue;
+            }
+            value = this.ConvertBindingValue(sourceObj, bindingValue[i], element);
+            if (value != null) {
+              text = text.replace("%" + i, value);
+            }
+          }
+          return text;
+        } else {
+          return this._convertBindingValue(sourceObj, bindingValue, element);
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return bindingValue;
+    };
+    _.CreateItemByType = function(type, initialParameters = {}) {
+      var e;
+      try {
+        // * SHOULD HAVE: dataBingins(size), realWidth, realHeight
+        switch (type) {
+          case 'button':
+            return new KDCore.Sprite_SButton(initialParameters);
+          case 'text':
+            return new KDCore.UI.Sprite_UIText2(initialParameters);
+          case 'plane':
+            return new KDCore.Sprite_Plane(initialParameters);
+          case 'rect':
+            return new KDCore.Sprite_BaseRect(initialParameters);
+          case 'image':
+            return new KDCore.Sprite_Image(initialParameters);
+          case 'legacyText':
+            return new KDCore.UI.Sprite_UIText(initialParameters);
+          case 'textExt':
+            return new KDCore.UI.Sprite_UITextEx(initialParameters);
+          case 'group':
+            return new KDCore.Sprite_Group(initialParameters);
+          case 'legacyButton':
+            return new KDCore.Sprite_ImgButton(initialParameters);
+          case 'circle':
+            return new KDCore.Sprite_BaseCircle(initialParameters);
+          case 'gauge':
+            return new KDCore.Sprite_Gauge(initialParameters);
+          case 'list':
+            return new KDCore.Sprite_ItemsListN(initialParameters);
+          case 'horList':
+            return new KDCore.Sprite_ItemsListNHor(initialParameters);
+          case 'screen':
+            /*screenGroup = {
+                "type": "group",
+                "bindings": {
+                    "width": "@Graphics.width",
+                    "height": "@Graphics.height"
+                }
+            }
+            return KDCore.UI.Builder.Make(screenGroup)*/
+            return new KDCore.Sprite_Screen(initialParameters);
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return null;
+    };
+    _._convertValueDataFromShortcut = function(valueData) {
+      var data, e, item, j, len, n, outerItems, p, v;
+      try {
+        if (valueData.contains("|")) {
+          data = {};
+          outerItems = valueData.split("|");
+          for (j = 0, len = outerItems.length; j < len; j++) {
+            item = outerItems[j];
+            p = item.split("=");
+            n = p.shift();
+            v = p;
+            if (v.length === 0) {
+              v = true;
+            } else {
+              if (v.length === 1) {
+                v = v[0];
+                if (isFinite(v)) {
+                  v = Number(v);
+                }
+              } else {
+                v = KDCore.UI.Builder._convertValueDataFromShortcut(v.join("="));
+              }
+            }
+            data[n] = v;
+          }
+          return data;
+        }
+        data = KDCore.UI.Builder.ConvertShortcut(valueData, ",", "=");
+        return data;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _.ConvertShortcut = function(shortcut, outerSep = ";", innerSep = ":") {
+      var config, e, j, len, pair, value, valueData, valueName, values;
+      try {
+        config = {};
+        values = shortcut.split(outerSep);
+//console.log(values)
+        for (j = 0, len = values.length; j < len; j++) {
+          value = values[j];
+          if (!String.any(value)) {
+            continue;
+          }
+          pair = value.split(innerSep);
+          valueName = pair[0];
+          valueData = pair[1];
+          if (String.any(valueData) && valueData.contains("=")) {
+            valueData = KDCore.UI.Builder._convertValueDataFromShortcut(valueData);
+          } else {
+            if (valueData == null) {
+              valueData = true;
+            } else {
+              if (isFinite(valueData)) {
+                valueData = Number(valueData);
+              }
+            }
+          }
+          config[valueName] = valueData;
+        }
+        //console.log(valueName, valueData)
+        return config;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    _._convertBindingValue = function(sourceObj, bindingValue, element = null) {
+      var captured, dpValue, e, evalString, r, result, resultValue;
+      try {
+        if (typeof bindingValue === 'string') {
+          // * Replace all HDP
+          if (bindingValue.contains("hdp")) {
+            r = new RegExp("(\\d+)hdp", "g");
+            result = r.exec(bindingValue);
+            while ((result != null)) {
+              dpValue = Number(result[1]);
+              resultValue = KDCore.Utils.convertDP(dpValue, true);
+              bindingValue = bindingValue.replace(/(\d+)hdp/, resultValue);
+              result = r.exec(bindingValue);
+            }
+          }
+          // * Replace all DP
+          if (bindingValue.contains("dp")) {
+            r = new RegExp("(\\d+)dp", "g");
+            result = r.exec(bindingValue);
+            while ((result != null)) {
+              dpValue = Number(result[1]);
+              resultValue = KDCore.Utils.convertDP(dpValue, false);
+              bindingValue = bindingValue.replace(/(\d+)dp/, resultValue);
+              result = r.exec(bindingValue);
+            }
+          }
+          // * FORCE EVAL
+          if (bindingValue.contains("@") && bindingValue[0] === "@") {
+            evalString = bindingValue.replace("@", "");
+            return eval(evalString);
+          }
+          // * EXTRA $ calculations
+          if (bindingValue.contains("~") && bindingValue[0] === "~") { // * POST EVAL
+            if (bindingValue.contains("$")) {
+              r = new RegExp("(\\$[\\w+.]*)", "g");
+              result = r.exec(bindingValue);
+              if (result != null) {
+                //console.log(result)
+                captured = result[1];
+                if (String.any(captured)) {
+                  resultValue = this._convertSingleBindingValue$(sourceObj, captured, element);
+                  if (resultValue == null) {
+                    return null;
+                  }
+                  if (typeof resultValue === 'function') {
+                    return resultValue;
+                  } else {
+                    if (String.any(resultValue)) {
+                      bindingValue = bindingValue.replace(captured, resultValue);
+                      return this._convertBindingValue(sourceObj, bindingValue, element);
+                    } else {
+                      return null;
+                    }
+                  }
+                }
+              }
+            } else {
+              evalString = bindingValue.replace("~", "");
+              return eval(evalString);
+            }
+          }
+          
+          // * Default old style simple $
+          if (bindingValue.contains("$")) {
+            return this._convertSingleBindingValue$(...arguments);
+          }
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      return bindingValue;
+    };
+    _._convertSingleBindingValue$ = function(sourceObj, bindingValue, element) {
+      var e, field, parts, subData, subField;
+      try {
+        field = bindingValue.replace("$", "");
+        if (field.contains(".")) { //$parent.width
+          parts = field.split(".");
+          // * Только одно вхождение
+          field = parts[0];
+          subField = parts[1];
+          if (!String.any(field) && String.any(subField)) {
+            if (element != null) {
+              return this._convertSingleBindingValue$(element, "$" + subField, element);
+            } else {
+              return null;
+            }
+          }
+          if (String.any(field) && !String.any(subField)) {
+            return this._convertSingleBindingValue$(sourceObj, "$" + field, element);
+          }
+          if (sourceObj != null) {
+            if (typeof sourceObj[field] === 'function') {
+              subData = sourceObj[field]();
+            } else {
+              subData = sourceObj[field];
+            }
+            return this._convertSingleBindingValue$(subData, "$" + subField, element);
+          } else {
+            return null;
+          }
+        } else {
+          if ((sourceObj != null) && (sourceObj[field] != null)) {
+            if (typeof sourceObj[field] === 'function') {
+              return sourceObj[field]();
+            } else {
+              return sourceObj[field];
+            }
+          } else {
+            return null; // * We can't find value
+          }
+        }
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+  })();
+  //@[EXTEND]
+  KDCore.UI = KDCore.UI || {};
+  return KDCore.UI.Builder = Builder;
+});
+
+
+// Generated by CoffeeScript 2.6.1
+KDCore.registerLibraryToLoad(function() {
   var alias_WBDTEX_KDCore29122021;
   // * <center>, для RPG Maker MZ и если нету Visu Message Core
   if (KDCore.isMZ()) {
@@ -8146,8 +15283,7 @@ KDCore.registerLibraryToLoad(function() {
           if (String.any(text) && text.contains("<center>")) {
             if (text[0] === "<" && text[1] === "c") { // * Должен быть в начале строки
               newText = text.replace("<center>", "");
-              this.drawTextExInCenter(newText, x, y, width);
-              return;
+              return this.drawTextExInCenter(newText, x, y, width);
             }
           }
         }
@@ -8155,7 +15291,7 @@ KDCore.registerLibraryToLoad(function() {
         e = error;
         KDCore.warning(e);
       }
-      alias_WBDTEX_KDCore29122021.call(this, ...arguments);
+      return alias_WBDTEX_KDCore29122021.call(this, ...arguments);
     };
   }
   //?NEW
@@ -8173,19 +15309,20 @@ KDCore.registerLibraryToLoad(function() {
       } else {
         newY = y;
       }
-      this.drawTextEx(text, newX, newY, width);
+      return this.drawTextEx(text, newX, newY, width);
     } catch (error) {
       e = error;
       KDCore.warning(e);
-      this.drawTextEx(text, x, y, width);
+      return this.drawTextEx(text, x, y, width);
     }
   };
   //?NEW
   Window_Base.prototype.drawTextExWithWordWrap = function(text, x, y, width, maxLines) {
     var maxWidth, wrappedText;
+    this.drawTextEx("", 0, 0, 100);
     maxWidth = this.contentsWidth();
     wrappedText = Window_Message.prototype.pWordWrap.call(this, text, width || maxWidth, maxLines);
-    this.drawTextEx(wrappedText, x, y, width);
+    return this.drawTextEx(wrappedText, x, y, width);
   };
   //?NEW
   return Window_Message.prototype.pWordWrap = function(text, maxWidth, maxLines) {
@@ -8200,7 +15337,7 @@ KDCore.registerLibraryToLoad(function() {
       line = lines[i];
       words = line.split(' ');
       for (j = l = 0, ref1 = words.length; (0 <= ref1 ? l < ref1 : l > ref1); j = 0 <= ref1 ? ++l : --l) {
-        wordWidth = this.contents.measureTextWidth(words[j]);
+        wordWidth = this.contents.measureTextWidth(words[j].replaceAll(/\\C\[\d+\]/g, ""));
         wordWidthWithSpace = wordWidth + spaceWidth;
         if (j === 0 || wordWidthWithSpace > spaceLeft) {
           if (j > 0) {
@@ -8241,7 +15378,7 @@ if (KDCore._requireLoadLibrary === true) {
     lib();
   }
   KDCore[KDCore._loader] = [];
-  text = "%c  KDCore is loaded " + KDCore.Version;
+  text = "%c  KDCore is loaded " + KDCore.Version + " + NUI " + KDCore.nuiVersion;
   console.log(text, 'background: #222; color: #82b2ff');
 }
 
@@ -8254,7 +15391,7 @@ if (KDCore._requireLoadLibrary === true) {
 // ==========================================================================
 // ==========================================================================
 
-//Plugin KDCore builded by PKD PluginBuilder 2.1 - 21.06.2022
+//Plugin KDCore builded by PKD PluginBuilder 2.2 - 22.05.2024
 
 (function () {
 
@@ -8304,7 +15441,7 @@ if (KDCore._requireLoadLibrary === true) {
 })();
 
 ANET.isPro = function() {
-    return false;
+    return true;
 };
 
 var Notyf = function () {
@@ -8570,6 +15707,142 @@ var Notyf = function () {
     }, l
 }();
 
+//@[EXTENSION]
+ANET.mz3d_patch = function() {
+
+
+    // Thanks to Cutievirus and Cantux for the MZ3D compatibility code
+
+    if(!window.mz3d) {
+        return;
+    }
+
+	console.log("ANET.mz3d_patch applied");
+
+    // MZ3D compatibility
+
+    // create 3D network characters
+	const _addNewCharacters = NETCharactersGroup.prototype._addNewCharacters;
+	NETCharactersGroup.prototype._addNewCharacters = function(){
+		_addNewCharacters.apply(this,arguments);
+		const netchars = $gameMap.netChars();
+		for(let i=0;i<netchars.length;++i){
+			mz3d.createCharacterFor(netchars[i],20-i/100);
+		}
+	};
+
+	// remove 3D network characters
+	const refreshNetworkCharacters = Spriteset_Map.prototype.refreshNetworkCharacters;
+	Spriteset_Map.prototype.refreshNetworkCharacters = function(){
+		const sprites = this._networkCharacterSprites;
+		const characters = sprites.map(spr=>spr._character);
+		refreshNetworkCharacters.apply(this,arguments);
+		const left_characters = characters.filter(char=>!$gameMap.netChars().includes(char));
+		for(let i=0;i<left_characters.length;++i){
+			const char = left_characters[i];
+			if(char.mv3d_sprite && !char.mv3d_sprite.isDisposed()) char.mv3d_sprite.dispose();
+		}
+	};
+
+
+	// display nameplate
+	const _nCreateNameplateSpr = Sprite_Character.prototype._nCreateNameplateSpr;
+	Sprite_Character.prototype._nCreateNameplateSpr = function(){
+		_nCreateNameplateSpr.apply(this,arguments);
+		if(!this.netNameplateSpr) return;
+		SceneManager._scene._spriteset.addChild(this.netNameplateSpr);
+	};
+
+	const _createNetworkCharactersInfo = Spriteset_Map.prototype._createNetworkCharactersInfo;
+	Spriteset_Map.prototype._createNetworkCharactersInfo=function(){
+		_createNetworkCharactersInfo.apply(this,arguments);
+		this.addChild(this._networkCharactersInfoLayer)
+	};
+
+	mz3d.util.override(Sprite_Character.prototype,'_updateNetworkNameplateMain', o=> function() {
+		o.apply(this,arguments);
+		if(this._character&&this._character.mv3d_sprite){
+			const screenPos = mz3d.getScreenPosition(this._character.mv3d_sprite);
+			const scale = getScreenScale(this._character.mv3d_sprite);
+			this.netNameplateSpr.visible = !screenPos.behindCamera;
+			this.netNameplateSpr.y = this.y - this.height*scale;
+		}
+	});
+
+	// sync directions
+
+	mz3d.util.override(Game_Player.prototype,'update', o=> function(direction) {
+		o.apply(this,arguments);
+		const dir = this.mv3d_direction();
+		if(this.mv3d_data._mz3d_alpha_old_direction!==dir){
+			_sendDirection.call(this);
+		}
+		this.mv3d_data._mz3d_alpha_old_direction=dir;
+	});
+
+	mz3d.util.override(Game_Player.prototype,'executeMove', o=> function(direction) {
+		o.apply(this,arguments);
+		_sendDirection.call(this);
+		this.mv3d_data._mz3d_alpha_old_direction=this.mv3d_direction();
+	});
+
+	function _sendDirection(){
+		const dir = this.mv3d_direction();
+		const h = (dir-1)%3-1;
+		const v = -(Math.ceil(dir/3)-2);
+		if(window.AANetworkManager&&AANetworkManager.sendTurnTowardCharacter)
+			AANetworkManager.sendTurnTowardCharacter(this, new Point(this.x+h,this.y+v));
+	}
+
+	const turnTowardCharacter = Game_Character.prototype.turnTowardCharacter;
+	Game_Character.prototype.turnTowardCharacter = function(character){
+		turnTowardCharacter.apply(this,arguments);
+		const x = character.x - this.x;
+		const y = character.y - this.y;
+		const dir = 10-mz3d.yawToDir(mz3d.util.radtodeg(Math.atan2(x,y)),true);
+		this.mv3d_setDirection(dir);
+		this._diagonalDir = dir;
+		this.mv3d_data._mz3d_alpha_old_direction=dir;
+	};
+
+    const Tilemap = window.ShaderTilemap||window.Tilemap;
+    const removeChild = Tilemap.prototype.removeChild;
+    Tilemap.prototype.removeChild = function(child) {
+        removeChild.apply(this,arguments);
+        if(child&&child.parent) child.parent.removeChild(child);
+    };
+
+	function getScreenScale(pos){
+		if(!(pos instanceof BABYLON.Vector3)){
+			if(typeof pos.getAbsolutePosition==='function'){
+				pos = pos.getAbsolutePosition();
+			}else if(pos.globalPosition){
+				pos = pos.globalPosition;
+			}
+		}
+		let scale;
+		if(mz3d.camera.mode===BABYLON.Constants.ORTHOGRAPHIC_CAMERA){
+			scale = mz3d.getScaleForDist();
+		}else{
+			const dist = BABYLON.Vector3.Distance(mz3d.camera.globalPosition, pos);
+			scale = mz3d.getScaleForDist(dist);
+		}
+		return scale;
+	}
+
+    const processMapTouch = Scene_Map.prototype.processMapTouch;
+    Scene_Map.prototype.processMapTouch = function() {
+        if(Imported.PKD_MapInventory && PKD_MI.isProcessEUITouch()){
+            return;
+        }
+        if ($gameTemp.floatingWindowUnderMouse != null || $gameTemp.kdButtonUnderMouse != null) {
+            return true;
+        }
+        return processMapTouch.call(this);
+    };
+
+};
+
 
 
 
@@ -8630,346 +15903,257 @@ console.log(text, 'background: #3b3b3b; color: #22ab3b');
 //---------------------------------------------------------------------------
 
 
-function _0x21d2(_0x2d5ff8, _0x1a0a22) {
-    var _0x2baf35 = _0x2baf();
-    return _0x21d2 = function (_0x21d2ac, _0x3e9f94) {
-        _0x21d2ac = _0x21d2ac - 0x18d;
-        var _0xe2e8e8 = _0x2baf35[_0x21d2ac];
-        return _0xe2e8e8;
-    }, _0x21d2(_0x2d5ff8, _0x1a0a22);
-}
-var _0x472fd9 = _0x21d2;
-function _0x2baf() {
-    var _0x2587ef = [
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x55\x73\x69\x6e\x67\x20\x48\x54\x54\x50\x53\x20\x73\x65\x63\x75\x72\x65\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e',
-        '\x72\x65\x71\x75\x65\x73\x74\x52\x6f\x6f\x6d\x52\x65\x66\x72\x65\x73\x68',
-        '\x54\x69\x6d\x65\x6f\x75\x74\x20\x66\x6f\x72\x3a\x20',
-        '\x77\x68\x6d\x74\x64',
-        '\x33\x30\x33\x34',
-        '\x41\x75\x4e\x53\x6a',
-        '\x76\x71\x73\x5a\x57',
-        '\x69\x73\x48\x54\x54\x50\x53\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e',
-        '\x6d\x61\x78\x50\x6c\x61\x79\x65\x72\x73\x49\x6e\x52\x6f\x6f\x6d',
-        '\x67\x65\x74',
-        '\x42\x4c\x41\x43\x4b',
-        '\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64',
-        '\x74\x72\x61\x63\x65',
-        '\x69\x73\x4d\x61\x73\x74\x65\x72\x43\x6c\x69\x65\x6e\x74',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x4e\x45\x54',
-        '\x44\x4a\x62\x47\x6a',
-        '\x31\x33\x31\x39\x39\x35\x36\x51\x74\x4e\x55\x59\x69',
-        '\x4c\x6f\x62\x62\x79',
-        '\x6f\x6e\x4c\x65\x61\x76\x65\x52\x6f\x6f\x6d',
-        '\x35\x37\x32\x37\x35\x35\x4a\x51\x6f\x70\x56\x4d',
-        '\x72\x65\x73\x65\x74',
-        '\x50\x4d\x6d\x71\x4b',
-        '\x4d\x50\x6c\x73\x55',
-        '\x73\x6f\x63\x6b\x65\x74',
-        '\x73\x65\x6e\x64',
-        '\x72\x65\x73\x65\x74\x57\x61\x69\x74',
-        '\x73\x65\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x54\x6f\x4d\x61\x73\x74\x65\x72\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x72\x6f\x6f\x6d',
-        '\x61\x70\x70\x6c\x79',
-        '\x65\x6b\x6e\x72\x72',
-        '\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x73\x65\x74\x57\x61\x69\x74',
-        '\x4f\x4e\x44\x62\x66',
-        '\x73\x65\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e',
-        '\x5f\x69\x73\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72',
-        '\x72\x48\x63\x54\x4b',
-        '\x31\x39\x34\x37\x34\x37\x34\x50\x50\x76\x43\x64\x41',
-        '\x5a\x41\x4b\x43\x79',
-        '\x39\x38\x39\x31\x43\x6b\x73\x6d\x59\x78',
-        '\x69\x6e\x69\x74\x53\x79\x73\x74\x65\x6d',
-        '\x4f\x67\x62\x71\x63',
-        '\x47\x52\x45\x45\x4e',
-        '\x32\x38\x37\x34\x73\x72\x67\x66\x74\x45',
-        '\x32\x39\x32\x32\x38\x31\x31\x30\x4f\x4e\x62\x6f\x55\x5a',
-        '\x6c\x65\x61\x76\x65\x52\x6f\x6f\x6d',
-        '\x64\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x68\x6f\x66\x4e\x42',
-        '\x31\x39\x35\x2e\x31\x36\x31\x2e\x34\x31\x2e\x32\x30',
-        '\x73\x74\x61\x72\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e',
-        '\x73\x65\x74\x52\x6f\x6f\x6d\x4d\x61\x73\x74\x65\x72',
-        '\x41\x62\x59\x79\x75',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x32\x34\x30\x31\x32\x32\x37\x4e\x62\x44\x6d\x55\x47',
-        '\x53\x65\x6e\x64\x2c\x20\x63\x61\x6c\x6c\x62\x61\x63\x6b\x3a\x20',
-        '\x53\x65\x6e\x64\x3a\x20',
-        '\x6f\x6e\x52\x6f\x6f\x6d\x43\x6c\x6f\x73\x65\x64',
-        '\x74\x6b\x4e\x41\x58',
-        '\x58\x66\x6b\x70\x5a',
-        '\x59\x6f\x75\x20\x74\x72\x79\x20\x73\x65\x6e\x64\x20\x63\x61\x6c\x6c\x62\x61\x63\x6b\x20\x6d\x65\x73\x73\x61\x67\x65\x2c\x20\x62\x75\x74\x20\x4e\x4f\x54\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x21',
-        '\x50\x6f\x72\x74\x20\x63\x68\x61\x6e\x67\x65\x64\x20\x74\x6f\x20\x33\x30\x33\x35\x2e\x20\x43\x68\x65\x63\x6b\x20\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x20\x70\x6c\x75\x67\x69\x6e\x20\x70\x61\x72\x61\x6d\x65\x74\x65\x72',
-        '\x75\x4f\x61\x67\x66',
-        '\x66\x76\x65\x73\x64',
-        '\x41\x4e\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x61\x6e\x65\x74\x7a\x67\x6c\x6f\x62\x61\x6c\x2e\x72\x75',
-        '\x67\x65\x74\x52\x6f\x6f\x6d\x44\x61\x74\x61',
-        '\x59\x6f\x75\x20\x61\x72\x65\x20\x4d\x61\x73\x74\x65\x72\x20\x28\x68\x6f\x73\x74\x29\x20\x6f\x66\x20\x72\x6f\x6f\x6d\x3a\x20',
-        '\x77\x61\x72\x6e',
-        '\x6f\x6e\x52\x6f\x6f\x6d\x44\x61\x74\x61\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x32\x30\x36\x33\x36\x39\x35\x53\x5a\x58\x74\x68\x7a',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x46\x4e\x52\x4a\x54',
-        '\x69\x73\x53\x61\x6d\x65\x4d\x61\x70\x4d\x6f\x64\x65',
-        '\x73\x65\x72\x76\x65\x72\x49\x70',
-        '\x52\x65\x73\x70\x6f\x6e\x73\x65\x20\x28\x67\x65\x74\x29\x20\x66\x6f\x72\x3a\x20',
-        '\x67\x65\x74\x47\x61\x6d\x65\x56\x65\x72\x73\x69\x6f\x6e',
-        '\x43\x61\x6c\x6c\x62\x61\x63\x6b\x20\x66\x6f\x72\x3a\x20',
-        '\x69\x73\x4d\x5a',
-        '\x6e\x61\x6d\x65',
-        '\x68\x74\x74\x70\x3a\x2f\x2f',
-        '\x4b\x74\x54\x5a\x58',
-        '\x69\x73\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72',
-        '\x73\x65\x74\x46\x72\x6f\x6d',
-        '\x6d\x79\x49\x64',
-        '\x69\x73\x53\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72',
-        '\x44\x41\x51\x78\x57',
-        '\x38\x73\x4e\x6f\x56\x4c\x73',
-        '\x66\x75\x6c\x6c\x4e\x61\x6d\x65',
-        '\x59\x6f\x75\x20\x74\x72\x79\x20\x73\x65\x6e\x64\x20\x6d\x65\x73\x73\x61\x67\x65\x2c\x20\x62\x75\x74\x20\x4e\x4f\x54\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x21',
-        '\x79\x4a\x6f\x6b\x50',
-        '\x63\x6c\x6f\x73\x65\x52\x6f\x6f\x6d',
-        '\x6c\x79\x46\x67\x52',
-        '\x6c\x6f\x67',
-        '\x73\x65\x74\x52\x6f\x6f\x6d\x4a\x6f\x69\x6e',
-        '\x59\x6f\x75\x20\x74\x72\x79\x20\x67\x65\x74\x20\x64\x61\x74\x61\x20\x66\x72\x6f\x6d\x20\x53\x65\x72\x76\x65\x72\x2c\x20\x62\x75\x74\x20\x4e\x4f\x54\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x21',
-        '\x5f\x69\x73\x48\x6f\x73\x74',
-        '\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72',
-        '\x74\x69\x74\x53\x5a',
-        '\x63\x6c\x69\x65\x6e\x74',
-        '\x73\x65\x72\x76\x65\x72\x50\x6f\x72\x74',
-        '\x34\x50\x4d\x77\x73\x5a\x61',
-        '\x4e\x64\x59\x65\x56',
-        '\x69\x73\x42\x75\x73\x79'
-    ];
-    _0x2baf = function () {
-        return _0x2587ef;
-    };
-    return _0x2baf();
-}
-(function (_0xd2b6b, _0x319c2b) {
-    var _0x36344 = _0x21d2, _0x668c6a = _0xd2b6b();
-    while (!![]) {
-        try {
-            var _0x2c776f = -parseInt(_0x36344(0x194)) / 0x1 + -parseInt(_0x36344(0x191)) / 0x2 + -parseInt(_0x36344(0x1a5)) / 0x3 + -parseInt(_0x36344(0x1e5)) / 0x4 * (-parseInt(_0x36344(0x1c6)) / 0x5) + -parseInt(_0x36344(0x1ab)) / 0x6 * (parseInt(_0x36344(0x1a7)) / 0x7) + parseInt(_0x36344(0x1d7)) / 0x8 * (-parseInt(_0x36344(0x1b6)) / 0x9) + parseInt(_0x36344(0x1ac)) / 0xa;
-            if (_0x2c776f === _0x319c2b)
-                break;
-            else
-                _0x668c6a['push'](_0x668c6a['shift']());
-        } catch (_0x13fdca) {
-            _0x668c6a['push'](_0x668c6a['shift']());
-        }
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за подключение и хранит общие методы отправки и обработки команд
+
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANNetwork = function() {};
+
+//@[EXTEND]
+window.NET = window.ANNetwork;
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("Network");
+  LOG.setColors(KDCore.Color.GREEN, KDCore.Color.BLACK.getLightestColor(35));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANNetwork;
+  _.isConnected = function() {
+    return this.socket != null;
+  };
+  _.myId = function() {
+    var ref;
+    return (ref = this.socket) != null ? ref.id : void 0;
+  };
+  _.isMasterClient = function() {
+    return this._isHost === true;
+  };
+  // * Игроки могу находится на одной карте
+  _.isSameMapMode = function() {
+    // * User defined by nAPI call
+    if ((typeof $gameSystem !== "undefined" && $gameSystem !== null) && ($gameSystem.nWaitTransferModeState != null)) {
+      return $gameSystem.nWaitTransferModeState === true; // * Default from PP
+    } else {
+      return ANET.PP.isOnlySameMapMode();
     }
-}(_0x2baf, 0x7c84d), window[_0x472fd9(0x1c0)] = function () {
-}, window[_0x472fd9(0x18f)] = window['\x41\x4e\x4e\x65\x74\x77\x6f\x72\x6b'], (function () {
-    var _0x79c5a9 = _0x472fd9, _0x1133d8, _0x324592;
-    _0x1133d8 = new KDCore[(_0x79c5a9(0x1b5))](_0x79c5a9(0x19f)), _0x1133d8[_0x79c5a9(0x18e)](KDCore[_0x79c5a9(0x1c7)][_0x79c5a9(0x1aa)], KDCore[_0x79c5a9(0x1c7)][_0x79c5a9(0x1f3)][_0x79c5a9(0x1e8)](0x23)), _0x1133d8['\x6f\x6e'](), _0x324592 = window[_0x79c5a9(0x1c0)], _0x324592['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64'] = function () {
-        var _0x253df2 = _0x79c5a9;
-        if (_0x253df2(0x1dc) === _0x253df2(0x1a9))
-            !this[_0x253df2(0x1f4)]() ? _0x200ebb['\x70'](_0x253df2(0x1d9)) : (!_0x56b2fd && _0x86d0e3['\x70'](_0x253df2(0x1b8) + _0x138081[_0x253df2(0x1d8)]()), _0x39e7c5[_0x253df2(0x1d3)](this[_0x253df2(0x198)]['\x69\x64'])[_0x253df2(0x199)]());
-        else
-            return this[_0x253df2(0x198)] != null;
-    }, _0x324592[_0x79c5a9(0x1d4)] = function () {
-        var _0x1ccc75 = _0x79c5a9, _0x3ff144;
-        return (_0x3ff144 = this[_0x1ccc75(0x198)]) != null ? _0x3ff144['\x69\x64'] : void 0x0;
-    }, _0x324592['\x69\x73\x4d\x61\x73\x74\x65\x72\x43\x6c\x69\x65\x6e\x74'] = function () {
-        var _0x277701 = _0x79c5a9;
-        return this[_0x277701(0x1e0)] === !![];
-    }, _0x324592[_0x79c5a9(0x1c9)] = function () {
-        return ANET['\x50\x50']['\x69\x73\x4f\x6e\x6c\x79\x53\x61\x6d\x65\x4d\x61\x70\x4d\x6f\x64\x65']();
-    }, _0x324592[_0x79c5a9(0x1e7)] = function () {
-        var _0x1efcee = _0x79c5a9;
-        return this[_0x1efcee(0x1f4)]() && (this[_0x1efcee(0x1d2)]() || ANGameManager[_0x1efcee(0x1d5)]());
-    }, _0x324592[_0x79c5a9(0x1d2)] = function () {
-        var _0x43913c = _0x79c5a9;
-        return this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']() && this[_0x43913c(0x1a3)] === !![];
-    }, _0x324592['\x73\x65\x74\x57\x61\x69\x74'] = function () {
-        return this['\x5f\x69\x73\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72'] = !![];
-    }, _0x324592[_0x79c5a9(0x19a)] = function () {
-        var _0x8a9c1a = _0x79c5a9;
-        if ('\x4e\x48\x6b\x51\x4a' !== '\x4e\x48\x6b\x51\x4a') {
-            var _0x14a945;
-            _0xf21b95[_0x8a9c1a(0x19b)](null), (_0x14a945 = this[_0x8a9c1a(0x1e3)]) != null && _0x14a945['\x64\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74'](), this[_0x8a9c1a(0x19a)](), this[_0x8a9c1a(0x198)] = null, _0x30fc71[_0x8a9c1a(0x195)]();
-        } else
-            return this['\x5f\x69\x73\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72'] = ![];
-    }, (function () {
-        var _0x3b4e39 = _0x79c5a9;
-        if ('\x46\x4e\x52\x4a\x54' !== _0x3b4e39(0x1c8))
-            _0x20d186[_0x3b4e39(0x19d)](this, _0x3b74a4);
-        else
-            return _0x324592[_0x3b4e39(0x1a8)] = function () {
-                var _0x56625c = _0x3b4e39;
-                if (_0x56625c(0x1d1) === _0x56625c(0x197))
-                    return this[_0x56625c(0x1e0)] === !![];
-                else
-                    this['\x73\x6f\x63\x6b\x65\x74'] = null, this[_0x56625c(0x1e3)] = null, this[_0x56625c(0x19a)](), this[_0x56625c(0x1e0)] = ![], '\x4e\x65\x74\x77\x6f\x72\x6b\x20\x69\x6e\x69\x74\x65\x64'['\x70']();
-            }, _0x324592['\x73\x74\x6f\x70'] = function () {
-                var _0x286f2e = _0x3b4e39;
-                if (_0x286f2e(0x1a4) === '\x6f\x55\x4d\x66\x46')
-                    return this[_0x286f2e(0x1a3)] = !![];
-                else {
-                    var _0x446c64;
-                    NetClientMethodsManager[_0x286f2e(0x19b)](null), (_0x446c64 = this[_0x286f2e(0x1e3)]) != null && (_0x286f2e(0x1da) !== _0x286f2e(0x1da) ? (_0x520784[_0x286f2e(0x1dd)](_0x286f2e(0x1e9)), _0x207f91 = '\x68\x74\x74\x70\x73\x3a\x2f\x2f', _0x518ad6 = {
-                        '\x73\x65\x63\x75\x72\x65': !![],
-                        '\x72\x65\x63\x6f\x6e\x6e\x65\x63\x74': !![],
-                        '\x72\x65\x6a\x65\x63\x74\x55\x6e\x61\x75\x74\x68\x6f\x72\x69\x7a\x65\x64': ![]
-                    }, _0x5d9b1 === _0x286f2e(0x1ed) && (_0x4907f8 === _0x286f2e(0x1c1) || _0x286f2e(0x1b1)) && (_0x591e86[_0x286f2e(0x1c4)]('\x59\x6f\x75\x20\x74\x72\x79\x20\x63\x6f\x6e\x6e\x65\x63\x74\x20\x76\x69\x61\x20\x48\x54\x54\x50\x53\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x20\x77\x69\x74\x68\x20\x70\x6f\x72\x74\x20\x33\x30\x33\x34\x20\x28\x68\x74\x74\x70\x29'), _0xba2a00[_0x286f2e(0x1c4)](_0x286f2e(0x1bd)), _0x276846 = 0xbdb)) : _0x446c64[_0x286f2e(0x1ae)]()), this[_0x286f2e(0x19a)](), this[_0x286f2e(0x198)] = null, ANGameManager[_0x286f2e(0x195)]();
-                }
-            }, _0x324592['\x73\x74\x61\x72\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e'] = function () {
-                var _0x5d3b75 = _0x3b4e39, _0x4140d7, _0xece29d, _0x2bc9de, _0x2b2f62, _0x5005fc;
-                _0xece29d = ANET['\x50\x50'][_0x5d3b75(0x1ca)](), _0x2b2f62 = ANET['\x50\x50'][_0x5d3b75(0x1e4)]();
-                if (ANET['\x50\x50'][_0x5d3b75(0x1f0)]() === !![]) {
-                    if (_0x5d3b75(0x1ef) === '\x62\x52\x54\x43\x6b')
-                        return;
-                    else
-                        console[_0x5d3b75(0x1dd)](_0x5d3b75(0x1e9)), _0x5005fc = '\x68\x74\x74\x70\x73\x3a\x2f\x2f', _0x2bc9de = {
-                            '\x73\x65\x63\x75\x72\x65': !![],
-                            '\x72\x65\x63\x6f\x6e\x6e\x65\x63\x74': !![],
-                            '\x72\x65\x6a\x65\x63\x74\x55\x6e\x61\x75\x74\x68\x6f\x72\x69\x7a\x65\x64': ![]
-                        }, _0x2b2f62 === _0x5d3b75(0x1ed) && (_0xece29d === '\x61\x6e\x65\x74\x7a\x67\x6c\x6f\x62\x61\x6c\x2e\x72\x75' || _0x5d3b75(0x1b1)) && ('\x44\x4a\x62\x47\x6a' !== _0x5d3b75(0x190) ? (_0x20971d['\x73\x65\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x54\x6f\x4d\x61\x73\x74\x65\x72\x43\x61\x6c\x6c\x62\x61\x63\x6b'](_0x5dbebe), this[_0x5d3b75(0x1b2)]()) : (console[_0x5d3b75(0x1c4)]('\x59\x6f\x75\x20\x74\x72\x79\x20\x63\x6f\x6e\x6e\x65\x63\x74\x20\x76\x69\x61\x20\x48\x54\x54\x50\x53\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x20\x77\x69\x74\x68\x20\x70\x6f\x72\x74\x20\x33\x30\x33\x34\x20\x28\x68\x74\x74\x70\x29'), console['\x77\x61\x72\x6e'](_0x5d3b75(0x1bd)), _0x2b2f62 = 0xbdb));
-                } else
-                    _0x5005fc = _0x5d3b75(0x1d0), _0x2bc9de = {};
-                _0x4140d7 = _0x5005fc + _0xece29d + '\x3a' + _0x2b2f62, console[_0x5d3b75(0x1dd)]('\x43\x6f\x6e\x6e\x65\x63\x74\x20\x74\x6f\x20' + _0x4140d7), this['\x73\x6f\x63\x6b\x65\x74'] = io(_0x4140d7, _0x2bc9de), this[_0x5d3b75(0x1e3)] = new NetworkClientHandler(this['\x73\x6f\x63\x6b\x65\x74']);
-            }, _0x324592[_0x3b4e39(0x1a2)] = function (_0x4f221e) {
-                var _0x179a08 = _0x3b4e39;
-                if (_0x179a08(0x1bb) === '\x58\x66\x6b\x70\x5a')
-                    NetClientMethodsManager['\x73\x65\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x54\x6f\x4d\x61\x73\x74\x65\x72\x43\x61\x6c\x6c\x62\x61\x63\x6b'](_0x4f221e), this['\x73\x74\x61\x72\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e']();
-                else {
-                    var _0xb83e2c, _0x1520f4;
-                    !this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']() ? _0x24f3ee['\x70'](_0x179a08(0x1bc)) : (_0x1520f4 = _0x3f411a[_0x179a08(0x1d8)](), _0xb83e2c = function (..._0x1743b4) {
-                        var _0x48ba50 = _0x179a08;
-                        return _0x353074['\x70'](_0x48ba50(0x1cd) + _0x1520f4), _0x2d0187['\x61\x70\x70\x6c\x79'](this, _0x1743b4);
-                    }, _0x358b7c['\x70']('\x53\x65\x6e\x64\x2c\x20\x63\x61\x6c\x6c\x62\x61\x63\x6b\x3a\x20' + _0x1520f4), _0x257946[_0x179a08(0x1d3)](this['\x73\x6f\x63\x6b\x65\x74']['\x69\x64'])[_0x179a08(0x1af)](_0xb83e2c));
-                }
-            }, _0x324592[_0x3b4e39(0x199)] = function (_0x4d2235, _0x56d0f0 = ![]) {
-                var _0x4fdd64 = _0x3b4e39;
-                if (_0x4fdd64(0x1b4) === _0x4fdd64(0x1b4)) {
-                    if (!this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']()) {
-                        if (_0x4fdd64(0x1ee) !== _0x4fdd64(0x1ee))
-                            return {
-                                '\x69\x64': _0x1351cf['\x56\x44'][_0x4fdd64(0x1cc)](),
-                                '\x74\x69\x74\x6c\x65': _0x54bde5['\x67\x61\x6d\x65\x54\x69\x74\x6c\x65'],
-                                '\x76\x65\x72\x73\x69\x6f\x6e': _0x53696e[_0x4fdd64(0x1ce)]() ? 0x0 : 0x1,
-                                '\x6d\x61\x78\x50\x6c\x61\x79\x65\x72\x73': _0x23f102['\x50\x50'][_0x4fdd64(0x1f1)](),
-                                '\x6d\x6f\x64\x65': 0x0
-                            };
-                        else
-                            _0x1133d8['\x70']('\x59\x6f\x75\x20\x74\x72\x79\x20\x73\x65\x6e\x64\x20\x6d\x65\x73\x73\x61\x67\x65\x2c\x20\x62\x75\x74\x20\x4e\x4f\x54\x20\x63\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x21');
-                    } else
-                        !_0x56d0f0 && _0x1133d8['\x70'](_0x4fdd64(0x1b8) + _0x4d2235[_0x4fdd64(0x1d8)]()), _0x4d2235[_0x4fdd64(0x1d3)](this[_0x4fdd64(0x198)]['\x69\x64'])['\x73\x65\x6e\x64']();
-                } else {
-                    if (!this[_0x4fdd64(0x1f4)]())
-                        return;
-                    this['\x73\x65\x6e\x64'](_0x33fc56[_0x4fdd64(0x192)](_0x4fdd64(0x1c2)));
-                }
-            }, _0x324592[_0x3b4e39(0x1f2)] = function (_0x4f26bd, _0x13286f, _0x2ac5d3, _0x995820 = 0x7d0) {
-                var _0x1b32a0 = _0x3b4e39, _0x435e19, _0x15d5b7, _0x539751;
-                if (!this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']())
-                    '\x65\x6b\x6e\x72\x72' !== _0x1b32a0(0x19e) ? _0x338091['\x64\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74']() : _0x1133d8['\x70'](_0x1b32a0(0x1df));
-                else {
-                    if (_0x1b32a0(0x1ec) !== '\x77\x68\x6d\x74\x64')
-                        return;
-                    else
-                        _0x539751 = _0x4f26bd[_0x1b32a0(0x1d8)](), this[_0x1b32a0(0x1a0)](), HUIManager['\x73\x68\x6f\x77\x4c\x6f\x61\x64\x65\x72'](), _0x15d5b7 = function (..._0x19b6d9) {
-                            var _0x1d3b17 = _0x1b32a0;
-                            return _0x1133d8['\x70'](_0x1d3b17(0x1eb) + _0x539751), _0x2ac5d3 != null && _0x2ac5d3['\x61\x70\x70\x6c\x79'](this, _0x19b6d9), ANNetwork[_0x1d3b17(0x19a)](), HUIManager['\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72']();
-                        }, _0x435e19 = function (..._0xd45394) {
-                            var _0x1c468e = _0x1b32a0;
-                            return _0x1133d8['\x70'](_0x1c468e(0x1cb) + _0x539751), _0x13286f != null && _0x13286f['\x61\x70\x70\x6c\x79'](this, _0xd45394), ANNetwork['\x72\x65\x73\x65\x74\x57\x61\x69\x74'](), HUIManager[_0x1c468e(0x1e1)]();
-                        }, _0x1133d8['\x70']('\x53\x65\x6e\x64\x2c\x20\x67\x65\x74\x21\x3a\x20' + _0x539751), _0x4f26bd[_0x1b32a0(0x1d3)](this[_0x1b32a0(0x198)]['\x69\x64'])['\x67\x65\x74'](_0x435e19, _0x15d5b7, _0x995820);
-                }
-            }, _0x324592[_0x3b4e39(0x1af)] = function (_0x2fb992, _0x501348) {
-                var _0x342a49 = _0x3b4e39, _0x36a5a4, _0x193164;
-                if (!this[_0x342a49(0x1f4)]()) {
-                    if (_0x342a49(0x1ba) === _0x342a49(0x1ba))
-                        _0x1133d8['\x70'](_0x342a49(0x1bc));
-                    else
-                        return;
-                } else
-                    _0x193164 = _0x2fb992['\x66\x75\x6c\x6c\x4e\x61\x6d\x65'](), _0x36a5a4 = function (..._0x189546) {
-                        var _0x23ea41 = _0x342a49;
-                        return '\x74\x69\x74\x53\x5a' === _0x23ea41(0x1e2) ? (_0x1133d8['\x70']('\x43\x61\x6c\x6c\x62\x61\x63\x6b\x20\x66\x6f\x72\x3a\x20' + _0x193164), _0x501348['\x61\x70\x70\x6c\x79'](this, _0x189546)) : this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']() && this['\x5f\x69\x73\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72'] === !![];
-                    }, _0x1133d8['\x70'](_0x342a49(0x1b7) + _0x193164), _0x2fb992[_0x342a49(0x1d3)](this['\x73\x6f\x63\x6b\x65\x74']['\x69\x64'])[_0x342a49(0x1af)](_0x36a5a4);
-            }, _0x324592[_0x3b4e39(0x1f5)] = function (_0x47de57) {
-                var _0x4a4b12 = _0x3b4e39;
-                return this[_0x4a4b12(0x199)](NMS['\x54\x72\x61\x63\x65'](_0x47de57));
-            };
-    }()), (function () {
-        var _0x49c979 = _0x79c5a9;
-        if ('\x6a\x55\x64\x69\x65' === _0x49c979(0x1bf)) {
-            if (this['\x72\x6f\x6f\x6d'] == null)
-                return;
-            _0x3ec804[_0x49c979(0x193)](), this[_0x49c979(0x199)](_0x3d331c[_0x49c979(0x192)](_0x49c979(0x1ad), this['\x72\x6f\x6f\x6d']['\x6e\x61\x6d\x65']));
-        } else
-            return _0x324592[_0x49c979(0x1b3)] = function (_0x58143b) {
-                var _0x31a38c = _0x49c979;
-                return this[_0x31a38c(0x19c)] = _0x58143b, this[_0x31a38c(0x1e0)] = !![], _0x1133d8['\x70'](_0x31a38c(0x1c3) + this[_0x31a38c(0x19c)][_0x31a38c(0x1cf)]);
-            }, _0x324592[_0x49c979(0x1de)] = function (_0x4d9537) {
-                var _0x22b7cc = _0x49c979;
-                return this[_0x22b7cc(0x19c)] = _0x4d9537, this['\x5f\x69\x73\x48\x6f\x73\x74'] = ![], _0x1133d8['\x70']('\x59\x6f\x75\x20\x61\x72\x65\x20\x6a\x6f\x69\x6e\x65\x64\x20\x74\x6f\x20\x72\x6f\x6f\x6d\x3a\x20' + this['\x72\x6f\x6f\x6d']['\x6e\x61\x6d\x65']);
-            }, _0x324592[_0x49c979(0x1c5)] = function (_0x36275d) {
-                this['\x72\x6f\x6f\x6d'] = _0x36275d;
-            }, _0x324592[_0x49c979(0x1b9)] = function () {
-                var _0x189076 = _0x49c979;
-                if ('\x74\x4d\x45\x55\x42' === _0x189076(0x1be))
-                    return;
-                else {
-                    if (!this['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']()) {
-                        if (_0x189076(0x1a6) === _0x189076(0x1b0))
-                            _0x33a4c8['\x70'](_0x189076(0x1df));
-                        else
-                            return;
-                    }
-                    if (this[_0x189076(0x19c)] == null)
-                        return;
-                    this[_0x189076(0x1ad)](), this[_0x189076(0x1e0)] = ![], this[_0x189076(0x19c)] = null;
-                }
-            }, _0x324592[_0x49c979(0x1db)] = function () {
-                var _0xe87ebf = _0x49c979;
-                if (_0xe87ebf(0x196) === _0xe87ebf(0x1a1))
-                    _0x22c086['\x70'](_0xe87ebf(0x1bc));
-                else {
-                    if (!this[_0xe87ebf(0x18d)]()) {
-                        if ('\x4e\x64\x59\x65\x56' !== _0xe87ebf(0x1e6))
-                            return _0x2f7ee8['\x70']('\x52\x65\x73\x70\x6f\x6e\x73\x65\x20\x28\x67\x65\x74\x29\x20\x66\x6f\x72\x3a\x20' + _0x279f80), _0x2c1972 != null && _0x39db99[_0xe87ebf(0x19d)](this, _0x1f632d), _0x4904c7[_0xe87ebf(0x19a)](), _0x580d94['\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72']();
-                        else
-                            return;
-                    }
-                    if (this[_0xe87ebf(0x19c)] == null)
-                        return;
-                    this[_0xe87ebf(0x199)](NMS[_0xe87ebf(0x192)](_0xe87ebf(0x1db)));
-                }
-            }, _0x324592['\x6c\x65\x61\x76\x65\x52\x6f\x6f\x6d'] = function () {
-                var _0x4d2dcf = _0x49c979;
-                if (_0x4d2dcf(0x1d6) === '\x68\x41\x61\x61\x53')
-                    _0x34199e['\x70'](_0x4d2dcf(0x1b8) + _0x13a284[_0x4d2dcf(0x1d8)]());
-                else {
-                    if (this[_0x4d2dcf(0x19c)] == null)
-                        return;
-                    ANGameManager['\x6f\x6e\x4c\x65\x61\x76\x65\x52\x6f\x6f\x6d'](), this[_0x4d2dcf(0x199)](NMS['\x4c\x6f\x62\x62\x79']('\x6c\x65\x61\x76\x65\x52\x6f\x6f\x6d', this[_0x4d2dcf(0x19c)][_0x4d2dcf(0x1cf)]));
-                }
-            }, _0x324592[_0x49c979(0x1ea)] = function () {
-                var _0x41bad8 = _0x49c979;
-                if (!this[_0x41bad8(0x1f4)]())
-                    return;
-                this['\x73\x65\x6e\x64'](NMS[_0x41bad8(0x192)](_0x41bad8(0x1c2)));
-            };
-    }()), _0x324592['\x67\x65\x74\x4e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65\x49\x6e\x66\x6f\x44\x61\x74\x61'] = function () {
-        var _0x52c73f = _0x79c5a9;
-        return {
-            '\x69\x64': ANET['\x56\x44'][_0x52c73f(0x1cc)](),
-            '\x74\x69\x74\x6c\x65': $dataSystem['\x67\x61\x6d\x65\x54\x69\x74\x6c\x65'],
-            '\x76\x65\x72\x73\x69\x6f\x6e': KDCore[_0x52c73f(0x1ce)]() ? 0x0 : 0x1,
-            '\x6d\x61\x78\x50\x6c\x61\x79\x65\x72\x73': ANET['\x50\x50'][_0x52c73f(0x1f1)](),
-            '\x6d\x6f\x64\x65': 0x0
-        };
+  };
+  // * Надо ждать сеть
+  _.isBusy = function() {
+    return this.isConnected() && (this.isWaitServer() || ANGameManager.isShouldWaitServer());
+  };
+  // * Ждёт ответ от сервера
+  _.isWaitServer = function() {
+    return this.isConnected() && this._isWaitServer === true;
+  };
+  // * Включить вручную ожидание сервера
+  _.setWait = function() {
+    return this._isWaitServer = true;
+  };
+  // * Отключть вручную ожидание сервера
+  _.resetWait = function() {
+    return this._isWaitServer = false;
+  };
+  (function() {    // * MAIN NETWORK ====================================================
+    _.initSystem = function() {
+      this.socket = null;
+      this.client = null;
+      this.resetWait();
+      this._isHost = false; // * Мастер клиент?
+      "Network inited".p();
     };
-}()));
+    _.stop = function() {
+      var ref;
+      NetClientMethodsManager.setConnectionToMasterCallback(null);
+      if ((ref = this.client) != null) {
+        ref.disconnect();
+      }
+      this.resetWait();
+      this.socket = null;
+      ANGameManager.reset();
+    };
+    _.startConnection = function() {
+      var adr, ip, options, port, protocol;
+      ip = ANET.PP.serverIp();
+      port = ANET.PP.serverPort();
+      // * SSL (https) connection
+      if (ANET.PP.isHTTPSConnection() === true) {
+        console.log("Using HTTPS secure connection");
+        protocol = "https://";
+        options = {
+          secure: true,
+          reconnect: true,
+          rejectUnauthorized: false
+        };
+        // * Возможно пользователь не внимателен и не указал порт 3035 при HTTP опции
+        if (port === "3034" && (ip === "anetzglobal.ru" || "195.161.41.20")) {
+          console.warn("You try connect via HTTPS connection with port 3034 (http)");
+          console.warn("Port changed to 3035. Check Connection plugin parameter");
+          port = 3035;
+        }
+      } else {
+        protocol = "http://";
+        options = {};
+      }
+      adr = protocol + ip + ":" + port;
+      console.log("Connect to " + adr);
+      this.socket = io(adr, options);
+      this.client = new NetworkClientHandler(this.socket);
+    };
+    _.setConnection = function(callback) {
+      NetClientMethodsManager.setConnectionToMasterCallback(callback);
+      this.startConnection();
+    };
+    // * Просто отправить данные на сервер
+    _.send = function(msg, noLog = false) {
+      if (!this.isConnected()) {
+        LOG.p("You try send message, but NOT connection!");
+      } else {
+        if (ANET.isShowExtOutput()) {
+          if (!noLog) {
+            LOG.p("Send: " + msg.fullName());
+          }
+        }
+        msg.setFrom(this.socket.id).send();
+      }
+    };
+    // * Отправить сообщение и ждать! результат (есть Timeout)
+    // * (тут данные должен обратно отправить именно сам сервер)
+    _.get = function(msg, onData, onTimeout, timeoutTime = 2000) {
+      var _onData, _onTimeout, msgName;
+      if (!this.isConnected()) {
+        LOG.p("You try get data from Server, but NOT connection!");
+      } else {
+        msgName = msg.fullName();
+        // * Ставим игру на паузу
+        this.setWait();
+        HUIManager.showLoader();
+        // * Дополняем callbacks, чтобы снять игру автоматически с паузы
+        _onTimeout = function(...args) {
+          LOG.p("Timeout for: " + msgName);
+          if (onTimeout != null) {
+            onTimeout.apply(this, args);
+          }
+          ANNetwork.resetWait();
+          return HUIManager.hideLoader();
+        };
+        _onData = function(...args) {
+          if (ANET.isShowExtOutput()) {
+            LOG.p("Response (get) for: " + msgName);
+          }
+          if (onData != null) {
+            onData.apply(this, args);
+          }
+          ANNetwork.resetWait();
+          return HUIManager.hideLoader();
+        };
+        if (ANET.isShowExtOutput()) {
+          LOG.p("Send, get!: " + msgName);
+        }
+        msg.setFrom(this.socket.id).get(_onData, _onTimeout, timeoutTime);
+      }
+    };
+    // * Отправить сообщение и вызвать callback, когда прийдёт ответ
+    _.callback = function(msg, method) {
+      var _method, msgName;
+      if (!this.isConnected()) {
+        LOG.p("You try send callback message, but NOT connection!");
+      } else {
+        msgName = msg.fullName();
+        _method = function(...args) {
+          if (ANET.isShowExtOutput()) {
+            LOG.p("Callback for: " + msgName);
+          }
+          return method.apply(this, args);
+        };
+        if (ANET.isShowExtOutput()) {
+          LOG.p("Send, callback: " + msgName);
+        }
+        msg.setFrom(this.socket.id).callback(_method);
+      }
+    };
+    return _.trace = function(text) {
+      return this.send(NMS.Trace(text));
+    };
+  })();
+  (function() {    // * ROOMS ======================================================
+    // * Этот метод вызывается когда создаём комнату
+    _.setRoomMaster = function(room) {
+      this.room = room;
+      this._isHost = true;
+      return LOG.p("You are Master (host) of room: " + this.room.name);
+    };
+    //TODO: установить флаг в NetMessage? что типо теперь send.to
+
+    // * Когда подключаемся к комнате
+    _.setRoomJoin = function(room) {
+      this.room = room;
+      this._isHost = false;
+      return LOG.p("You are joined to room: " + this.room.name);
+    };
+    //TODO: установить флаг в NetMessage? что типо теперь send.to
+
+    // * Обновить данные команты (к которой подключён)
+    _.onRoomDataFromServer = function(room) {
+      this.room = room;
+    };
+    // * Комната была закрыта
+    _.onRoomClosed = function() {
+      if (!this.isConnected()) {
+        return;
+      }
+      if (this.room == null) {
+        return;
+      }
+      this.leaveRoom();
+      this._isHost = false;
+      this.room = null;
+    };
+    // * Закрыть комнату (созданную этим клиентом)
+    _.closeRoom = function() {
+      if (!this.isMasterClient()) {
+        return;
+      }
+      if (this.room == null) {
+        return;
+      }
+      this.send(NMS.Lobby("closeRoom"));
+    };
+    // * Покинуть комнату (к которой этот клиент подключился)
+    _.leaveRoom = function() {
+      if (this.room == null) {
+        return;
+      }
+      ANGameManager.onLeaveRoom();
+      this.send(NMS.Lobby("leaveRoom", this.room.name));
+    };
+    
+    // * Запросить данные о игроках в комнате
+    return _.requestRoomRefresh = function() {
+      if (!this.isConnected()) {
+        return;
+      }
+      this.send(NMS.Lobby("getRoomData"));
+    };
+  })();
+  // * HELPERS ====================================================
+
+  // * Получить общие данные о игре для сети (комнаты)
+  // * (используется при создании комнаты)
+  _.getNetworkGameInfoData = function() {
+    return {
+      id: ANET.VD.getGameVersion(),
+      title: $dataSystem.gameTitle,
+      version: KDCore.isMZ() ? 0 : 1,
+      maxPlayers: ANET.PP.maxPlayersInRoom(),
+      mode: 0 //TODO: Deprecated
+    };
+  };
+})();
+
 
 // Generated by CoffeeScript 2.6.1
 // * Глабольный менеджер с основными методами системы
@@ -8987,37 +16171,22 @@ ANET.System = function() {};
     //TODO: * Лог свой для сообщений версий
     _.initSystem = function() {
       "INIT ANET SYSTEM".p();
-      this.registerGEvents();
       this.loadParameters();
       this.applyParameters();
       ANET.loadPluginCommands();
       ANET.loadExtensions(); // 1_ANExtensions.coffee
       HUIManager.init();
     };
-    // * Регистрация всех глобальных событий
-    _.registerGEvents = function() {
-      var i, item, len, list;
-      list = ['netzRefreshNameplate'];
-      for (i = 0, len = list.length; i < len; i++) {
-        item = list[i];
-        KDCore.GEventsManager.register(item);
-      }
-    };
     _.loadParameters = function() {
       return ANET.PP = new ANET.ParamsManager();
     };
     _.applyParameters = function() {};
-    //TODO: Например конфигурация классов (dinamyc методов)
-
-    // * Очищает из памяти все события которые существуют только на карте
-    _.clearSceneMapGEvents = function() {
-      return KDCore.GEventsManager.clear('netzRefreshNameplate');
-    };
   })();
   // -----------------------------------------------------------------------
 
   // * Все эти команды нельзя запускать через опции (виртуально), но
   // * их теоретически можно вызывать через общее событие у другого игрока
+  //TODO: Например конфигурация классов (dinamyc методов)
   _.ForbiddenVirtualCommandsList = [
     // * Message
     101,
@@ -9134,565 +16303,435 @@ ANET.VD = function() {};
 //---------------------------------------------------------------------------
 
 
-function _0x36f1(_0x520dab, _0x12176a) {
-    var _0x274820 = _0x2748();
-    return _0x36f1 = function (_0x36f10c, _0x4767e5) {
-        _0x36f10c = _0x36f10c - 0xad;
-        var _0xb65126 = _0x274820[_0x36f10c];
-        return _0xb65126;
-    }, _0x36f1(_0x520dab, _0x12176a);
-}
-(function (_0xc5fa57, _0x541924) {
-    var _0x5265c2 = _0x36f1, _0x325b07 = _0xc5fa57();
-    while (!![]) {
-        try {
-            var _0x17a0b4 = -parseInt(_0x5265c2(0xed)) / 0x1 * (parseInt(_0x5265c2(0x104)) / 0x2) + -parseInt(_0x5265c2(0x138)) / 0x3 + -parseInt(_0x5265c2(0xc7)) / 0x4 + parseInt(_0x5265c2(0x12c)) / 0x5 + parseInt(_0x5265c2(0xaf)) / 0x6 + parseInt(_0x5265c2(0x106)) / 0x7 * (-parseInt(_0x5265c2(0xfd)) / 0x8) + parseInt(_0x5265c2(0x130)) / 0x9 * (parseInt(_0x5265c2(0xe9)) / 0xa);
-            if (_0x17a0b4 === _0x541924)
-                break;
-            else
-                _0x325b07['push'](_0x325b07['shift']());
-        } catch (_0x25a1cd) {
-            _0x325b07['push'](_0x325b07['shift']());
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за HTML элементы пользовательского интерфейса на сценах
+
+//https://github.com/caroso1222/notyf
+
+//TODO: load material icons? make more notifies (info, warning?)
+
+//<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+//$[ENCODE]
+window.HUIManager = function() {};
+
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = window.HUIManager;
+  _.init = function() {
+    this._isMouseHoverHtmlElement = false;
+    this._loadCSS();
+    this._createRelativeParent();
+    this._createLoadSpinner();
+    this._createNotify();
+    // * Отключаем контекстное меню у новых элементов
+    Graphics._disableContextMenu();
+  };
+  _.isUnderMouse = function() {
+    return this._isMouseHoverHtmlElement === true;
+  };
+  // * Когда происходит смена сцены в игре
+  // * (надо убирать лишние элементы, которые не могут переходить на другую сцену)
+  _.onGameSceneChanged = function() {
+    return this.hideWaitingInfo();
+  };
+  _.showLoader = function(delay = 200) {
+    var e;
+    try {
+      if (this.isLoaderActive()) {
+        return;
+      }
+      this._loaderThread = setTimeout((function() {
+        if (!document.getElementById("anetLoader")) {
+          return document.body.appendChild(HUIManager._loader);
         }
+      }), delay);
+    } catch (error) {
+      e = error;
+      console.warn(e);
     }
-}(_0x2748, 0x6fb3e), window['\x48\x55\x49\x4d\x61\x6e\x61\x67\x65\x72'] = function () {
-}, (function () {
-    var _0x5634f9 = _0x36f1, _0x114e35;
-    _0x114e35 = window[_0x5634f9(0x117)], _0x114e35[_0x5634f9(0xf3)] = function () {
-        var _0x125986 = _0x5634f9;
-        if (_0x125986(0x13f) !== _0x125986(0xd9))
-            this['\x5f\x69\x73\x4d\x6f\x75\x73\x65\x48\x6f\x76\x65\x72\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74'] = ![], this[_0x125986(0xe4)](), this[_0x125986(0x10c)](), this[_0x125986(0x135)](), this[_0x125986(0xb3)](), Graphics[_0x125986(0xd5)]();
-        else
-            return;
-    }, _0x114e35[_0x5634f9(0x11b)] = function () {
-        var _0x24e4cd = _0x5634f9;
-        return _0x24e4cd(0x133) !== _0x24e4cd(0x118) ? this[_0x24e4cd(0x13a)] === !![] : (_0x1de9e2 = _0x54a289, _0x154116['\x77'](_0x24fc78));
-    }, _0x114e35['\x6f\x6e\x47\x61\x6d\x65\x53\x63\x65\x6e\x65\x43\x68\x61\x6e\x67\x65\x64'] = function () {
-        var _0x158430 = _0x5634f9;
-        if (_0x158430(0x129) === _0x158430(0xc3))
-            _0xec5bbe = _0x1f6883, _0x18211c[_0x158430(0xc0)](_0x25f4f6);
-        else
-            return this['\x68\x69\x64\x65\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f']();
-    }, _0x114e35[_0x5634f9(0x127)] = function (_0x1e7e66 = 0xc8) {
-        var _0x4d8861 = _0x5634f9, _0x2cac15;
-        try {
-            if (this[_0x4d8861(0xe5)]()) {
-                if (_0x4d8861(0xc6) !== _0x4d8861(0xc6)) {
-                    if (this['\x5f\x72\x43\x68\x61\x74'] == null)
-                        return;
-                    return (_0x506f7b = this[_0x4d8861(0x10a)]) != null ? _0x14cbd8[_0x4d8861(0x121)]() : void 0x0;
-                } else
-                    return;
-            }
-            this[_0x4d8861(0xbb)] = setTimeout(function () {
-                var _0x199427 = _0x4d8861;
-                if (!document[_0x199427(0xb9)](_0x199427(0xb5)))
-                    return document['\x62\x6f\x64\x79'][_0x199427(0xd4)](HUIManager['\x5f\x6c\x6f\x61\x64\x65\x72']);
-            }, _0x1e7e66);
-        } catch (_0x30aaee) {
-            if (_0x4d8861(0x110) !== _0x4d8861(0x145))
-                _0x2cac15 = _0x30aaee, console['\x77\x61\x72\x6e'](_0x2cac15);
-            else {
-                if (_0x56aa0b['\x6b\x65\x79\x43\x6f\x64\x65'] === 0x5a || _0x3d8ee6[_0x4d8861(0x141)] === 0x58 || _0x322973[_0x4d8861(0x141)] === 0x20) {
-                    this[_0x4d8861(0xfe)]();
-                    return;
-                }
-            }
-        }
-    }, _0x114e35[_0x5634f9(0xe6)] = function () {
-        var _0x5e9c20 = _0x5634f9, _0xff39e7;
-        try {
-            if (_0x5e9c20(0xe1) !== _0x5e9c20(0xc2)) {
-                if (!this[_0x5e9c20(0xe5)]())
-                    return;
-                clearTimeout(this['\x5f\x6c\x6f\x61\x64\x65\x72\x54\x68\x72\x65\x61\x64']), this[_0x5e9c20(0xbb)] = null, document[_0x5e9c20(0xb9)](_0x5e9c20(0xb5)) && document[_0x5e9c20(0xe7)][_0x5e9c20(0xf7)](this[_0x5e9c20(0x134)]);
-            } else
-                _0x2b85df['\x66\x6f\x63\x75\x73']();
-        } catch (_0x37cc27) {
-            _0xff39e7 = _0x37cc27, console[_0x5e9c20(0x113)](_0xff39e7);
-        }
-    }, _0x114e35[_0x5634f9(0xe5)] = function () {
-        return this['\x5f\x6c\x6f\x61\x64\x65\x72\x54\x68\x72\x65\x61\x64'] != null;
-    }, _0x114e35['\x73\x68\x6f\x77\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f'] = function (_0x22d551, _0x2963b3, _0x1155e7 = 0xc8) {
-        var _0x29baac = _0x5634f9, _0x2d0f97;
-        try {
-            if (this[_0x29baac(0xd1)]()) {
-                if (_0x29baac(0xad) === _0x29baac(0xcf))
-                    return _0x2019f5[_0x29baac(0x13a)] = !![];
-                else
-                    return;
-            }
-            this[_0x29baac(0xbc)] = setTimeout(function () {
-                return HUIManager['\x5f\x63\x72\x65\x61\x74\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x41\x6c\x65\x72\x74'](_0x22d551, _0x2963b3);
-            }, _0x1155e7);
-        } catch (_0x50e2bc) {
-            if ('\x45\x4c\x74\x47\x4b' !== _0x29baac(0x12b)) {
-                var _0x1981ed;
-                if (this[_0x29baac(0x122)] == null)
-                    return;
-                (_0x1981ed = _0x128155[_0x29baac(0xb9)](_0x29baac(0x12a))) != null && _0x1981ed['\x66\x6f\x63\x75\x73']();
-            } else
-                _0x2d0f97 = _0x50e2bc, console[_0x29baac(0xc0)](_0x2d0f97);
-        }
-    }, _0x114e35[_0x5634f9(0xb6)] = function () {
-        var _0x571485 = _0x5634f9, _0x4860b0;
-        try {
-            if (!this[_0x571485(0xd1)]()) {
-                if (_0x571485(0xbd) === _0x571485(0xbd))
-                    return;
-                else
-                    return _0x598431[_0x571485(0xe7)]['\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64'](_0x90ae04[_0x571485(0x134)]);
-            }
-            clearTimeout(this[_0x571485(0xbc)]), this[_0x571485(0xbc)] = null, this[_0x571485(0x120)] != null && (document[_0x571485(0xb9)]('\x61\x6e\x65\x74\x43\x61\x6e\x76\x61\x73\x45\x6c\x65\x6d\x65\x6e\x74\x73')[_0x571485(0xf7)](this[_0x571485(0x120)]), this['\x5f\x77\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73'] = null);
-        } catch (_0x218701) {
-            if ('\x62\x79\x4e\x43\x4c' !== _0x571485(0x13c))
-                return this[_0x571485(0xf5)][_0x571485(0x111)](_0x25ef42);
-            else
-                _0x4860b0 = _0x218701, console[_0x571485(0xc0)](_0x4860b0);
-        }
-    }, _0x114e35[_0x5634f9(0xd1)] = function () {
-        var _0x348dd2 = _0x5634f9;
-        return this[_0x348dd2(0xbc)] != null;
-    }, _0x114e35[_0x5634f9(0xf2)] = function (_0x1550db) {
-        var _0x16aa8c = _0x5634f9, _0x11a23a;
-        try {
-            return this[_0x16aa8c(0xf5)][_0x16aa8c(0x111)](_0x1550db);
-        } catch (_0x2b6372) {
-            return _0x11a23a = _0x2b6372, console['\x77\x61\x72\x6e'](_0x11a23a);
-        }
-    }, _0x114e35['\x6e\x6f\x74\x69\x66\x79\x53\x75\x63\x65\x73\x73'] = function (_0x475a60) {
-        var _0x4e56d2 = _0x5634f9, _0x10b126;
-        try {
-            return this['\x5f\x6e\x6f\x74\x69\x66\x79'][_0x4e56d2(0x108)](_0x475a60);
-        } catch (_0xbf1f79) {
-            return _0x10b126 = _0xbf1f79, console[_0x4e56d2(0xc0)](_0x10b126);
-        }
-    }, _0x114e35[_0x5634f9(0x116)] = function () {
-        return this['\x5f\x69\x6e\x70\x75\x74'] != null;
-    }, _0x114e35[_0x5634f9(0xcd)] = function (_0xae80de, _0x125fed) {
-        var _0xfe1704 = _0x5634f9;
-        if (this['\x5f\x69\x6e\x70\x75\x74'] != null) {
-            if (_0xfe1704(0x13d) !== '\x4f\x7a\x78\x77\x6d')
-                this[_0xfe1704(0x112)]();
-            else {
-                var _0x255af5;
-                _0x255af5 = _0xfe1704(0x12f), this[_0xfe1704(0x128)] = _0xa31378[_0xfe1704(0x10e)](_0xfe1704(0x103)), this[_0xfe1704(0x128)]['\x69\x64'] = '\x61\x6e\x65\x74\x52\x6f\x6f\x6d\x43\x68\x61\x74', this[_0xfe1704(0x128)]['\x63\x6c\x61\x73\x73\x4c\x69\x73\x74'][_0xfe1704(0xde)](_0xfe1704(0xd2)), this['\x5f\x72\x43\x68\x61\x74'][_0xfe1704(0x10d)](_0xfe1704(0xb4), function () {
-                    return _0x2dfe5c['\x5f\x69\x73\x4d\x6f\x75\x73\x65\x48\x6f\x76\x65\x72\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74'] = !![];
-                }), this['\x5f\x72\x43\x68\x61\x74'][_0xfe1704(0x10d)]('\x6d\x6f\x75\x73\x65\x6c\x65\x61\x76\x65', function () {
-                    return _0xe0c9f1['\x5f\x69\x73\x4d\x6f\x75\x73\x65\x48\x6f\x76\x65\x72\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74'] = ![];
-                }), this[_0xfe1704(0x128)][_0xfe1704(0xee)](_0xfe1704(0x115), _0x255af5), this[_0xfe1704(0x128)][_0xfe1704(0x13b)] = ![], this[_0xfe1704(0xd7)][_0xfe1704(0xd4)](this[_0xfe1704(0x128)]);
-            }
-        }
-        this['\x5f\x63\x72\x65\x61\x74\x65\x49\x6e\x70\x75\x74\x46\x69\x65\x6c\x64'](_0xae80de, _0x125fed);
-    }, _0x114e35[_0x5634f9(0x112)] = function () {
-        var _0x3c85c8 = _0x5634f9;
-        if (_0x3c85c8(0x114) !== _0x3c85c8(0x144)) {
-            var _0x28811a, _0x230f78;
-            if (this[_0x3c85c8(0x122)] == null)
-                return;
-            HUIManager[_0x3c85c8(0x13a)] = ![];
-            try {
-                if (_0x3c85c8(0xc4) !== _0x3c85c8(0xc4))
-                    return _0x397935[_0x3c85c8(0xda)](_0x2eeefa, _0x373d7f);
-                else
-                    _0x230f78 = document[_0x3c85c8(0xb9)](_0x3c85c8(0xdc)), this[_0x3c85c8(0x122)][_0x3c85c8(0x102)][_0x3c85c8(0x123)] = _0x3c85c8(0x119), this[_0x3c85c8(0x122)]['\x70\x61\x72\x65\x6e\x74\x4e\x6f\x64\x65'] != null && this[_0x3c85c8(0x122)]['\x70\x61\x72\x65\x6e\x74\x4e\x6f\x64\x65'][_0x3c85c8(0xf7)](this['\x5f\x69\x6e\x70\x75\x74']);
-            } catch (_0x5d6703) {
-                '\x69\x76\x58\x50\x4a' !== _0x3c85c8(0xef) ? (_0x4db122 = _0x494da5, _0x4b416b[_0x3c85c8(0xc0)](_0xcfc44c)) : (_0x28811a = _0x5d6703, ANET['\x77'](_0x28811a));
-            }
-            this[_0x3c85c8(0x122)] = null;
-        } else {
-            var _0x3cdd9b;
-            if (this[_0x3c85c8(0x122)] == null)
-                return;
-            (_0x3cdd9b = _0x2eb5ce[_0x3c85c8(0xb9)]('\x61\x6e\x65\x74\x49\x6e\x70\x75\x74\x4e\x61\x6d\x65')) != null && (_0x3cdd9b['\x76\x61\x6c\x75\x65'] = _0x31f95a);
-        }
-    }, _0x114e35[_0x5634f9(0xdf)] = function () {
-        var _0x170346 = _0x5634f9, _0x3e49ae;
-        if (this[_0x170346(0x122)] == null)
-            return;
-        if ((_0x3e49ae = document[_0x170346(0xb9)](_0x170346(0x12a))) != null) {
-            if ('\x50\x47\x50\x63\x6e' !== _0x170346(0xc8))
-                return this[_0x170346(0xbb)] != null;
-            else
-                _0x3e49ae[_0x170346(0xec)]();
-        }
-    }, _0x114e35[_0x5634f9(0xf6)] = function () {
-        var _0x53e5e4 = _0x5634f9;
-        if (_0x53e5e4(0xae) !== _0x53e5e4(0x10b)) {
-            var _0x304850;
-            if (this[_0x53e5e4(0x122)] == null) {
-                if (_0x53e5e4(0x12e) === _0x53e5e4(0x12e))
-                    return '';
-                else {
-                    if (!this[_0x53e5e4(0xe5)]())
-                        return;
-                    _0x265d4b(this[_0x53e5e4(0xbb)]), this[_0x53e5e4(0xbb)] = null, _0x290162['\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64'](_0x53e5e4(0xb5)) && _0x3f361e['\x62\x6f\x64\x79'][_0x53e5e4(0xf7)](this[_0x53e5e4(0x134)]);
-                }
-            }
-            return (_0x304850 = document[_0x53e5e4(0xb9)](_0x53e5e4(0x12a))) != null ? _0x304850['\x76\x61\x6c\x75\x65'] : void 0x0;
-        } else
-            return '';
-    }, _0x114e35['\x73\x65\x74\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65'] = function (_0x783f3) {
-        var _0x247165 = _0x5634f9;
-        if (_0x247165(0xbf) !== _0x247165(0xbf))
-            _0x1f165c = _0x5c1de8, _0x31a38d['\x77\x61\x72\x6e'](_0x15acb5);
-        else {
-            var _0x3e2d3a;
-            if (this['\x5f\x69\x6e\x70\x75\x74'] == null) {
-                if (_0x247165(0xd8) !== _0x247165(0xd8))
-                    this[_0x247165(0xe2)](), this[_0x247165(0x10a)] = new _0x1681d5();
-                else
-                    return;
-            }
-            (_0x3e2d3a = document[_0x247165(0xb9)](_0x247165(0x12a))) != null && (_0x3e2d3a['\x76\x61\x6c\x75\x65'] = _0x783f3);
-        }
-    }, _0x114e35[_0x5634f9(0xc9)] = function () {
-        var _0x879d75 = _0x5634f9;
-        if (this[_0x879d75(0xd7)] == null) {
-            if (_0x879d75(0xc5) !== '\x75\x58\x49\x62\x58')
-                return _0x3e6114[_0x879d75(0x13a)] = ![];
-            else
-                return;
-        }
-        Graphics[_0x879d75(0xba)](this[_0x879d75(0xd7)]), this[_0x879d75(0xd7)][_0x879d75(0x102)]['\x7a\x49\x6e\x64\x65\x78'] = 0x4, this[_0x879d75(0xd7)][_0x879d75(0x102)][_0x879d75(0x126)] = Graphics['\x5f\x63\x61\x6e\x76\x61\x73'][_0x879d75(0x102)][_0x879d75(0x126)], this['\x5f\x63\x61\x6e\x76\x61\x73\x52\x65\x6c\x61\x74\x69\x76\x65\x45\x6c\x65\x6d\x65\x6e\x74\x73'][_0x879d75(0x102)][_0x879d75(0x11c)] = Graphics[_0x879d75(0x124)]['\x73\x74\x79\x6c\x65'][_0x879d75(0x11c)];
-    }, _0x114e35[_0x5634f9(0x143)] = function (_0x5b4403) {
-        var _0x402712 = _0x5634f9, _0x1f360b;
-        try {
-            if (!ANET['\x50\x50'][_0x402712(0xdb)]()) {
-                if ('\x6e\x43\x50\x51\x73' !== _0x402712(0x149)) {
-                    if (_0x35845a['\x69\x73\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x76\x65']()) {
-                        if (_0x105671['\x6b\x65\x79\x43\x6f\x64\x65'] === 0x5a || _0x5a8934['\x6b\x65\x79\x43\x6f\x64\x65'] === 0x58 || _0x4868fd[_0x402712(0x141)] === 0x20) {
-                            this[_0x402712(0xfe)]();
-                            return;
-                        }
-                    }
-                    return _0x5c2089[_0x402712(0x11a)](this, _0x294a21);
-                } else
-                    return;
-            }
-            return this['\x5f\x63\x68\x61\x74'] != null ? this[_0x402712(0x10a)][_0x402712(0xea)](_0x5b4403) : _0x402712(0x140) !== '\x65\x58\x47\x6f\x50' ? (_0x1c4cd9 = _0x5500ab, _0x1dceda['\x77'](_0x2a2548)) : NETLobbyChat[_0x402712(0x109)](_0x5b4403);
-        } catch (_0x487e3a) {
-            return _0x1f360b = _0x487e3a, ANET['\x77'](_0x1f360b);
-        }
-    }, _0x114e35['\x6c\x6f\x62\x62\x79\x43\x68\x61\x74\x53\x65\x6e\x64\x4d\x65\x73\x73\x61\x67\x65\x42\x75\x74\x74\x6f\x6e\x43\x6c\x69\x63\x6b'] = function () {
-        var _0x8cbfc9 = _0x5634f9, _0x1cafdb, _0x1ed7ac;
-        try {
-            if (_0x8cbfc9(0x105) !== '\x65\x74\x4e\x63\x71')
-                return _0x45c06a[_0x8cbfc9(0x11a)](this);
-            else {
-                if (this[_0x8cbfc9(0x128)] == null) {
-                    if (_0x8cbfc9(0xc1) === '\x68\x4b\x64\x72\x48')
-                        return;
-                    else
-                        return this[_0x8cbfc9(0xbc)] != null;
-                }
-                return (_0x1ed7ac = this[_0x8cbfc9(0x10a)]) != null ? _0x1ed7ac[_0x8cbfc9(0x121)]() : void 0x0;
-            }
-        } catch (_0x7dbf30) {
-            return _0x1cafdb = _0x7dbf30, ANET['\x77'](_0x1cafdb);
-        }
-    }, _0x114e35[_0x5634f9(0x132)] = function () {
-        var _0x34ce92 = _0x5634f9;
-        this[_0x34ce92(0xe2)](), this[_0x34ce92(0x10a)] = new NETLobbyChat();
-    }, _0x114e35['\x72\x65\x6d\x6f\x76\x65\x4c\x6f\x62\x62\x79\x43\x68\x61\x74'] = function () {
-        var _0x586250 = _0x5634f9;
-        if (_0x586250(0x125) === _0x586250(0x125)) {
-            var _0x1e40b7, _0x7e8e26;
-            try {
-                if (this[_0x586250(0x128)] == null)
-                    return;
-                return _0x7e8e26 = document[_0x586250(0xb9)](_0x586250(0xdc)), this['\x5f\x72\x43\x68\x61\x74']['\x73\x74\x79\x6c\x65']['\x64\x69\x73\x70\x6c\x61\x79'] = _0x586250(0x119), this[_0x586250(0x128)][_0x586250(0xe8)] != null && this[_0x586250(0x128)]['\x70\x61\x72\x65\x6e\x74\x4e\x6f\x64\x65'][_0x586250(0xf7)](this[_0x586250(0x128)]), this[_0x586250(0x128)] = null, this[_0x586250(0x10a)] = null;
-            } catch (_0x2dde9f) {
-                return _0x1e40b7 = _0x2dde9f, ANET['\x77'](_0x1e40b7);
-            }
-        } else
-            _0x50539b = _0x136f3b, _0x3e295c['\x77'](_0x2746f9);
-    }, _0x114e35[_0x5634f9(0xe4)] = function () {
-        var _0x9e8787 = _0x5634f9, _0x373ee4;
-        _0x373ee4 = document[_0x9e8787(0x148)](_0x9e8787(0xe3))[0x0], _0x373ee4[_0x9e8787(0xee)]('\x62\x65\x66\x6f\x72\x65\x65\x6e\x64', _0x9e8787(0x139)), _0x373ee4[_0x9e8787(0xee)](_0x9e8787(0x115), _0x9e8787(0xfb));
-    }, _0x114e35['\x5f\x63\x72\x65\x61\x74\x65\x4c\x6f\x61\x64\x53\x70\x69\x6e\x6e\x65\x72'] = function () {
-        var _0x365456 = _0x5634f9;
-        this[_0x365456(0x134)] = document[_0x365456(0x10e)](_0x365456(0x103)), this[_0x365456(0x134)]['\x69\x64'] = _0x365456(0xb5), this[_0x365456(0xbb)] = null;
-    }, _0x114e35['\x5f\x63\x72\x65\x61\x74\x65\x4e\x6f\x74\x69\x66\x79'] = function () {
-        var _0x1015de = _0x5634f9;
-        if (_0x1015de(0xce) !== '\x52\x55\x50\x78\x4a')
-            this['\x5f\x6e\x6f\x74\x69\x66\x79'] = new Notyf({
-                '\x64\x75\x72\x61\x74\x69\x6f\x6e': 0x578,
-                '\x70\x6f\x73\x69\x74\x69\x6f\x6e': {
-                    '\x78': '\x63\x65\x6e\x74\x65\x72',
-                    '\x79': _0x1015de(0xb7)
-                },
-                '\x72\x69\x70\x70\x6c\x65': ![]
-            });
-        else {
-            this[_0x1015de(0xfe)]();
-            return;
-        }
-    }, _0x114e35['\x5f\x63\x72\x65\x61\x74\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x41\x6c\x65\x72\x74'] = function (_0x500bae, _0x3fa26b) {
-        var _0x5be41d = _0x5634f9;
-        if ('\x62\x6d\x4c\x77\x42' !== _0x5be41d(0x10f))
-            return this[_0x5be41d(0x13a)] === !![];
-        else {
-            var _0x1110e6;
-            this['\x5f\x77\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73'] = document[_0x5be41d(0x10e)](_0x5be41d(0xcb)), this[_0x5be41d(0x120)]['\x69\x64'] = _0x5be41d(0xb0), this[_0x5be41d(0x120)]['\x63\x6c\x61\x73\x73\x4c\x69\x73\x74'][_0x5be41d(0xde)]('\x73\x70\x65\x65\x63\x68\x2d\x62\x75\x62\x62\x6c\x65'), _0x1110e6 = _0x5be41d(0xd3) + _0x500bae + _0x5be41d(0x11f) + _0x5be41d(0xcc) + _0x3fa26b + _0x5be41d(0x147), this[_0x5be41d(0x120)][_0x5be41d(0xee)](_0x5be41d(0x115), _0x1110e6), this[_0x5be41d(0xd7)][_0x5be41d(0xd4)](this[_0x5be41d(0x120)]);
-        }
-    }, _0x114e35[_0x5634f9(0x10c)] = function () {
-        var _0x1d95ec = _0x5634f9;
-        this[_0x1d95ec(0xd7)] = document['\x63\x72\x65\x61\x74\x65\x45\x6c\x65\x6d\x65\x6e\x74'](_0x1d95ec(0x103)), this['\x5f\x63\x61\x6e\x76\x61\x73\x52\x65\x6c\x61\x74\x69\x76\x65\x45\x6c\x65\x6d\x65\x6e\x74\x73']['\x69\x64'] = '\x61\x6e\x65\x74\x43\x61\x6e\x76\x61\x73\x45\x6c\x65\x6d\x65\x6e\x74\x73', this[_0x1d95ec(0xd7)][_0x1d95ec(0x102)][_0x1d95ec(0xf1)] = 0x4, this['\x75\x70\x64\x61\x74\x65\x43\x61\x6e\x76\x61\x73\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74\x73'](), document[_0x1d95ec(0xe7)]['\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64'](this['\x5f\x63\x61\x6e\x76\x61\x73\x52\x65\x6c\x61\x74\x69\x76\x65\x45\x6c\x65\x6d\x65\x6e\x74\x73']);
-    }, _0x114e35[_0x5634f9(0xdd)] = function (_0x2dbdba, _0x5dd054) {
-        var _0x197e06 = _0x5634f9;
-        if (_0x197e06(0xff) !== '\x77\x45\x6c\x4e\x58') {
-            if (!_0x5e0dc8['\x50\x50'][_0x197e06(0xdb)]())
-                return;
-            return this[_0x197e06(0x10a)] != null ? this[_0x197e06(0x10a)]['\x6f\x6e\x4d\x65\x73\x73\x61\x67\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0xb956cf) : _0x468d4b[_0x197e06(0x109)](_0x589c87);
-        } else {
-            var _0x411695;
-            this[_0x197e06(0x122)] = document['\x63\x72\x65\x61\x74\x65\x45\x6c\x65\x6d\x65\x6e\x74'](_0x197e06(0x103)), this['\x5f\x69\x6e\x70\x75\x74']['\x69\x64'] = _0x197e06(0x136), this['\x5f\x69\x6e\x70\x75\x74']['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72']('\x6d\x6f\x75\x73\x65\x65\x6e\x74\x65\x72', function () {
-                var _0x273997 = _0x197e06;
-                if (_0x273997(0x11d) === _0x273997(0xb1))
-                    return;
-                else
-                    return HUIManager[_0x273997(0x13a)] = !![];
-            }), this[_0x197e06(0x122)][_0x197e06(0x10d)](_0x197e06(0xe0), function () {
-                return HUIManager['\x5f\x69\x73\x4d\x6f\x75\x73\x65\x48\x6f\x76\x65\x72\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74'] = ![];
-            }), this[_0x197e06(0x122)]['\x63\x6c\x61\x73\x73\x4c\x69\x73\x74'][_0x197e06(0xde)]('\x66\x6f\x72\x6d\x5f\x5f\x67\x72\x6f\x75\x70'), this[_0x197e06(0x122)][_0x197e06(0xca)][_0x197e06(0xde)](_0x197e06(0x107)), _0x5dd054 == null && (_0x5dd054 = ANET['\x50\x50']['\x67\x65\x74\x54\x65\x78\x74\x49\x6e\x70\x75\x74\x4d\x61\x78\x4c\x65\x6e\x67\x74\x68']()), _0x411695 = '\x3c\x69\x6e\x70\x75\x74\x20\x74\x79\x70\x65\x3d\x22\x69\x6e\x70\x75\x74\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x6f\x72\x6d\x5f\x5f\x66\x69\x65\x6c\x64\x22\x20\x70\x6c\x61\x63\x65\x68\x6f\x6c\x64\x65\x72\x3d\x22' + _0x2dbdba + _0x197e06(0x11e) + _0x5dd054 + '\x22\x20\x6e\x61\x6d\x65\x3d\x22\x61\x6e\x65\x74\x49\x6e\x70\x75\x74\x4e\x61\x6d\x65\x22\x20\x69\x64\x3d\x27\x61\x6e\x65\x74\x49\x6e\x70\x75\x74\x4e\x61\x6d\x65\x27\x20\x72\x65\x71\x75\x69\x72\x65\x64\x20\x2f\x3e\x20\x3c\x6c\x61\x62\x65\x6c\x20\x66\x6f\x72\x3d\x22\x61\x6e\x65\x74\x49\x6e\x70\x75\x74\x4e\x61\x6d\x65\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x6f\x72\x6d\x5f\x5f\x6c\x61\x62\x65\x6c\x22\x3e' + _0x2dbdba + '\x3c\x2f\x6c\x61\x62\x65\x6c\x3e', this[_0x197e06(0x122)][_0x197e06(0xee)](_0x197e06(0x115), _0x411695), this[_0x197e06(0xd7)][_0x197e06(0xd4)](this['\x5f\x69\x6e\x70\x75\x74']);
-        }
-    }, _0x114e35['\x5f\x63\x72\x65\x61\x74\x65\x4c\x6f\x62\x62\x79\x43\x68\x61\x74'] = function () {
-        var _0x2510e3 = _0x5634f9;
-        if (_0x2510e3(0xf9) === _0x2510e3(0xd6)) {
-            if (this['\x69\x73\x4c\x6f\x61\x64\x65\x72\x41\x63\x74\x69\x76\x65']())
-                return;
-            this['\x5f\x6c\x6f\x61\x64\x65\x72\x54\x68\x72\x65\x61\x64'] = _0x385fbe(function () {
-                var _0x528acf = _0x2510e3;
-                if (!_0x41d0a7['\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64'](_0x528acf(0xb5)))
-                    return _0x302187[_0x528acf(0xe7)]['\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64'](_0xa03220[_0x528acf(0x134)]);
-            }, _0x580add);
-        } else {
-            var _0x5acfc9;
-            _0x5acfc9 = _0x2510e3(0x12f), this[_0x2510e3(0x128)] = document[_0x2510e3(0x10e)]('\x64\x69\x76'), this[_0x2510e3(0x128)]['\x69\x64'] = _0x2510e3(0xf4), this[_0x2510e3(0x128)][_0x2510e3(0xca)][_0x2510e3(0xde)]('\x6d\x73\x67\x2d\x63\x6f\x6e\x74\x61\x69\x6e\x65\x72'), this[_0x2510e3(0x128)]['\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72'](_0x2510e3(0xb4), function () {
-                var _0xe564ef = _0x2510e3;
-                return _0xe564ef(0xf0) !== '\x55\x47\x62\x66\x74' ? _0x2e4e9e[_0xe564ef(0x13a)] = ![] : HUIManager[_0xe564ef(0x13a)] = !![];
-            }), this[_0x2510e3(0x128)][_0x2510e3(0x10d)](_0x2510e3(0xe0), function () {
-                var _0x4cca2b = _0x2510e3;
-                return HUIManager[_0x4cca2b(0x13a)] = ![];
-            }), this[_0x2510e3(0x128)][_0x2510e3(0xee)]('\x62\x65\x66\x6f\x72\x65\x65\x6e\x64', _0x5acfc9), this[_0x2510e3(0x128)][_0x2510e3(0x13b)] = ![], this[_0x2510e3(0xd7)]['\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64'](this[_0x2510e3(0x128)]);
-        }
-    }, _0x114e35['\x5f\x73\x77\x69\x74\x63\x68\x43\x68\x61\x74\x53\x74\x61\x74\x65'] = function () {
-        var _0x55812e = _0x5634f9, _0x4e2fd3, _0x1cf828, _0x3a4832, _0x46b6a7;
-        if (this[_0x55812e(0x128)] == null)
-            return;
-        try {
-            _0x1cf828 = SceneManager['\x5f\x73\x63\x65\x6e\x65'], _0x3a4832 = document[_0x55812e(0xb9)](_0x55812e(0xeb)), _0x46b6a7 = document['\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64'](_0x55812e(0xf8));
-            if (this[_0x55812e(0x128)][_0x55812e(0x13b)] === !![])
-                _0x3a4832['\x63\x6c\x61\x73\x73\x4c\x69\x73\x74'][_0x55812e(0xfc)]('\x6d\x73\x67\x65\x72\x2d\x6e\x6f\x6e\x65'), _0x46b6a7[_0x55812e(0xca)][_0x55812e(0xde)](_0x55812e(0xb2)), this[_0x55812e(0x128)]['\x5f\x5f\x69\x73\x56\x69\x73\x69\x62\x6c\x65'] = ![], this[_0x55812e(0xcd)]('\x52\x6f\x6f\x6d\x20\x4e\x61\x6d\x65\x2e\x2e\x2e'), this[_0x55812e(0xd0)]($gameTemp[_0x55812e(0x13e)]);
-            else {
-                if (_0x55812e(0x137) !== _0x55812e(0x137))
-                    return this[_0x55812e(0x10a)][_0x55812e(0xea)](_0xaf4a0e);
-                else
-                    _0x3a4832[_0x55812e(0xca)][_0x55812e(0xde)]('\x6d\x73\x67\x65\x72\x2d\x6e\x6f\x6e\x65'), _0x46b6a7['\x63\x6c\x61\x73\x73\x4c\x69\x73\x74']['\x72\x65\x6d\x6f\x76\x65'](_0x55812e(0xb2)), $gameTemp[_0x55812e(0x13e)] = this['\x67\x65\x74\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65'](), this[_0x55812e(0x112)](), this[_0x55812e(0x128)][_0x55812e(0x13b)] = !![];
-            }
-            _0x1cf828[_0x55812e(0x142)] != null && ('\x4f\x6f\x6a\x52\x61' !== _0x55812e(0x100) ? (this[_0x55812e(0x134)] = _0x316037[_0x55812e(0x10e)](_0x55812e(0x103)), this[_0x55812e(0x134)]['\x69\x64'] = _0x55812e(0xb5), this[_0x55812e(0xbb)] = null) : _0x1cf828[_0x55812e(0x142)](!this['\x5f\x72\x43\x68\x61\x74'][_0x55812e(0x13b)]));
-        } catch (_0x393647) {
-            _0x4e2fd3 = _0x393647, ANET['\x77'](_0x4e2fd3);
-        }
-    };
-}()), (function () {
-    var _0x50167c = _0x36f1, _0x11a049;
-    _0x11a049 = Scene_Map[_0x50167c(0xfa)];
-}()), (function () {
-    var _0x5c5f76 = _0x36f1, _0x33b1cd, _0x5d8dd6, _0x4416b5;
-    _0x4416b5 = Input, _0x5d8dd6 = _0x4416b5[_0x5c5f76(0x131)], _0x4416b5[_0x5c5f76(0x131)] = function () {
-        var _0x593747 = _0x5c5f76;
-        return HUIManager['\x69\x73\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x76\x65']() ? ![] : _0x5d8dd6[_0x593747(0x11a)](this);
-    }, _0x33b1cd = _0x4416b5[_0x5c5f76(0x101)], _0x4416b5[_0x5c5f76(0x101)] = function (_0x13037f) {
-        var _0x4a53cf = _0x5c5f76;
-        if (HUIManager[_0x4a53cf(0x116)]()) {
-            if (_0x13037f[_0x4a53cf(0x141)] === 0x5a || _0x13037f['\x6b\x65\x79\x43\x6f\x64\x65'] === 0x58 || _0x13037f['\x6b\x65\x79\x43\x6f\x64\x65'] === 0x20) {
-                if (_0x4a53cf(0x146) === _0x4a53cf(0xb8))
-                    _0x162883[_0x4a53cf(0xe7)][_0x4a53cf(0xf7)](this[_0x4a53cf(0x134)]);
-                else {
-                    this['\x63\x6c\x65\x61\x72']();
-                    return;
-                }
-            }
-        }
-        return _0x33b1cd[_0x4a53cf(0x11a)](this, _0x13037f);
-    };
-}()), (function () {
-    var _0x4caeb8 = _0x36f1, _0x171ee0, _0x3772c3;
-    _0x3772c3 = Graphics, _0x171ee0 = _0x3772c3[_0x4caeb8(0xbe)], _0x3772c3['\x5f\x75\x70\x64\x61\x74\x65\x43\x61\x6e\x76\x61\x73'] = function () {
-        var _0x37de10 = _0x4caeb8;
-        if (_0x37de10(0x12d) === '\x67\x53\x49\x41\x6e')
-            return _0x171ee0[_0x37de10(0x11a)](this), HUIManager[_0x37de10(0xc9)]();
-        else
-            return;
-    };
-}()));
-function _0x2748() {
-    var _0x4de269 = [
-        '\x7a\x49\x6e\x64\x65\x78',
-        '\x6e\x6f\x74\x69\x66\x79\x45\x72\x72\x6f\x72',
-        '\x69\x6e\x69\x74',
-        '\x61\x6e\x65\x74\x52\x6f\x6f\x6d\x43\x68\x61\x74',
-        '\x5f\x6e\x6f\x74\x69\x66\x79',
-        '\x67\x65\x74\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65',
-        '\x72\x65\x6d\x6f\x76\x65\x43\x68\x69\x6c\x64',
-        '\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x73\x65\x63\x74\x69\x6f\x6e\x42',
-        '\x72\x6d\x68\x65\x77',
-        '\x70\x72\x6f\x74\x6f\x74\x79\x70\x65',
-        '\x3c\x6c\x69\x6e\x6b\x20\x72\x65\x6c\x3d\x22\x73\x74\x79\x6c\x65\x73\x68\x65\x65\x74\x22\x20\x68\x72\x65\x66\x3d\x22\x63\x73\x73\x2f\x61\x6e\x65\x74\x2e\x63\x73\x73\x22\x20\x2f\x3e\x20\x3c\x6c\x69\x6e\x6b\x20\x72\x65\x6c\x3d\x22\x73\x74\x79\x6c\x65\x73\x68\x65\x65\x74\x22\x20\x68\x72\x65\x66\x3d\x22\x63\x73\x73\x2f\x61\x6e\x65\x74\x5f\x63\x68\x61\x74\x2e\x63\x73\x73\x22\x20\x2f\x3e',
-        '\x72\x65\x6d\x6f\x76\x65',
-        '\x31\x31\x31\x30\x34\x36\x34\x41\x6d\x6b\x50\x76\x70',
-        '\x63\x6c\x65\x61\x72',
-        '\x77\x45\x6c\x4e\x58',
-        '\x4f\x6f\x6a\x52\x61',
-        '\x5f\x6f\x6e\x4b\x65\x79\x44\x6f\x77\x6e',
-        '\x73\x74\x79\x6c\x65',
-        '\x64\x69\x76',
-        '\x31\x32\x32\x35\x34\x74\x58\x74\x6c\x63\x4f',
-        '\x65\x74\x4e\x63\x71',
-        '\x32\x31\x4d\x6d\x4c\x63\x52\x4e',
-        '\x66\x69\x65\x6c\x64',
-        '\x73\x75\x63\x63\x65\x73\x73',
-        '\x41\x64\x64\x54\x6f\x48\x69\x73\x74\x6f\x72\x79',
-        '\x5f\x63\x68\x61\x74',
-        '\x56\x55\x4a\x67\x6f',
-        '\x5f\x63\x72\x65\x61\x74\x65\x52\x65\x6c\x61\x74\x69\x76\x65\x50\x61\x72\x65\x6e\x74',
-        '\x61\x64\x64\x45\x76\x65\x6e\x74\x4c\x69\x73\x74\x65\x6e\x65\x72',
-        '\x63\x72\x65\x61\x74\x65\x45\x6c\x65\x6d\x65\x6e\x74',
-        '\x62\x6d\x4c\x77\x42',
-        '\x4b\x76\x76\x4b\x56',
-        '\x65\x72\x72\x6f\x72',
-        '\x72\x65\x6d\x6f\x76\x65\x49\x6e\x70\x75\x74',
-        '\x6c\x6f\x67',
-        '\x74\x75\x45\x69\x55',
-        '\x62\x65\x66\x6f\x72\x65\x65\x6e\x64',
-        '\x69\x73\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x76\x65',
-        '\x48\x55\x49\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x62\x4d\x63\x79\x55',
-        '\x6e\x6f\x6e\x65',
-        '\x63\x61\x6c\x6c',
-        '\x69\x73\x55\x6e\x64\x65\x72\x4d\x6f\x75\x73\x65',
-        '\x68\x65\x69\x67\x68\x74',
-        '\x4b\x46\x55\x50\x41',
-        '\x22\x20\x61\x75\x74\x6f\x63\x6f\x6d\x70\x6c\x65\x74\x65\x3d\x22\x6f\x66\x66\x22\x20\x6d\x61\x78\x6c\x65\x6e\x67\x74\x68\x3d\x22',
-        '\x3c\x2f\x70\x3e',
-        '\x5f\x77\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73',
-        '\x73\x65\x6e\x64\x4d\x65\x73\x73\x61\x67\x65',
-        '\x5f\x69\x6e\x70\x75\x74',
-        '\x64\x69\x73\x70\x6c\x61\x79',
-        '\x5f\x63\x61\x6e\x76\x61\x73',
-        '\x53\x61\x6d\x41\x50',
-        '\x77\x69\x64\x74\x68',
-        '\x73\x68\x6f\x77\x4c\x6f\x61\x64\x65\x72',
-        '\x5f\x72\x43\x68\x61\x74',
-        '\x45\x6a\x6a\x77\x43',
-        '\x61\x6e\x65\x74\x49\x6e\x70\x75\x74\x4e\x61\x6d\x65',
-        '\x45\x4c\x74\x47\x4b',
-        '\x33\x34\x30\x38\x31\x32\x35\x65\x71\x4c\x74\x6a\x76',
-        '\x67\x53\x49\x41\x6e',
-        '\x74\x70\x43\x54\x77',
-        '\x3c\x73\x65\x63\x74\x69\x6f\x6e\x20\x69\x64\x3d\x22\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x73\x65\x63\x74\x69\x6f\x6e\x41\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x63\x6c\x6f\x73\x65\x64\x22\x3e\x20\x3c\x68\x65\x61\x64\x65\x72\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x22\x20\x6f\x6e\x43\x6c\x69\x63\x6b\x3d\x22\x48\x55\x49\x4d\x61\x6e\x61\x67\x65\x72\x2e\x5f\x73\x77\x69\x74\x63\x68\x43\x68\x61\x74\x53\x74\x61\x74\x65\x28\x29\x22\x3e\x20\x3c\x64\x69\x76\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x2d\x74\x69\x74\x6c\x65\x22\x3e\x20\x3c\x73\x74\x72\x6f\x6e\x67\x3e\x43\x48\x41\x54\x3c\x2f\x73\x74\x72\x6f\x6e\x67\x3e\x20\x3c\x2f\x64\x69\x76\x3e\x20\x3c\x64\x69\x76\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x2d\x6f\x70\x74\x69\x6f\x6e\x73\x22\x3e\x20\x3c\x73\x70\x61\x6e\x3e\x3c\x69\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x61\x73\x20\x66\x61\x2d\x63\x61\x72\x65\x74\x2d\x73\x71\x75\x61\x72\x65\x2d\x75\x70\x22\x3e\x3c\x2f\x69\x3e\x3c\x2f\x73\x70\x61\x6e\x3e\x20\x3c\x2f\x64\x69\x76\x3e\x20\x3c\x2f\x68\x65\x61\x64\x65\x72\x3e\x20\x3c\x2f\x73\x65\x63\x74\x69\x6f\x6e\x3e\x20\x3c\x73\x65\x63\x74\x69\x6f\x6e\x20\x69\x64\x3d\x22\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x73\x65\x63\x74\x69\x6f\x6e\x42\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x20\x6d\x73\x67\x65\x72\x2d\x6e\x6f\x6e\x65\x22\x3e\x20\x3c\x68\x65\x61\x64\x65\x72\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x22\x20\x6f\x6e\x43\x6c\x69\x63\x6b\x3d\x22\x48\x55\x49\x4d\x61\x6e\x61\x67\x65\x72\x2e\x5f\x73\x77\x69\x74\x63\x68\x43\x68\x61\x74\x53\x74\x61\x74\x65\x28\x29\x22\x3e\x20\x3c\x64\x69\x76\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x2d\x74\x69\x74\x6c\x65\x22\x3e\x20\x3c\x73\x74\x72\x6f\x6e\x67\x3e\x43\x48\x41\x54\x3c\x2f\x73\x74\x72\x6f\x6e\x67\x3e\x20\x3c\x2f\x64\x69\x76\x3e\x20\x3c\x64\x69\x76\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x68\x65\x61\x64\x65\x72\x2d\x6f\x70\x74\x69\x6f\x6e\x73\x22\x3e\x20\x3c\x73\x70\x61\x6e\x3e\x3c\x69\x20\x63\x6c\x61\x73\x73\x3d\x22\x66\x61\x73\x20\x66\x61\x2d\x63\x61\x72\x65\x74\x2d\x73\x71\x75\x61\x72\x65\x2d\x64\x6f\x77\x6e\x22\x3e\x3c\x2f\x69\x3e\x3c\x2f\x73\x70\x61\x6e\x3e\x20\x3c\x2f\x64\x69\x76\x3e\x20\x3c\x2f\x68\x65\x61\x64\x65\x72\x3e\x20\x3c\x6d\x61\x69\x6e\x20\x69\x64\x3d\x22\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x6d\x61\x69\x6e\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x63\x68\x61\x74\x22\x3e\x20\x3c\x2f\x6d\x61\x69\x6e\x3e\x20\x3c\x64\x69\x76\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x69\x6e\x70\x75\x74\x61\x72\x65\x61\x22\x3e\x20\x3c\x69\x6e\x70\x75\x74\x20\x69\x64\x3d\x22\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x69\x6e\x70\x75\x74\x22\x20\x74\x79\x70\x65\x3d\x22\x74\x65\x78\x74\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x69\x6e\x70\x75\x74\x22\x20\x70\x6c\x61\x63\x65\x68\x6f\x6c\x64\x65\x72\x3d\x22\x45\x6e\x74\x65\x72\x20\x79\x6f\x75\x72\x20\x6d\x65\x73\x73\x61\x67\x65\x2e\x2e\x2e\x22\x3e\x20\x3c\x62\x75\x74\x74\x6f\x6e\x20\x6f\x6e\x43\x6c\x69\x63\x6b\x3d\x22\x48\x55\x49\x4d\x61\x6e\x61\x67\x65\x72\x2e\x6c\x6f\x62\x62\x79\x43\x68\x61\x74\x53\x65\x6e\x64\x4d\x65\x73\x73\x61\x67\x65\x42\x75\x74\x74\x6f\x6e\x43\x6c\x69\x63\x6b\x28\x29\x22\x20\x63\x6c\x61\x73\x73\x3d\x22\x6d\x73\x67\x65\x72\x2d\x73\x65\x6e\x64\x2d\x62\x74\x6e\x22\x3e\x53\x65\x6e\x64\x3c\x2f\x62\x75\x74\x74\x6f\x6e\x3e\x20\x3c\x2f\x64\x69\x76\x3e\x20\x3c\x2f\x73\x65\x63\x74\x69\x6f\x6e\x3e',
-        '\x39\x63\x6a\x53\x46\x44\x6e',
-        '\x5f\x73\x68\x6f\x75\x6c\x64\x50\x72\x65\x76\x65\x6e\x74\x44\x65\x66\x61\x75\x6c\x74',
-        '\x73\x68\x6f\x77\x4c\x6f\x62\x62\x79\x43\x68\x61\x74',
-        '\x77\x62\x77\x79\x7a',
-        '\x5f\x6c\x6f\x61\x64\x65\x72',
-        '\x5f\x63\x72\x65\x61\x74\x65\x4c\x6f\x61\x64\x53\x70\x69\x6e\x6e\x65\x72',
-        '\x61\x6e\x65\x74\x49\x6e\x70\x75\x74',
-        '\x75\x59\x65\x4c\x50',
-        '\x38\x35\x35\x37\x38\x39\x48\x70\x49\x4b\x6c\x61',
-        '\x3c\x6c\x69\x6e\x6b\x20\x72\x65\x6c\x3d\x22\x73\x74\x79\x6c\x65\x73\x68\x65\x65\x74\x22\x20\x68\x72\x65\x66\x3d\x22\x68\x74\x74\x70\x73\x3a\x2f\x2f\x75\x73\x65\x2e\x66\x6f\x6e\x74\x61\x77\x65\x73\x6f\x6d\x65\x2e\x63\x6f\x6d\x2f\x72\x65\x6c\x65\x61\x73\x65\x73\x2f\x76\x35\x2e\x31\x35\x2e\x34\x2f\x63\x73\x73\x2f\x61\x6c\x6c\x2e\x63\x73\x73\x22\x20\x69\x6e\x74\x65\x67\x72\x69\x74\x79\x3d\x22\x73\x68\x61\x33\x38\x34\x2d\x44\x79\x5a\x38\x38\x6d\x43\x36\x55\x70\x32\x75\x71\x53\x34\x68\x2f\x4b\x52\x67\x48\x75\x6f\x65\x47\x77\x42\x63\x44\x34\x4e\x67\x39\x53\x69\x50\x34\x64\x49\x52\x79\x30\x45\x58\x54\x6c\x6e\x75\x7a\x34\x37\x76\x41\x77\x6d\x65\x47\x77\x56\x43\x68\x69\x67\x6d\x22\x20\x63\x72\x6f\x73\x73\x6f\x72\x69\x67\x69\x6e\x3d\x22\x61\x6e\x6f\x6e\x79\x6d\x6f\x75\x73\x22\x2f\x3e',
-        '\x5f\x69\x73\x4d\x6f\x75\x73\x65\x48\x6f\x76\x65\x72\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74',
-        '\x5f\x5f\x69\x73\x56\x69\x73\x69\x62\x6c\x65',
-        '\x62\x79\x4e\x43\x4c',
-        '\x68\x53\x62\x65\x4a',
-        '\x6e\x4c\x61\x73\x74\x4e\x65\x74\x77\x6f\x72\x6b\x53\x63\x65\x6e\x65\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65',
-        '\x42\x70\x4e\x51\x54',
-        '\x65\x58\x47\x6f\x50',
-        '\x6b\x65\x79\x43\x6f\x64\x65',
-        '\x73\x65\x74\x49\x6e\x70\x75\x74\x41\x6c\x6c\x6f\x77\x65\x64',
-        '\x6f\x6e\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x64\x46\x77\x4c\x56',
-        '\x76\x78\x6a\x59\x6f',
-        '\x6d\x52\x42\x48\x72',
-        '\x3c\x2f\x63\x69\x74\x65\x3e',
-        '\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x73\x42\x79\x54\x61\x67\x4e\x61\x6d\x65',
-        '\x6e\x43\x50\x51\x73',
-        '\x55\x6a\x6d\x75\x74',
-        '\x58\x72\x77\x47\x6e',
-        '\x34\x37\x35\x30\x31\x34\x36\x71\x65\x43\x6a\x41\x44',
-        '\x61\x6e\x65\x74\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x41\x6c\x65\x72\x74',
-        '\x6e\x44\x65\x53\x6f',
-        '\x6d\x73\x67\x65\x72\x2d\x6e\x6f\x6e\x65',
-        '\x5f\x63\x72\x65\x61\x74\x65\x4e\x6f\x74\x69\x66\x79',
-        '\x6d\x6f\x75\x73\x65\x65\x6e\x74\x65\x72',
-        '\x61\x6e\x65\x74\x4c\x6f\x61\x64\x65\x72',
-        '\x68\x69\x64\x65\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f',
-        '\x62\x6f\x74\x74\x6f\x6d',
-        '\x57\x69\x4f\x4d\x63',
-        '\x67\x65\x74\x45\x6c\x65\x6d\x65\x6e\x74\x42\x79\x49\x64',
-        '\x5f\x63\x65\x6e\x74\x65\x72\x45\x6c\x65\x6d\x65\x6e\x74',
-        '\x5f\x6c\x6f\x61\x64\x65\x72\x54\x68\x72\x65\x61\x64',
-        '\x5f\x77\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f\x54\x68\x72\x65\x61\x64',
-        '\x73\x79\x4f\x6c\x49',
-        '\x5f\x75\x70\x64\x61\x74\x65\x43\x61\x6e\x76\x61\x73',
-        '\x6c\x52\x74\x58\x75',
-        '\x77\x61\x72\x6e',
-        '\x68\x4b\x64\x72\x48',
-        '\x4e\x6b\x6c\x66\x53',
-        '\x79\x72\x51\x55\x57',
-        '\x7a\x4b\x67\x46\x52',
-        '\x75\x58\x49\x62\x58',
-        '\x62\x48\x56\x63\x53',
-        '\x31\x31\x35\x38\x30\x6a\x62\x6d\x6a\x67\x6d',
-        '\x50\x47\x50\x63\x6e',
-        '\x75\x70\x64\x61\x74\x65\x43\x61\x6e\x76\x61\x73\x48\x74\x6d\x6c\x45\x6c\x65\x6d\x65\x6e\x74\x73',
-        '\x63\x6c\x61\x73\x73\x4c\x69\x73\x74',
-        '\x62\x6c\x6f\x63\x6b\x71\x75\x6f\x74\x65',
-        '\x3c\x63\x69\x74\x65\x3e',
-        '\x73\x68\x6f\x77\x49\x6e\x70\x75\x74',
-        '\x50\x70\x4d\x4a\x57',
-        '\x45\x4a\x50\x46\x58',
-        '\x73\x65\x74\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65',
-        '\x69\x73\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f\x41\x63\x74\x69\x76\x65',
-        '\x6d\x73\x67\x2d\x63\x6f\x6e\x74\x61\x69\x6e\x65\x72',
-        '\x3c\x70\x3e',
-        '\x61\x70\x70\x65\x6e\x64\x43\x68\x69\x6c\x64',
-        '\x5f\x64\x69\x73\x61\x62\x6c\x65\x43\x6f\x6e\x74\x65\x78\x74\x4d\x65\x6e\x75',
-        '\x56\x64\x72\x61\x51',
-        '\x5f\x63\x61\x6e\x76\x61\x73\x52\x65\x6c\x61\x74\x69\x76\x65\x45\x6c\x65\x6d\x65\x6e\x74\x73',
-        '\x51\x63\x6b\x58\x51',
-        '\x62\x57\x6d\x66\x7a',
-        '\x5f\x63\x72\x65\x61\x74\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x41\x6c\x65\x72\x74',
-        '\x69\x73\x53\x68\x6f\x77\x4c\x6f\x62\x62\x79\x43\x68\x61\x74',
-        '\x61\x6e\x65\x74\x43\x61\x6e\x76\x61\x73\x45\x6c\x65\x6d\x65\x6e\x74\x73',
-        '\x5f\x63\x72\x65\x61\x74\x65\x49\x6e\x70\x75\x74\x46\x69\x65\x6c\x64',
-        '\x61\x64\x64',
-        '\x66\x6f\x63\x75\x73\x49\x6e\x70\x75\x74',
-        '\x6d\x6f\x75\x73\x65\x6c\x65\x61\x76\x65',
-        '\x47\x53\x47\x5a\x57',
-        '\x5f\x63\x72\x65\x61\x74\x65\x4c\x6f\x62\x62\x79\x43\x68\x61\x74',
-        '\x68\x65\x61\x64',
-        '\x5f\x6c\x6f\x61\x64\x43\x53\x53',
-        '\x69\x73\x4c\x6f\x61\x64\x65\x72\x41\x63\x74\x69\x76\x65',
-        '\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72',
-        '\x62\x6f\x64\x79',
-        '\x70\x61\x72\x65\x6e\x74\x4e\x6f\x64\x65',
-        '\x32\x30\x39\x35\x39\x35\x30\x65\x56\x46\x4f\x50\x43',
-        '\x6f\x6e\x4d\x65\x73\x73\x61\x67\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x61\x6e\x65\x74\x2d\x63\x68\x61\x74\x2d\x73\x65\x63\x74\x69\x6f\x6e\x41',
-        '\x66\x6f\x63\x75\x73',
-        '\x38\x35\x4d\x68\x76\x79\x6b\x67',
-        '\x69\x6e\x73\x65\x72\x74\x41\x64\x6a\x61\x63\x65\x6e\x74\x48\x54\x4d\x4c',
-        '\x69\x76\x58\x50\x4a',
-        '\x55\x47\x62\x66\x74'
-    ];
-    _0x2748 = function () {
-        return _0x4de269;
-    };
-    return _0x2748();
-}
+  };
+  _.hideLoader = function() {
+    var e;
+    try {
+      if (!this.isLoaderActive()) {
+        return;
+      }
+      clearTimeout(this._loaderThread);
+      this._loaderThread = null;
+      if (document.getElementById("anetLoader")) {
+        document.body.removeChild(this._loader);
+      }
+    } catch (error) {
+      e = error;
+      console.log(e);
+    }
+  };
+  _.isLoaderActive = function() {
+    return this._loaderThread != null;
+  };
+  _.showWaitingInfo = function(text, text2, delay = 200) {
+    var e;
+    try {
+      if (this.isWaitingInfoActive()) {
+        return;
+      }
+      this._waitingInfoThread = setTimeout((function() {
+        return HUIManager._createWaitPlayersAlert(text, text2);
+      }), delay);
+    } catch (error) {
+      e = error;
+      console.warn(e);
+    }
+  };
+  _.hideWaitingInfo = function() {
+    var e;
+    try {
+      if (!this.isWaitingInfoActive()) {
+        return;
+      }
+      clearTimeout(this._waitingInfoThread);
+      this._waitingInfoThread = null;
+      if (this._waitPlayers != null) {
+        document.getElementById("anetCanvasElements").removeChild(this._waitPlayers);
+        this._waitPlayers = null;
+      }
+    } catch (error) {
+      e = error;
+      console.warn(e);
+    }
+  };
+  _.isWaitingInfoActive = function() {
+    return this._waitingInfoThread != null;
+  };
+  _.notifyError = function(msg) {
+    var e;
+    try {
+      return this._notify.error(msg);
+    } catch (error) {
+      e = error;
+      return console.warn(e);
+    }
+  };
+  _.notifySucess = function(msg) {
+    var e;
+    try {
+      return this._notify.success(msg);
+    } catch (error) {
+      e = error;
+      return console.warn(e);
+    }
+  };
+  _.isInputActive = function() {
+    return this._input != null;
+  };
+  _.showInput = function(placeholder, maxlength) {
+    if (this._input != null) {
+      this.removeInput();
+    }
+    this._createInputField(placeholder, maxlength);
+  };
+  _.removeInput = function() {
+    var e, root;
+    if (this._input == null) {
+      return;
+    }
+    // * Не всегда автоматически выключается, поэтому надо выключить флаг вручную
+    HUIManager._isMouseHoverHtmlElement = false;
+    try {
+      root = document.getElementById("anetCanvasElements");
+      this._input.style.display = 'none';
+      //root?.removeChild(@_input)
+      if (this._input.parentNode != null) {
+        this._input.parentNode.removeChild(this._input);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+    this._input = null;
+  };
+  _.focusInput = function() {
+    var ref;
+    if (this._input == null) {
+      return;
+    }
+    if ((ref = document.getElementById("anetInputName")) != null) {
+      ref.focus();
+    }
+  };
+  _.getInputValue = function() {
+    var ref;
+    if (this._input == null) {
+      return "";
+    }
+    return (ref = document.getElementById("anetInputName")) != null ? ref.value : void 0;
+  };
+  _.setInputValue = function(value) {
+    var ref;
+    if (this._input == null) {
+      return;
+    }
+    if ((ref = document.getElementById("anetInputName")) != null) {
+      ref.value = value;
+    }
+  };
+  _.updateCanvasHtmlElements = function() {
+    if (this._canvasRelativeElements == null) {
+      return;
+    }
+    Graphics._centerElement(this._canvasRelativeElements);
+    this._canvasRelativeElements.style.zIndex = 4;
+    this._canvasRelativeElements.style.width = Graphics._canvas.style.width;
+    this._canvasRelativeElements.style.height = Graphics._canvas.style.height;
+  };
+  // * Когда пришло сообщение чата от сервера
+  _.onChatMessageFromServer = function(message) {
+    var e;
+    try {
+      if (!ANET.PP.isShowLobbyChat()) {
+        return;
+      }
+      if (this._chat != null) {
+        return this._chat.onMessageFromServer(message);
+      } else {
+        return NETLobbyChat.AddToHistory(message);
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  // * Отправить сообщение из чата на сервер (написать всем, добавить в чат)
+  _.lobbyChatSendMessageButtonClick = function() {
+    var e, ref;
+    try {
+      if (this._rChat == null) {
+        return;
+      }
+      return (ref = this._chat) != null ? ref.sendMessage() : void 0;
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _.showLobbyChat = function() {
+    this._createLobbyChat();
+    this._chat = new NETLobbyChat();
+  };
+  _.removeLobbyChat = function() {
+    var e, root;
+    try {
+      if (this._rChat == null) {
+        return;
+      }
+      root = document.getElementById("anetCanvasElements");
+      //root?.removeChild(@_rChat) if @_rChat?
+      this._rChat.style.display = 'none';
+      if (this._rChat.parentNode != null) {
+        this._rChat.parentNode.removeChild(this._rChat);
+      }
+      this._rChat = null;
+      return this._chat = null;
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  // * PRIVATE  ======================================================
+  _._loadCSS = function() {
+    var head;
+    // * Подгружаем CSS стили
+    head = document.getElementsByTagName("head")[0];
+    // * Fontawesome
+    head.insertAdjacentHTML("beforeend", "<link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.15.4/css/all.css\" integrity=\"sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm\" crossorigin=\"anonymous\"/>");
+    head.insertAdjacentHTML("beforeend", "<link rel=\"stylesheet\" href=\"css/anet.css\" /> <link rel=\"stylesheet\" href=\"css/anet_chat.css\" />");
+  };
+  _._createLoadSpinner = function() {
+    this._loader = document.createElement("div");
+    this._loader.id = "anetLoader";
+    this._loaderThread = null;
+  };
+  _._createNotify = function() {
+    this._notify = new Notyf({
+      duration: 1400,
+      position: {
+        x: 'center',
+        y: 'bottom'
+      },
+      ripple: false
+    });
+  };
+  // * Информация при ожидании других игроков (или другая информация, ожидание сервера)
+  _._createWaitPlayersAlert = function(text, extraText) {
+    var htmlCode;
+    this._waitPlayers = document.createElement("blockquote");
+    this._waitPlayers.id = "anetWaitPlayersAlert";
+    this._waitPlayers.classList.add("speech-bubble");
+    htmlCode = "<p>" + text + "</p>" + "<cite>" + extraText + "</cite>";
+    this._waitPlayers.insertAdjacentHTML('beforeend', htmlCode);
+    this._canvasRelativeElements.appendChild(this._waitPlayers);
+  };
+  // * Элемент родитель, который будет изменяться вместе с размерами Canvas
+  // * Это позволит сохранять фиксированные позиции HTML элементов не зависимо от размера окна игры
+  _._createRelativeParent = function() {
+    this._canvasRelativeElements = document.createElement("div");
+    this._canvasRelativeElements.id = "anetCanvasElements";
+    this._canvasRelativeElements.style.zIndex = 4;
+    this.updateCanvasHtmlElements();
+    document.body.appendChild(this._canvasRelativeElements);
+  };
+  _._createInputField = function(placeholder, maxlength) {
+    var htmlCode;
+    this._input = document.createElement("div");
+    this._input.id = "anetInput";
+    this._input.addEventListener("mouseenter", function() {
+      return HUIManager._isMouseHoverHtmlElement = true;
+    });
+    this._input.addEventListener("mouseleave", function() {
+      return HUIManager._isMouseHoverHtmlElement = false;
+    });
+    this._input.classList.add("form__group");
+    this._input.classList.add("field");
+    if (maxlength == null) {
+      maxlength = ANET.PP.getTextInputMaxLength();
+    }
+    htmlCode = "<input type=\"input\" class=\"form__field\" placeholder=\"" + placeholder + "\" autocomplete=\"off\" maxlength=\"" + maxlength + "\" name=\"anetInputName\" id='anetInputName' required /> <label for=\"anetInputName\" class=\"form__label\">" + placeholder + "</label>";
+    this._input.insertAdjacentHTML('beforeend', htmlCode);
+    this._canvasRelativeElements.appendChild(this._input);
+  };
+  _._createLobbyChat = function() {
+    var htmlCode;
+    htmlCode = "<section id=\"anet-chat-sectionA\" class=\"msger-closed\"> <header class=\"msger-header\" onClick=\"HUIManager._switchChatState()\"> <div class=\"msger-header-title\"> <strong>CHAT</strong> </div> <div class=\"msger-header-options\"> <span><i class=\"fas fa-caret-square-up\"></i></span> </div> </header> </section> <section id=\"anet-chat-sectionB\" class=\"msger msger-none\"> <header class=\"msger-header\" onClick=\"HUIManager._switchChatState()\"> <div class=\"msger-header-title\"> <strong>CHAT</strong> </div> <div class=\"msger-header-options\"> <span><i class=\"fas fa-caret-square-down\"></i></span> </div> </header> <main id=\"anet-chat-main\" class=\"msger-chat\"> </main> <div class=\"msger-inputarea\"> <input id=\"anet-chat-input\" type=\"text\" class=\"msger-input\" placeholder=\"Enter your message...\"> <button onClick=\"HUIManager.lobbyChatSendMessageButtonClick()\" class=\"msger-send-btn\">Send</button> </div> </section>";
+    //https://codepen.io/sajadhsm/pen/odaBdd
+    //TODO: Методы отправки сообщений (через сервер тоже)
+    this._rChat = document.createElement("div");
+    this._rChat.id = "anetRoomChat";
+    this._rChat.classList.add('msg-container');
+    this._rChat.addEventListener("mouseenter", function() {
+      return HUIManager._isMouseHoverHtmlElement = true;
+    });
+    this._rChat.addEventListener("mouseleave", function() {
+      return HUIManager._isMouseHoverHtmlElement = false;
+    });
+    this._rChat.insertAdjacentHTML('beforeend', htmlCode);
+    this._rChat.__isVisible = false;
+    this._canvasRelativeElements.appendChild(this._rChat);
+  };
+  _._switchChatState = function() {
+    var e, s, sectionA, sectionB;
+    if (this._rChat == null) {
+      return;
+    }
+    try {
+      s = SceneManager._scene;
+      sectionA = document.getElementById("anet-chat-sectionA");
+      sectionB = document.getElementById("anet-chat-sectionB");
+      if (this._rChat.__isVisible === true) {
+        sectionA.classList.remove("msger-none");
+        sectionB.classList.add("msger-none");
+        this._rChat.__isVisible = false;
+      } else {
+        //@showInput("Room Name...")
+        //@setInputValue($gameTemp.nLastNetworkSceneInputValue)
+        sectionA.classList.add("msger-none");
+        sectionB.classList.remove("msger-none");
+        $gameTemp.nLastNetworkSceneInputValue = this.getInputValue();
+        //@removeInput()
+        this._rChat.__isVisible = true;
+      }
+      if (s.setInputAllowed != null) {
+        s.setInputAllowed(!this._rChat.__isVisible);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+})();
+
+(function() {  //╒═════════════════════════════════════════════════════════════════════════╛
+  // ■ Scene_Map.coffee
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  //---------------------------------------------------------------------------
+  var _;
+  //@[DEFINES]
+  _ = Scene_Map.prototype;
+})();
+
+(function() {  // ■ END Scene_Map.coffee
+  //---------------------------------------------------------------------------
+
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  // ■ Input.coffee
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  //---------------------------------------------------------------------------
+
+  //TODO: Временно отключил, так как пока нет HUI элементов на карте
+  /*if KDCore.isMV()
+      #@[ALIAS]
+      ALIAS__processMapTouch = _.processMapTouch
+      _.processMapTouch = ->
+          return if HUIManager.isUnderMouse()
+          ALIAS__processMapTouch.call(@)
+          return
+  else
+      #@[ALIAS]
+      ALIAS__onMapTouch = _.onMapTouch
+      _.onMapTouch = ->
+          return if HUIManager.isUnderMouse()
+          ALIAS__onMapTouch.call(@)
+          return */
+  var ALIAS___onKeyDown, ALIAS___shouldPreventDefault, _;
+  //@[DEFINES]
+  _ = Input;
+  //@[ALIAS]
+  ALIAS___shouldPreventDefault = _._shouldPreventDefault;
+  _._shouldPreventDefault = function() {
+    // * Чтобы backspace и стрелки работали в поле ввода текста
+    if (HUIManager.isInputActive()) {
+      return false;
+    } else {
+      return ALIAS___shouldPreventDefault.call(this);
+    }
+  };
+  
+  //@[ALIAS]
+  ALIAS___onKeyDown = _._onKeyDown;
+  _._onKeyDown = function(event) {
+    // * Чтобы игнорировать стандартные кнопки Z, X, space во время ввода
+    if (HUIManager.isInputActive()) {
+      if (event.keyCode === 90 || event.keyCode === 88 || event.keyCode === 32) {
+        this.clear();
+        return;
+      }
+    }
+    return ALIAS___onKeyDown.call(this, event);
+  };
+})();
+
+(function() {  // ■ END Input.coffee
+  //---------------------------------------------------------------------------
+
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  // ■ Graphics.coffee
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  //---------------------------------------------------------------------------
+  var ALIAS___updateCanvas, _;
+  //@[DEFINES]
+  _ = Graphics;
+  //@[ALIAS]
+  ALIAS___updateCanvas = _._updateCanvas;
+  _._updateCanvas = function() {
+    ALIAS___updateCanvas.call(this);
+    return HUIManager.updateCanvasHtmlElements();
+  };
+})();
+
+// ■ END Graphics.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.6.1
 // * Дополнительные расширения для KDCore
@@ -9713,183 +16752,172 @@ function _0x2748() {
 // * NOTHING
 
 
-var _0x1d61ae = _0x13c3;
-function _0x4d53() {
-    var _0x42a042 = [
-        '\x57\x69\x74\x68\x54\x69\x6d\x65\x6f\x75\x74',
-        '\x32\x39\x30\x36\x30\x6b\x53\x4a\x47\x67\x76',
-        '\x45\x6d\x70\x74\x79\x4d\x65\x73\x73\x61\x67\x65',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x65\x6d\x69\x74',
-        '\x77\x61\x69\x74\x65\x64',
-        '\x36\x51\x52\x6d\x50\x69\x4f',
-        '\x33\x32\x5a\x50\x49\x4f\x52\x63',
-        '\x73\x65\x74\x46\x72\x6f\x6d',
-        '\x61\x70\x70\x6c\x79',
-        '\x54\x48\x52\x54\x4c',
-        '\x4f\x74\x4d\x6a\x74',
-        '\x73\x65\x74\x44\x61\x74\x61',
-        '\x36\x31\x37\x30\x35\x36\x32\x42\x45\x6e\x77\x44\x4a',
-        '\x41\x52\x44\x4d\x65',
-        '\x5f\x6d\x61\x6b\x65\x44\x61\x74\x61',
-        '\x31\x30\x39\x35\x37\x32\x4e\x48\x4f\x6d\x65\x50',
-        '\x38\x37\x36\x32\x31\x39\x52\x53\x55\x74\x62\x77',
-        '\x33\x33\x30\x30\x36\x31\x30\x6e\x4c\x62\x6c\x6c\x48',
-        '\x50\x72\x62\x50\x78',
-        '\x73\x65\x6e\x64',
-        '\x45\x6d\x70\x74\x79\x4d\x65\x73\x73\x61\x67\x65\x57\x69\x74\x68\x46\x6c\x61\x67',
-        '\x37\x44\x7a\x44\x56\x41\x6d',
-        '\x70\x76\x65\x52\x45',
-        '\x53\x6f\x63\x6b\x65\x74',
-        '\x73\x65\x74\x54\x6f',
-        '\x53\x65\x74\x4f\x77\x6e\x53\x6f\x63\x6b\x65\x74',
-        '\x54\x72\x61\x63\x65',
-        '\x33\x37\x34\x6a\x49\x74\x5a\x76\x67',
-        '\x63\x61\x6c\x6c',
-        '\x73\x65\x74\x4e\x61\x6d\x65',
-        '\x73\x6f\x63\x6b\x65\x74',
-        '\x32\x6d\x77\x57\x70\x53\x4f',
-        '\x4f\x53\x78\x76\x45',
-        '\x71\x49\x79\x44\x51',
-        '\x66\x75\x6c\x6c\x4e\x61\x6d\x65',
-        '\x34\x37\x33\x38\x35\x34\x38\x4c\x76\x54\x79\x74\x6f',
-        '\x62\x72\x6f\x61\x64\x63\x61\x73\x74',
-        '\x36\x30\x32\x32\x32\x31\x36\x68\x69\x6c\x4f\x41\x48',
-        '\x4e\x4d\x53',
-        '\x4b\x58\x52\x70\x44',
-        '\x73\x55\x51\x5a\x58',
-        '\x4c\x74\x47\x57\x6a',
-        '\x6e\x61\x6d\x65',
-        '\x64\x61\x74\x61',
-        '\x66\x72\x6f\x6d'
-    ];
-    _0x4d53 = function () {
-        return _0x42a042;
-    };
-    return _0x4d53();
-}
-function _0x13c3(_0x5240d3, _0x2581d7) {
-    var _0x4d5309 = _0x4d53();
-    return _0x13c3 = function (_0x13c32c, _0x21b9c6) {
-        _0x13c32c = _0x13c32c - 0x1e0;
-        var _0x532c4b = _0x4d5309[_0x13c32c];
-        return _0x532c4b;
-    }, _0x13c3(_0x5240d3, _0x2581d7);
-}
-(function (_0x241ae1, _0x2dbe1d) {
-    var _0x157bbf = _0x13c3, _0x124957 = _0x241ae1();
-    while (!![]) {
-        try {
-            var _0x381c7b = -parseInt(_0x157bbf(0x209)) / 0x1 * (-parseInt(_0x157bbf(0x1ea)) / 0x2) + -parseInt(_0x157bbf(0x208)) / 0x3 * (parseInt(_0x157bbf(0x1ff)) / 0x4) + parseInt(_0x157bbf(0x20a)) / 0x5 * (-parseInt(_0x157bbf(0x1fe)) / 0x6) + parseInt(_0x157bbf(0x1e0)) / 0x7 * (parseInt(_0x157bbf(0x1f0)) / 0x8) + -parseInt(_0x157bbf(0x205)) / 0x9 + -parseInt(_0x157bbf(0x1f9)) / 0xa * (-parseInt(_0x157bbf(0x1e6)) / 0xb) + parseInt(_0x157bbf(0x1ee)) / 0xc;
-            if (_0x381c7b === _0x2dbe1d)
-                break;
-            else
-                _0x124957['push'](_0x124957['shift']());
-        } catch (_0x3771b5) {
-            _0x124957['push'](_0x124957['shift']());
-        }
-    }
-}(_0x4d53, 0x7658b));
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ NetMessage.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+//$[ENCODE]
+//@[GLOBAL]
 var NetMessage;
-NetMessage = function () {
-    var _0x2b0e1b = _0x13c3;
-    class _0x5dac58 {
-        constructor(_0x21364e) {
-            var _0x37908d = _0x13c3;
-            if (_0x37908d(0x1ec) !== _0x37908d(0x1eb))
-                this[_0x37908d(0x1e9)] = _0x21364e, this[_0x37908d(0x1f5)] = '\x74\x72\x61\x63\x65', this[_0x37908d(0x1f7)] = '', this['\x74\x6f'] = '', this[_0x37908d(0x1f6)] = '', this[_0x37908d(0x1fd)] = ![];
-            else
-                return this[_0x37908d(0x1fa)](_0x1528d8)[_0x37908d(0x1e8)]('\x74\x72\x61\x63\x65')[_0x37908d(0x204)](_0x520267);
-        }
-        ['\x73\x65\x74\x4e\x61\x6d\x65'](_0x445b18) {
-            var _0x35a3d7 = _0x13c3;
-            return this[_0x35a3d7(0x1f5)] = _0x445b18, this;
-        }
-        [_0x2b0e1b(0x1e3)](_0x44260d) {
-            return this['\x74\x6f'] = _0x44260d, this;
-        }
-        [_0x2b0e1b(0x200)](_0x2a6f40) {
-            var _0x272025 = _0x2b0e1b;
-            return _0x272025(0x1f4) !== _0x272025(0x1f3) ? (this['\x66\x72\x6f\x6d'] = _0x2a6f40, this) : this[_0x272025(0x1f5)] + '\x5f' + this[_0x272025(0x1f6)]['\x69\x64'];
-        }
-        [_0x2b0e1b(0x204)](_0x225cb3) {
-            var _0x76decf = _0x2b0e1b;
-            return this[_0x76decf(0x1f6)] = _0x225cb3, this;
-        }
-        [_0x2b0e1b(0x1ed)]() {
-            var _0x5e6823 = _0x2b0e1b;
-            return _0x5e6823(0x1f2) === _0x5e6823(0x1e1) ? this[_0x5e6823(0x1f6)] != null && this[_0x5e6823(0x1f6)]['\x69\x64'] ? this[_0x5e6823(0x1f5)] + '\x5f' + this['\x64\x61\x74\x61']['\x69\x64'] : this[_0x5e6823(0x1f5)] : this[_0x5e6823(0x1f6)] != null && this[_0x5e6823(0x1f6)]['\x69\x64'] ? this[_0x5e6823(0x1f5)] + '\x5f' + this[_0x5e6823(0x1f6)]['\x69\x64'] : this[_0x5e6823(0x1f5)];
-        }
-        [_0x2b0e1b(0x20c)](_0x4bc181) {
-            var _0x4112e0 = _0x2b0e1b;
-            return this['\x73\x6f\x63\x6b\x65\x74']['\x65\x6d\x69\x74'](this['\x6e\x61\x6d\x65'], this[_0x4112e0(0x207)](_0x4bc181)), this;
-        }
-        [_0x2b0e1b(0x1fb)](_0x21509d, _0x474cfc) {
-            var _0x1bb4cf = _0x2b0e1b;
-            return this[_0x1bb4cf(0x1e9)]['\x65\x6d\x69\x74'](this[_0x1bb4cf(0x1f5)], this[_0x1bb4cf(0x207)](_0x474cfc), _0x21509d), this;
-        }
-        ['\x67\x65\x74'](_0x24beb6, _0x71420, _0x4bd554, _0x471b15) {
-            var _0x4ef006 = _0x2b0e1b;
-            if (_0x4ef006(0x206) === _0x4ef006(0x206)) {
-                var _0x261b2e;
-                return _0x261b2e = _0x5dac58['\x57\x69\x74\x68\x54\x69\x6d\x65\x6f\x75\x74'], this[_0x4ef006(0x1e9)][_0x4ef006(0x1fc)](this['\x6e\x61\x6d\x65'], this['\x5f\x6d\x61\x6b\x65\x44\x61\x74\x61'](_0x471b15), _0x261b2e(_0x24beb6, _0x71420, _0x4bd554)), this;
-            } else {
-                var _0x15de57;
-                return _0x15de57 = _0x5ee59e['\x57\x69\x74\x68\x54\x69\x6d\x65\x6f\x75\x74'], this[_0x4ef006(0x1e9)]['\x65\x6d\x69\x74'](this['\x6e\x61\x6d\x65'], this[_0x4ef006(0x207)](_0x420e4a), _0x15de57(_0x4ff98a, _0x43d11f, _0x1aeac7)), this;
-            }
-        }
-        [_0x2b0e1b(0x1ef)](_0x410f74) {
-            var _0x39d3ce = _0x2b0e1b;
-            if (_0x39d3ce(0x20b) === _0x39d3ce(0x203)) {
-                if (_0x4940ad)
-                    return;
-                return _0x40580e = !![], _0x509bbb(_0x6ce5f4), _0x652311[_0x39d3ce(0x201)](this, _0x1897d1);
-            } else
-                return this[_0x39d3ce(0x1e9)]['\x62\x72\x6f\x61\x64\x63\x61\x73\x74'][_0x39d3ce(0x1fc)](this[_0x39d3ce(0x1f5)], this[_0x39d3ce(0x207)](_0x410f74));
-        }
-        [_0x2b0e1b(0x207)](_0x7d30c2 = null) {
-            var _0x54c182 = _0x2b0e1b, _0x45a4e9;
-            return _0x45a4e9 = {}, _0x7d30c2 == null ? _0x7d30c2 = this[_0x54c182(0x1f6)] : this[_0x54c182(0x1f6)] = _0x7d30c2, _0x45a4e9[_0x54c182(0x1f6)] = _0x7d30c2, _0x45a4e9[_0x54c182(0x1f7)] = this[_0x54c182(0x1f7)], _0x45a4e9['\x74\x6f'] = this['\x74\x6f'], _0x45a4e9[_0x54c182(0x1fd)] = this[_0x54c182(0x1fd)], _0x45a4e9;
-        }
-        static [_0x2b0e1b(0x1e4)](_0x5df53d) {
-            return _0x5dac58['\x53\x6f\x63\x6b\x65\x74'] = _0x5df53d;
-        }
-        static [_0x2b0e1b(0x1e5)](_0x3eb61b, _0x457ef5) {
-            var _0xa68b92 = _0x2b0e1b;
-            return this[_0xa68b92(0x1fa)](_0x457ef5)[_0xa68b92(0x1e8)]('\x74\x72\x61\x63\x65')[_0xa68b92(0x204)](_0x3eb61b);
-        }
-        static ['\x45\x6d\x70\x74\x79\x4d\x65\x73\x73\x61\x67\x65'](_0x92f50e = null) {
-            var _0x3c4c47 = _0x2b0e1b, _0xd6e023, _0x44c2c0;
-            return _0x44c2c0 = _0x92f50e, _0x92f50e == null && (_0x44c2c0 = this[_0x3c4c47(0x1e2)]), _0xd6e023 = new _0x5dac58(_0x44c2c0), _0x44c2c0 != null && _0xd6e023['\x73\x65\x74\x46\x72\x6f\x6d'](_0x44c2c0['\x69\x64']), _0xd6e023;
-        }
-        static [_0x2b0e1b(0x20d)](_0x4d7dc0, _0xe5284, _0x3db304 = null) {
-            var _0x52e7f1 = _0x2b0e1b, _0x2f6f8e;
-            return _0x2f6f8e = this['\x45\x6d\x70\x74\x79\x4d\x65\x73\x73\x61\x67\x65'](_0x3db304), _0x2f6f8e[_0x52e7f1(0x204)]({
-                '\x69\x64': _0x4d7dc0,
-                '\x63\x6f\x6e\x74\x65\x6e\x74': _0xe5284
-            }), _0x2f6f8e;
-        }
-        static [_0x2b0e1b(0x1f8)](_0x392ee5, _0x4309ed, _0x4e949e) {
-            var _0x4dd21d = _0x2b0e1b;
-            if (_0x4dd21d(0x202) === _0x4dd21d(0x202)) {
-                var _0x24055e, _0x3f7062;
-                return _0x24055e = ![], _0x3f7062 = setTimeout(function () {
-                    if (_0x24055e)
-                        return;
-                    return _0x24055e = !![], _0x4309ed();
-                }, _0x4e949e), function (..._0x153e7a) {
-                    var _0x588548 = _0x4dd21d;
-                    if (_0x24055e)
-                        return;
-                    return _0x24055e = !![], clearTimeout(_0x3f7062), _0x392ee5[_0x588548(0x201)](this, _0x153e7a);
-                };
-            } else
-                _0x138b56[_0x4dd21d(0x200)](_0x4c2c5d['\x69\x64']);
-        }
+
+NetMessage = (function() {
+  class NetMessage {
+    constructor(socket1) {
+      this.socket = socket1;
+      this.name = "trace";
+      this.from = "";
+      this.to = "";
+      this.data = "";
+      //@myMapId = 0
+      //@myPlayerIndex = -1 # * -1 = server
+      this.waited = false;
     }
-    ;
-    return _0x5dac58['\x53\x6f\x63\x6b\x65\x74'] = null, _0x5dac58;
-}[_0x1d61ae(0x1e7)](this), window[_0x1d61ae(0x1f1)] = NetMessage, window['\x4e\x65\x74\x4d\x65\x73\x73\x61\x67\x65'] = NetMessage;
+
+    setName(name) {
+      this.name = name;
+      return this;
+    }
+
+    setTo(socketId) {
+      this.to = socketId;
+      return this;
+    }
+
+    setFrom(socketId) {
+      this.from = socketId;
+      return this;
+    }
+
+    setData(data) {
+      this.data = data;
+      return this;
+    }
+
+    fullName() {
+      if ((this.data != null) && this.data.id) {
+        return this.name + "_" + this.data.id;
+      } else {
+        return this.name;
+      }
+    }
+
+    //setWait: (symbol) ->
+    //    @waited = true
+    //    Network.waitServerResponse @, symbol
+    //    @
+
+      //setRepeat: (symbol) ->
+    //    @waited = true
+    //    Network.waitServerResponseRepeated @, symbol
+    //    @
+
+      //TODO: @socket.to.emit? комната?
+    send(data) {
+      this.socket.emit(this.name, this._makeData(data));
+      return this;
+    }
+
+    callback(method, data) {
+      this.socket.emit(this.name, this._makeData(data), method);
+      return this;
+    }
+
+    get(methodA, methodB, timeout, data) {
+      var timeoutFunc;
+      timeoutFunc = NetMessage.WithTimeout;
+      this.socket.emit(this.name, this._makeData(data), timeoutFunc(methodA, methodB, timeout));
+      return this;
+    }
+
+    //TODO: наверное тут не надо
+    broadcast(data) {
+      return this.socket.broadcast.emit(this.name, this._makeData(data));
+    }
+
+    _makeData(data = null) {
+      var netData;
+      netData = {};
+      if (data == null) {
+        data = this.data;
+      } else {
+        this.data = data;
+      }
+      netData.data = data;
+      netData.from = this.from;
+      netData.to = this.to;
+      netData.waited = this.waited;
+      return netData;
+    }
+
+    static SetOwnSocket(socket) {
+      return NetMessage.Socket = socket;
+    }
+
+    static Trace(text, socket) {
+      return this.EmptyMessage(socket).setName("trace").setData(text);
+    }
+
+    static EmptyMessage(socket = null) {
+      var msg, targetSocket;
+      targetSocket = socket;
+      if (socket == null) {
+        targetSocket = this.Socket;
+      }
+      msg = new NetMessage(targetSocket);
+      if (targetSocket != null) {
+        msg.setFrom(targetSocket.id);
+      }
+      return msg;
+    }
+
+    static EmptyMessageWithFlag(flagName, data, socket = null) {
+      var msg;
+      msg = this.EmptyMessage(socket);
+      msg.setData({
+        id: flagName,
+        content: data
+      });
+      return msg;
+    }
+
+    static WithTimeout(onSuccess, onTimeout, timeout) {
+      var called, timer;
+      called = false;
+      timer = setTimeout(function() {
+        if (called) {
+          return;
+        }
+        called = true;
+        return onTimeout();
+      }, timeout);
+      return function(...args) {
+        if (called) {
+          return;
+        }
+        called = true;
+        clearTimeout(timer);
+        return onSuccess.apply(this, args);
+      };
+    }
+
+  };
+
+  // * Сокет текущего клиента (по умолчанию)
+  NetMessage.Socket = null;
+
+  return NetMessage;
+
+}).call(this);
+
+//@[EXTENDD]
+window.NMS = NetMessage;
+
+window.NetMessage = NetMessage;
+
+// ■ END NetMessage.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.6.1
 //@[GLOBAL]
@@ -9934,7 +16962,7 @@ NetPlayerDataWrapper = function() {};
     };
   };
   _.isHaveCharacterInGame = function(p) {
-    return p.characterReady === true && p.actorId > 0;
+    return (p != null) && p.characterReady === true && p.actorId > 0;
   };
   _.isOnMapScene = function(p) {
     return this.isCharOnMap(p) && p.scene === "map";
@@ -10185,917 +17213,744 @@ NetworkClientHandler = class NetworkClientHandler {
 //---------------------------------------------------------------------------
 
 
-var _0x363259 = _0x59c4;
-function _0x59c4(_0x5c4c95, _0x4fdbfa) {
-    var _0x3f62e1 = _0x3f62();
-    return _0x59c4 = function (_0x59c42f, _0x3ee90e) {
-        _0x59c42f = _0x59c42f - 0xb2;
-        var _0x50df23 = _0x3f62e1[_0x59c42f];
-        return _0x50df23;
-    }, _0x59c4(_0x5c4c95, _0x4fdbfa);
-}
-(function (_0x126efe, _0x5be257) {
-    var _0x3334e2 = _0x59c4, _0x2c99b4 = _0x126efe();
-    while (!![]) {
-        try {
-            var _0xd3e28f = -parseInt(_0x3334e2(0xd1)) / 0x1 + -parseInt(_0x3334e2(0xb7)) / 0x2 * (-parseInt(_0x3334e2(0xb9)) / 0x3) + -parseInt(_0x3334e2(0xb5)) / 0x4 * (parseInt(_0x3334e2(0xca)) / 0x5) + -parseInt(_0x3334e2(0xd3)) / 0x6 * (-parseInt(_0x3334e2(0xbe)) / 0x7) + parseInt(_0x3334e2(0xcb)) / 0x8 + -parseInt(_0x3334e2(0xcc)) / 0x9 * (parseInt(_0x3334e2(0xc7)) / 0xa) + parseInt(_0x3334e2(0xc0)) / 0xb;
-            if (_0xd3e28f === _0x5be257)
-                break;
-            else
-                _0x2c99b4['push'](_0x2c99b4['shift']());
-        } catch (_0x4a49be) {
-            _0x2c99b4['push'](_0x2c99b4['shift']());
-        }
-    }
-}(_0x3f62, 0xbf183), window[_0x363259(0xcf)] = function () {
-}, (function () {
-    var _0xdbbb0 = _0x363259, _0x1563b8, _0x474613;
-    _0x1563b8 = new KDCore[(_0xdbbb0(0xd2))](_0xdbbb0(0xb8)), _0x1563b8[_0xdbbb0(0xc3)](KDCore[_0xdbbb0(0xb3)]['\x42\x4c\x55\x45'][_0xdbbb0(0xc1)](0x41), KDCore[_0xdbbb0(0xb3)]['\x42\x4c\x41\x43\x4b'][_0xdbbb0(0xc1)](0x41)), _0x1563b8['\x6f\x6e'](), _0x474613 = window[_0xdbbb0(0xcf)], _0x474613[_0xdbbb0(0xc8)] = function (_0x1cce21, _0x5bddde, _0x4bf762, _0x596ead, _0x906e04) {
-        var _0x512996 = _0xdbbb0;
-        if (_0x512996(0xce) === _0x512996(0xce)) {
-            var _0x20cdf1;
-            try {
-                if (!ANNetwork[_0x512996(0xb2)]()) {
-                    if ('\x67\x43\x61\x64\x52' === _0x512996(0xc5))
-                        _0x2818c1(function () {
-                            var _0xaec190 = _0x512996;
-                            if (_0x21809e['\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65'] != null)
-                                return _0x56ce17[_0xaec190(0xbc)](_0xc6a504);
-                        }, 0x190);
-                    else
-                        return;
-                }
-                return ANNetwork['\x73\x65\x74\x57\x61\x69\x74'](), String['\x61\x6e\x79'](_0x906e04) && setTimeout(function () {
-                    var _0x15189a = _0x512996;
-                    if ('\x62\x75\x49\x71\x6c' !== _0x15189a(0xb6)) {
-                        if (ANClientResponceManager['\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65'] != null)
-                            return nAPI[_0x15189a(0xbc)](_0x906e04);
-                    } else
-                        return _0x150f13 = _0x5776c3, _0x42da68['\x77'](_0x124945);
-                }, 0x190), ANClientResponceManager['\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65'] = {
-                    '\x69\x64': _0x1cce21[_0x512996(0xc2)](),
-                    '\x74\x69\x6d\x65\x6f\x75\x74': setTimeout(function () {
-                        var _0x21dd63 = _0x512996;
-                        return ANClientResponceManager[_0x21dd63(0xbb)](), _0x4bf762();
-                    }, _0x596ead),
-                    '\x63\x61\x6c\x6c\x62\x61\x63\x6b': _0x5bddde
-                }, console[_0x512996(0xcd)](ANClientResponceManager[_0x512996(0xb4)]['\x69\x64']), ANNetwork[_0x512996(0xc6)](_0x1cce21);
-            } catch (_0x5a1fa4) {
-                return _0x20cdf1 = _0x5a1fa4, ANET['\x77'](_0x20cdf1);
-            }
-        } else {
-            if (_0x175292[_0x512996(0xb4)] == null)
-                return;
-            _0x2cad2f['\x72\x65\x73\x65\x74\x57\x61\x69\x74'](), _0x547459['\x68\x69\x64\x65\x49\x6e\x66\x6f\x4d\x65\x73\x73\x61\x67\x65'](), _0x10c5f1(_0x1fcfe7[_0x512996(0xb4)]['\x74\x69\x6d\x65\x6f\x75\x74']), _0x1b918a[_0x512996(0xb4)] = null;
-        }
-    }, _0x474613[_0xdbbb0(0xba)] = function (_0x1246f3, _0x50f98a) {
-        var _0x24d299 = _0xdbbb0;
-        if (_0x24d299(0xd0) === _0x24d299(0xbf))
-            return;
-        else {
-            var _0x36360c;
-            if (ANClientResponceManager['\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65'] == null)
-                return;
-            _0x36360c = ANClientResponceManager[_0x24d299(0xb4)], _0x36360c['\x69\x64'] === _0x1246f3 && ('\x4a\x5a\x6b\x79\x52' === '\x44\x72\x61\x6e\x6f' ? (this['\x5f\x63\x6f\x6e\x74\x69\x6e\x75\x65\x47\x61\x6d\x65\x50\x72\x6f\x63\x65\x73\x73'](), _0x276881[_0x24d299(0xd4)](_0x286453)) : (this[_0x24d299(0xbb)](), _0x36360c[_0x24d299(0xd4)](_0x50f98a)));
-        }
-    }, _0x474613[_0xdbbb0(0xbb)] = function () {
-        var _0x22bf93 = _0xdbbb0;
-        if ('\x61\x6d\x56\x6f\x61' !== _0x22bf93(0xbd)) {
-            if (ANClientResponceManager[_0x22bf93(0xb4)] == null)
-                return;
-            ANNetwork[_0x22bf93(0xd5)](), nAPI[_0x22bf93(0xc4)](), clearTimeout(ANClientResponceManager['\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65'][_0x22bf93(0xc9)]), ANClientResponceManager[_0x22bf93(0xb4)] = null;
-        } else
-            return _0x5b3f64['\x5f\x63\x6f\x6e\x74\x69\x6e\x75\x65\x47\x61\x6d\x65\x50\x72\x6f\x63\x65\x73\x73'](), _0x793368();
-    };
-}()));
-function _0x3f62() {
-    var _0x16533b = [
-        '\x41\x4e\x43\x6c\x69\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x48\x55\x7a\x46\x78',
-        '\x31\x32\x30\x35\x33\x35\x39\x7a\x72\x6d\x73\x4c\x4e',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x31\x33\x38\x6d\x77\x5a\x4e\x48\x48',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x72\x65\x73\x65\x74\x57\x61\x69\x74',
-        '\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x63\x75\x72\x72\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x63\x65',
-        '\x34\x31\x30\x38\x38\x32\x38\x48\x7a\x6c\x79\x4b\x56',
-        '\x57\x73\x6c\x68\x67',
-        '\x36\x35\x32\x30\x72\x6e\x50\x72\x4e\x49',
-        '\x43\x6c\x69\x65\x6e\x74\x52\x65\x73\x70',
-        '\x36\x39\x49\x48\x68\x4a\x67\x61',
-        '\x6f\x6e\x52\x65\x73\x70\x6f\x6e\x63\x65\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x5f\x63\x6f\x6e\x74\x69\x6e\x75\x65\x47\x61\x6d\x65\x50\x72\x6f\x63\x65\x73\x73',
-        '\x73\x68\x6f\x77\x49\x6e\x66\x6f\x4d\x65\x73\x73\x61\x67\x65',
-        '\x69\x4a\x58\x51\x66',
-        '\x32\x32\x36\x36\x34\x36\x74\x66\x73\x63\x51\x71',
-        '\x4f\x6e\x72\x62\x42',
-        '\x32\x31\x38\x38\x39\x39\x38\x39\x43\x59\x65\x7a\x58\x74',
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x66\x75\x6c\x6c\x4e\x61\x6d\x65',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x68\x69\x64\x65\x49\x6e\x66\x6f\x4d\x65\x73\x73\x61\x67\x65',
-        '\x74\x59\x58\x65\x48',
-        '\x73\x65\x6e\x64',
-        '\x36\x37\x31\x30\x43\x6a\x51\x47\x67\x69',
-        '\x73\x65\x6e\x64\x52\x65\x73\x70\x6f\x6e\x63\x65',
-        '\x74\x69\x6d\x65\x6f\x75\x74',
-        '\x35\x45\x50\x6f\x64\x65\x64',
-        '\x38\x38\x31\x31\x32\x30\x38\x56\x6b\x6d\x47\x70\x69',
-        '\x31\x32\x30\x31\x35\x61\x73\x61\x5a\x58\x57',
-        '\x6c\x6f\x67',
-        '\x62\x79\x57\x50\x42'
-    ];
-    _0x3f62 = function () {
-        return _0x16533b;
-    };
-    return _0x3f62();
-}
+// Generated by CoffeeScript 2.6.1
+// * Данный оперирует запросами данных и ответами от игрока к игроку
 
-var _0x257403 = _0x25c5;
-function _0x25c5(_0x50553d, _0x2b67ff) {
-    var _0x36e26c = _0x36e2();
-    return _0x25c5 = function (_0x25c54d, _0x81d81e) {
-        _0x25c54d = _0x25c54d - 0x139;
-        var _0x350dbc = _0x36e26c[_0x25c54d];
-        return _0x350dbc;
-    }, _0x25c5(_0x50553d, _0x2b67ff);
-}
-(function (_0x9f7f02, _0x532111) {
-    var _0x1575e7 = _0x25c5, _0x3aa9f1 = _0x9f7f02();
-    while (!![]) {
-        try {
-            var _0x345fdf = parseInt(_0x1575e7(0x190)) / 0x1 + -parseInt(_0x1575e7(0x1b5)) / 0x2 * (parseInt(_0x1575e7(0x1c2)) / 0x3) + -parseInt(_0x1575e7(0x159)) / 0x4 + parseInt(_0x1575e7(0x18d)) / 0x5 + parseInt(_0x1575e7(0x1bb)) / 0x6 * (parseInt(_0x1575e7(0x18b)) / 0x7) + parseInt(_0x1575e7(0x19b)) / 0x8 * (-parseInt(_0x1575e7(0x1e5)) / 0x9) + parseInt(_0x1575e7(0x15b)) / 0xa;
-            if (_0x345fdf === _0x532111)
-                break;
-            else
-                _0x3aa9f1['push'](_0x3aa9f1['shift']());
-        } catch (_0x3e57d6) {
-            _0x3aa9f1['push'](_0x3aa9f1['shift']());
-        }
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANClientResponceManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("ClientResp");
+  LOG.setColors(KDCore.Color.BLUE.getLightestColor(65), KDCore.Color.BLACK.getLightestColor(65));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANClientResponceManager;
+  // * Отправить сообщение и ждать результат
+  // * Тут результат должен прийти от другого клиента
+  //? Этот метод тормозит всю игру
+  //%[Главный метод отправки запроса данных]
+  _.sendResponce = function(msg, onResponce, onTimeout, timeoutTime, infoMessage) {
+    var e;
+    try {
+      if (!ANNetwork.isConnected()) {
+        return;
+      }
+      ANNetwork.setWait();
+      // * Показывам с задержкой, чтобы не было мелькания, если данные пришли сразу
+      if (String.any(infoMessage)) {
+        setTimeout((function() {
+          if (ANClientResponceManager.currentResponce != null) {
+            return nAPI.showInfoMessage(infoMessage);
+          }
+        }), 400);
+      }
+      ANClientResponceManager.currentResponce = {
+        id: msg.fullName(),
+        timeout: setTimeout((function() {
+          ANClientResponceManager._continueGameProcess();
+          return onTimeout();
+        }), timeoutTime),
+        callback: onResponce
+      };
+      console.log(ANClientResponceManager.currentResponce.id);
+      return ANNetwork.send(msg);
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
     }
-}(_0x36e2, 0xa1e03), window[_0x257403(0x179)] = function () {
-}, (function () {
-    var _0x32552d = _0x257403, _0x16df94, _0x3c147a;
-    _0x16df94 = new KDCore[(_0x32552d(0x1cf))](_0x32552d(0x19e)), _0x16df94['\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73'](KDCore[_0x32552d(0x172)]['\x41\x51\x55\x41'], KDCore[_0x32552d(0x172)][_0x32552d(0x165)][_0x32552d(0x1e4)](0x23)), _0x16df94['\x6f\x6e'](), _0x3c147a = window[_0x32552d(0x179)], _0x3c147a[_0x32552d(0x1ff)] = function () {
-        var _0xc938ce = _0x32552d;
-        return this[_0xc938ce(0x1e3)] != null;
-    }, _0x3c147a[_0x32552d(0x1ab)] = function () {
-        var _0x9a68c4 = _0x32552d;
-        return this['\x72\x65\x73\x65\x74'](), this[_0x9a68c4(0x16d)](), ANPlayersManager[_0x9a68c4(0x181)]();
-    }, _0x3c147a[_0x32552d(0x13c)] = function () {
-        var _0x2568da = _0x32552d;
-        this[_0x2568da(0x1cd)] = ![], this[_0x2568da(0x1e3)] = null, this['\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61'] = null, ANBattleManager[_0x2568da(0x206)] = null;
-    }, _0x3c147a[_0x32552d(0x16d)] = function () {
-        var _0x5613f7 = _0x32552d;
-        this['\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61'] = [], this[_0x5613f7(0x205)][_0x5613f7(0x161)](NetPlayerDataWrapper[_0x5613f7(0x1ef)]());
-    }, _0x3c147a['\x69\x73\x49\x6e\x69\x74\x65\x64'] = function () {
-        var _0x50c807 = _0x32552d;
-        return this[_0x50c807(0x205)] != null;
-    }, _0x3c147a[_0x32552d(0x1a3)] = function () {
-        var _0x319061 = _0x32552d;
-        return _0x319061(0x17c) === '\x49\x66\x6d\x6c\x75' ? this[_0x319061(0x1f2)](ANNetwork['\x6d\x79\x49\x64']()) : _0x2acb71['\x73\x61\x76\x65\x4f\x62\x6a\x65\x63\x74\x46\x6f\x72\x4e\x65\x74'](_0x195a50)[_0x319061(0x180)](function () {
-            var _0x18860a = _0x319061;
-            return _0x82a4e1[_0x18860a(0x17d)](_0x21271f['\x47\x61\x6d\x65'](_0x18860a(0x204), {
-                '\x77\x68\x6f\x52\x65\x71\x75\x65\x73\x74\x49\x64': _0x35c43c,
-                '\x67\x61\x6d\x65\x44\x61\x74\x61': _0x48abf8[_0x18860a(0x1c6)]
-            })), _0x5c2bc7[_0x18860a(0x1c6)] = null;
-        });
-    }, _0x3c147a['\x6d\x79\x41\x63\x74\x6f\x72\x49\x64'] = function () {
-        var _0xad6335 = _0x32552d;
-        if ('\x46\x51\x4b\x7a\x73' === '\x6a\x6a\x45\x57\x56')
-            _0x58ed3f = _0xad6335(0x1f3);
-        else
-            return this['\x6d\x79\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61']()[_0xad6335(0x1b7)];
-    }, _0x3c147a['\x6d\x79\x49\x6e\x64\x65\x78'] = function () {
-        var _0x18d7de = _0x32552d;
-        if (_0x18d7de(0x191) !== _0x18d7de(0x191))
-            _0x59dab5['\x5f\x61\x63\x74\x6f\x72\x73'][_0x18d7de(0x161)](_0xa04279[_0x18d7de(0x1b7)]);
-        else
-            return this[_0x18d7de(0x1a3)]()[_0x18d7de(0x1e2)];
-    }, _0x3c147a['\x69\x73\x4d\x61\x70\x4d\x61\x73\x74\x65\x72'] = function () {
-        var _0x186dd1 = _0x32552d;
-        return this[_0x186dd1(0x1a3)]()[_0x186dd1(0x1fb)] === !![];
-    }, _0x3c147a[_0x32552d(0x1f5)] = function () {
-        var _0x21353b = _0x32552d;
-        if (_0x21353b(0x19a) === _0x21353b(0x18a)) {
-            var _0x4013bd;
-            return _0x4013bd = this[_0x21353b(0x1f6)](), this[_0x21353b(0x205)][_0x21353b(0x1e1)](function (_0x1745f9) {
-                var _0x23d7ea = _0x21353b;
-                return _0x1745f9[_0x23d7ea(0x1e2)] !== _0x4013bd;
-            });
-        } else
-            return ANBattleManager['\x69\x73\x42\x61\x74\x74\x6c\x65\x4d\x61\x73\x74\x65\x72']();
-    }, _0x3c147a[_0x32552d(0x139)] = function (_0x1bec28) {
-        var _0x4f4b7a = _0x32552d, _0xfdb1dc;
-        return _0xfdb1dc = this[_0x4f4b7a(0x205)][_0x4f4b7a(0x156)](function (_0x230d5e) {
-            return _0x230d5e['\x69\x64'] === _0x1bec28;
-        }), _0xfdb1dc != null;
-    }, _0x3c147a['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64'] = function (_0x267613) {
-        var _0xa609cd = _0x32552d, _0x442480;
-        _0x442480 = this[_0xa609cd(0x205)][_0xa609cd(0x156)](function (_0x3ffc0d) {
-            return _0x3ffc0d['\x69\x64'] === _0x267613;
-        });
-        if (_0x442480 != null)
-            return _0x442480;
-        else
-            ANET['\x77'](_0xa609cd(0x1d7) + _0x267613 + '\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x21');
+  };
+  // * Данный метод вызывается когда приходит ответ от сервера
+  // * (когда приходят данные от другого клиента)
+  _.onResponceReceived = function(responceName, data) {
+    var r;
+    if (ANClientResponceManager.currentResponce == null) {
+      return;
+    }
+    r = ANClientResponceManager.currentResponce;
+    // * Надо проверить что этот ответ именно я жду
+    if (r.id === responceName) {
+      this._continueGameProcess();
+      r.callback(data);
+    }
+  };
+  // * Продолжить игровую логику (скрыть сообщение, убрать Timeout)
+  _._continueGameProcess = function() {
+    if (ANClientResponceManager.currentResponce == null) {
+      return;
+    }
+    ANNetwork.resetWait();
+    nAPI.hideInfoMessage();
+    clearTimeout(ANClientResponceManager.currentResponce.timeout);
+    ANClientResponceManager.currentResponce = null;
+  };
+})();
+
+
+// Generated by CoffeeScript 2.6.1
+// * Данный класс хранит сетевые методы игры
+
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANGameManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("NetGame");
+  LOG.setColors(KDCore.Color.AQUA, KDCore.Color.BLACK.getLightestColor(35));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANGameManager;
+  _.isShouldWaitServer = function() {
+    return this._waitMode != null;
+  };
+  // * Инициализация начальных данных (при подключении надо вызывать)
+  _.init = function() {
+    this.reset();
+    this.createMyPlayerData();
+    return ANPlayersManager.sendPlayerName();
+  };
+  // * Когда происходит отключение от сервера
+  _.reset = function() {
+    // * Флаг что игра только началась и надо установить персонажа когда карта загрузится
+    this.networkGameStarted = false;
+    this._waitMode = null;
+    this.playersData = null;
+    ANBattleManager.battleData = null;
+  };
+  _.createMyPlayerData = function() {
+    // * Данные всех игроков в игре
+    this.playersData = [];
+    // * Сразу добавляем себя
+    this.playersData.push(NetPlayerDataWrapper.createLocal());
+  };
+  _.isInited = function() {
+    return this.playersData != null;
+  };
+  _.myPlayerData = function() {
+    return this.getPlayerDataById(ANNetwork.myId());
+  };
+  _.myActorId = function() {
+    return this.myPlayerData().actorId;
+  };
+  _.myIndex = function() {
+    return this.myPlayerData().index;
+  };
+  _.isMapMaster = function() {
+    return this.myPlayerData().isMapMaster === true;
+  };
+  _.isActorIsBinded = function() {
+    return this.myActorId() !== 0;
+  };
+  // * Дублируется для удобства
+  _.isBattleMaster = function() {
+    return ANBattleManager.isBattleMaster();
+  };
+  _.isPlayerDataExists = function(id) {
+    var data;
+    data = this.playersData.find(function(p) {
+      return p.id === id;
+    });
+    return data != null;
+  };
+  _.getPlayerDataById = function(id) {
+    var data, e;
+    if (this.playersData == null) {
+      return null;
+    }
+    try {
+      data = this.playersData.find(function(p) {
+        return p.id === id;
+      });
+      if (data != null) {
+        return data;
+      } else {
+        ANET.w("Player data for " + id + " not found!");
+        this.requestDataClearFor(id);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+    return null;
+  };
+  _.requestDataClearFor = function(netId) {
+    var e;
+    try {
+
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _.getPlayerDataByActorId = function(actorId) {
+    var data;
+    data = this.playersData.find(function(p) {
+      return p.actorId === actorId;
+    });
+    if (data != null) {
+      return data;
+    } else {
+      ANET.w("Player data for Actor with ID " + actorId + " not found!");
+    }
+    return null;
+  };
+  // * Получить данные об игроке
+  //? what && byWhat: actor, actorId, netId, actorName, playerName, playerIndex, info
+  _.getPlayerInfo = function(what, byWhat, value) {
+    var actorWithName, actors, e, playerData;
+    if (what === byWhat) {
+      return value;
+    }
+    if (value == null) {
+      return null;
+    }
+    playerData = null;
+    try {
+      switch (byWhat) {
+        case "actorId":
+          playerData = this.getPlayerDataByActorId(value);
+          break;
+        case "netId":
+          playerData = this.getPlayerDataById(value);
+          break;
+        case "actor":
+          playerData = this.getPlayerDataByActorId(value.actorId());
+          break;
+        case "actorName":
+          actors = this.playersData.map(function(d) {
+            return $gameActors.actor(d.actorId);
+          });
+          actorWithName = actors.find(function(a) {
+            return a.name() === value;
+          });
+          if (actorWithName != null) {
+            playerData = this.getPlayerDataByActorId(actorWithName.actorId());
+          }
+          break;
+        case "playerName":
+          playerData = this.playersData.getByField("name", value);
+          break;
+        case "playerIndex":
+          playerData = this.playersData.getByField("index", value);
+          break;
+        case "info":
+          playerData = value;
+          break;
+        default:
+          ANET.w("Unknown field: " + byWhat + ", info not finded");
+      }
+      if (playerData == null) {
         return null;
-    }, _0x3c147a[_0x32552d(0x13e)] = function (_0x1b0743) {
-        var _0x559175 = _0x32552d;
-        if (_0x559175(0x1cb) !== '\x66\x63\x73\x54\x69')
-            this['\x73\x74\x61\x74\x69\x63\x41\x63\x74\x6f\x72\x42\x69\x6e\x67\x69\x6e\x67']();
-        else {
-            var _0x1de374;
-            _0x1de374 = this[_0x559175(0x205)]['\x66\x69\x6e\x64'](function (_0xcf125b) {
-                var _0x21c191 = _0x559175;
-                return _0xcf125b[_0x21c191(0x1b7)] === _0x1b0743;
-            });
-            if (_0x1de374 != null)
-                return _0x1de374;
-            else
-                _0x559175(0x169) === _0x559175(0x169) ? ANET['\x77']('\x50\x6c\x61\x79\x65\x72\x20\x64\x61\x74\x61\x20\x66\x6f\x72\x20\x41\x63\x74\x6f\x72\x20\x77\x69\x74\x68\x20\x49\x44\x20' + _0x1b0743 + _0x559175(0x194)) : (this['\x6f\x6e\x52\x6f\x6f\x6d\x50\x6c\x61\x79\x65\x72\x73'](_0x149f92), this['\x72\x65\x66\x72\x65\x73\x68\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x74\x65\x73'](), _0x42b50c[_0x559175(0x14b)]());
-            return null;
+      }
+      switch (what) {
+        case "actorId":
+          return playerData.actorId;
+        case "netId":
+          return playerData.id;
+        case "actorName":
+          // * Можно рекурсией, через Actor, но для производительности пусть будет так
+          actorWithName = $gameActors.actor(playerData.actorId);
+          if (actorWithName != null) {
+            return actorWithName.name();
+          } else {
+            return "";
+          }
+          break;
+        case "playerName":
+          return playerData.name;
+        case "playerIndex":
+          return playerData.index;
+        case "actor":
+          return $gameActors.actor(playerData.actorId); // * info
+        default:
+          return playerData;
+      }
+      return null;
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+      return null;
+    }
+  };
+  _.setupNewNetworkGame = function() {
+    this.networkGameStarted = true;
+    return $gameParty.setupNetworkGame();
+  };
+  // * Когда клиент переходит на новую (другую) карту (а не на туже самую)
+  _.onNewGameMapSetup = function() {
+    // * На всякий случай и тут отключу
+    $gameTemp._nLocalActorMode = false;
+    this._shouldWaitPlayerOnSameMap = ANNetwork.isSameMapMode();
+  };
+  // * Когда на клиенте загрузилась карта
+  _.onMapLoaded = function() {
+    // * Отправляем что мы на карте (загрузились)
+    ANMapManager.sendMapLoaded();
+    // * Отправляем начальные данные (позиция игрока)
+    ANMapManager.sendInitialMapData();
+    // * Сбрасываем торговлю
+    ANTradeManager.onTradeSceneEnd();
+    // * Если загрузка
+    if (ANET.Utils.isLoadGameRoom()) {
+      // * Ждём игроков (Только при параметре)
+      if (this._shouldWaitPlayerOnSameMap === true) {
+        this.setWait('playersOnMap');
+      } else {
+        this.bindingActors(); // * Присвоение персонажей
+      }
+    } else {
+      // * Ждём игроков (при параметре и если новая игра (чтобы начать события например))
+      if (this._shouldWaitPlayerOnSameMap === true || this.networkGameStarted === true) {
+        this.setWait('playersOnMap');
+      } else {
+        this.onRefreshGameParty();
+      }
+    }
+  };
+  _.setWait = function(_waitMode) {
+    this._waitMode = _waitMode;
+    return HUIManager.showLoader(500);
+  };
+  _.resetWait = function() {
+    this.setWait(null);
+    return HUIManager.hideLoader();
+  };
+  //  * Все ли игроки на данной карте (и сцене)
+  _.isAllPlayerOnSameMap = function() {
+    //TODO: проверка что на сцене отдельно
+    return this.playersData.every(function(p) {
+      return p.mapId === $gameMap.mapId();
+    });
+  };
+  // * Другие игроки (кроме этого клиента)
+  _.anotherPlayers = function() {
+    var myIndex;
+    myIndex = this.myIndex();
+    return this.playersData.filter(function(p) {
+      return p.index !== myIndex;
+    });
+  };
+  // * Все игроки (кроме клиента) на текущей карте (именно на карте, не обязательно на Сцене карты)
+  _.anotherPlayersOnMap = function() {
+    return this.anotherPlayers().filter(function(p) {
+      return NetPlayerDataWrapper.isCharOnMap(p);
+    });
+  };
+  // * Все ли игроки настроили персонажей
+  _.isAllPlayersActorsReady = function() {
+    return this.playersData.every(function(p) {
+      return p.characterReady === true;
+    });
+  };
+  // * Обновить иконку состояния игроков
+  _.refreshNetworkStates = function() {
+    var char, j, len, p, players, stateId;
+    if (!ANET.PP.isShowNetworkIcons()) {
+      return;
+    }
+    // * Используется _, так как метод вызывается в отдельном потоке тоже
+    players = this.anotherPlayersOnMap();
+    for (j = 0, len = players.length; j < len; j++) {
+      p = players[j];
+      stateId = NetPlayerDataWrapper.getRequestedNetworkState(p);
+      char = NetPlayerDataWrapper.getNetCharacterForPlayer(p);
+      if (char != null) {
+        char.requestNetworkStateIcon(stateId);
+      }
+    }
+  };
+  // * Задаём игрового персонажа
+  _.bindingActors = function() {
+    "START BINDING ACTORS".p();
+    this.networkGameStarted = false;
+    if (ANET.PP.isActorSelectionAllowed() || ANET.Utils.isLoadGameRoom()) {
+      this.actorBingingFromSelection();
+    } else {
+      this.staticActorBinging();
+    }
+  };
+  // * Персонаж, выбранный из списка
+  _.actorBingingFromSelection = function() {
+    var e;
+    // * Так как персонаж уже был выбран в лобби, то сразу отправляем готовнотсть
+    ANPlayersManager.sendActorReady();
+    try {
+      this.onPlayerCharacterIsBinded();
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+  };
+  // * Статический режимм присвоения персонажа
+  _.staticActorBinging = function() {
+    var actorId;
+    // * -1, так как myIndex начинается с 1, а массив с 0
+    actorId = ANET.PP.actorsForNetwork()[this.myIndex() - 1];
+    //  * Пытаемся зарезервировать персонажа
+    ANPlayersManager.sendBindActorFromGame(actorId);
+  };
+  // * Ожидание данных (игроков) от сервера
+  _.updateWaiting = function() {
+    if (!this.isShouldWaitServer()) {
+      return;
+    }
+    switch (this._waitMode) {
+      case 'playersOnMap':
+        if (this.isAllPlayerOnSameMap()) {
+          this.resetWait();
+          this._shouldWaitPlayerOnSameMap = false;
+          if (this.networkGameStarted === true) {
+            this.bindingActors();
+          }
         }
-    }, _0x3c147a[_0x32552d(0x210)] = function (_0x2d6310, _0x90b503, _0x474242) {
-        var _0x13cbf2 = _0x32552d;
-        if (_0x13cbf2(0x199) === _0x13cbf2(0x1d6))
-            this[_0x13cbf2(0x1e8)]();
-        else {
-            var _0x35ec2b, _0x2f9e95, _0x3d2630, _0x2f3fda;
-            if (_0x2d6310 === _0x90b503)
-                return _0x474242;
-            if (_0x474242 == null) {
-                if (_0x13cbf2(0x171) !== '\x69\x44\x68\x63\x4c')
-                    _0x43e0df[_0x13cbf2(0x184)](_0x32178d);
-                else
-                    return null;
-            }
-            _0x2f3fda = null;
-            try {
-                if (_0x13cbf2(0x1d3) === _0x13cbf2(0x158))
-                    return this[_0x13cbf2(0x205)][_0x13cbf2(0x1df)](function (_0x3e7987) {
-                        return _0x3e7987['\x63\x68\x61\x72\x61\x63\x74\x65\x72\x52\x65\x61\x64\x79'] === !![];
-                    });
-                else {
-                    switch (_0x90b503) {
-                    case _0x13cbf2(0x1b7):
-                        _0x2f3fda = this['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x41\x63\x74\x6f\x72\x49\x64'](_0x474242);
-                        break;
-                    case _0x13cbf2(0x182):
-                        _0x2f3fda = this[_0x13cbf2(0x1f2)](_0x474242);
-                        break;
-                    case _0x13cbf2(0x16c):
-                        _0x2f3fda = this[_0x13cbf2(0x13e)](_0x474242[_0x13cbf2(0x1b7)]());
-                        break;
-                    case _0x13cbf2(0x1c0):
-                        _0x2f9e95 = this[_0x13cbf2(0x205)][_0x13cbf2(0x13b)](function (_0x110005) {
-                            var _0x29a728 = _0x13cbf2;
-                            return $gameActors[_0x29a728(0x16c)](_0x110005[_0x29a728(0x1b7)]);
-                        }), _0x35ec2b = _0x2f9e95[_0x13cbf2(0x156)](function (_0x461b7b) {
-                            return _0x461b7b['\x6e\x61\x6d\x65']() === _0x474242;
-                        });
-                        _0x35ec2b != null && (_0x2f3fda = this['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x41\x63\x74\x6f\x72\x49\x64'](_0x35ec2b[_0x13cbf2(0x1b7)]()));
-                        break;
-                    case _0x13cbf2(0x145):
-                        _0x2f3fda = this[_0x13cbf2(0x205)][_0x13cbf2(0x173)](_0x13cbf2(0x1b3), _0x474242);
-                        break;
-                    case _0x13cbf2(0x19f):
-                        _0x2f3fda = this[_0x13cbf2(0x205)]['\x67\x65\x74\x42\x79\x46\x69\x65\x6c\x64'](_0x13cbf2(0x1e2), _0x474242);
-                        break;
-                    case _0x13cbf2(0x1f7):
-                        _0x2f3fda = _0x474242;
-                        break;
-                    default:
-                        ANET['\x77']('\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x66\x69\x65\x6c\x64\x3a\x20' + _0x90b503 + _0x13cbf2(0x193));
-                    }
-                    if (_0x2f3fda == null)
-                        return null;
-                    switch (_0x2d6310) {
-                    case '\x61\x63\x74\x6f\x72\x49\x64':
-                        return _0x2f3fda[_0x13cbf2(0x1b7)];
-                    case _0x13cbf2(0x182):
-                        return _0x2f3fda['\x69\x64'];
-                    case _0x13cbf2(0x1c0):
-                        _0x35ec2b = $gameActors[_0x13cbf2(0x16c)](_0x2f3fda['\x61\x63\x74\x6f\x72\x49\x64']);
-                        return _0x35ec2b != null ? _0x13cbf2(0x186) === _0x13cbf2(0x186) ? _0x35ec2b['\x6e\x61\x6d\x65']() : (_0x4d2f78 = _0x19cbc1[_0x13cbf2(0x198)](), _0x1ab716[_0x13cbf2(0x1b1)]() ? _0x48b7c1[_0x13cbf2(0x20e)](_0x14be87)['\x74\x68\x65\x6e'](function () {
-                            var _0x31f93d = _0x13cbf2;
-                            return _0x32729d[_0x31f93d(0x17d)](_0x18a19e['\x47\x61\x6d\x65'](_0x31f93d(0x204), {
-                                '\x77\x68\x6f\x52\x65\x71\x75\x65\x73\x74\x49\x64': _0xc4d7cf,
-                                '\x67\x61\x6d\x65\x44\x61\x74\x61': _0x3136b4[_0x31f93d(0x1c6)]
-                            })), _0x24445a['\x5f\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x73\x70\x6f\x6e\x73\x65'] = null;
-                        }) : (_0x36e025 = _0xdb5b5a['\x73\x74\x72\x69\x6e\x67\x69\x66\x79'](_0x599ee8[_0x13cbf2(0x198)]()), _0x3c082b[_0x13cbf2(0x17d)](_0x5d8dee['\x47\x61\x6d\x65']('\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61', {
-                            '\x77\x68\x6f\x52\x65\x71\x75\x65\x73\x74\x49\x64': _0x4e54b5,
-                            '\x67\x61\x6d\x65\x44\x61\x74\x61': _0x485b2a
-                        })))) : '';
-                        break;
-                    case '\x70\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65':
-                        return _0x2f3fda[_0x13cbf2(0x1b3)];
-                    case _0x13cbf2(0x19f):
-                        return _0x2f3fda[_0x13cbf2(0x1e2)];
-                    case _0x13cbf2(0x16c):
-                        return $gameActors[_0x13cbf2(0x16c)](_0x2f3fda[_0x13cbf2(0x1b7)]);
-                    default:
-                        return _0x2f3fda;
-                    }
-                    return null;
-                }
-            } catch (_0x30ae9a) {
-                if ('\x78\x73\x46\x68\x6f' === _0x13cbf2(0x1de))
-                    this[_0x13cbf2(0x1e8)]();
-                else
-                    return _0x3d2630 = _0x30ae9a, ANET['\x77'](_0x3d2630), null;
-            }
+        break;
+      case 'playersActors':
+        if (this.isAllPlayersActorsReady()) {
+          this.resetWait();
+          this.startGame();
         }
-    }, _0x3c147a[_0x32552d(0x170)] = function () {
-        var _0xa75f9a = _0x32552d;
-        if ('\x59\x48\x45\x50\x6a' !== '\x59\x48\x45\x50\x6a')
-            this[_0xa75f9a(0x1d1)]();
-        else
-            return this[_0xa75f9a(0x1cd)] = !![], $gameParty['\x73\x65\x74\x75\x70\x4e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65']();
-    }, _0x3c147a['\x6f\x6e\x4e\x65\x77\x47\x61\x6d\x65\x4d\x61\x70\x53\x65\x74\x75\x70'] = function () {
-        var _0x29bf9c = _0x32552d;
-        '\x44\x59\x4b\x7a\x6c' === _0x29bf9c(0x14d) ? ($gameTemp[_0x29bf9c(0x148)] = ![], this[_0x29bf9c(0x163)] = ANNetwork[_0x29bf9c(0x17b)]()) : this[_0x29bf9c(0x1ba)](_0x52de9c, this['\x6d\x79\x41\x63\x74\x6f\x72\x49\x64'](), _0x35efea);
-    }, _0x3c147a[_0x32552d(0x13d)] = function () {
-        var _0x48f1b4 = _0x32552d;
-        if (_0x48f1b4(0x14f) === _0x48f1b4(0x167))
-            return this[_0x48f1b4(0x1cd)] = !![], _0x2f3765[_0x48f1b4(0x146)]();
-        else {
-            ANMapManager['\x73\x65\x6e\x64\x4d\x61\x70\x4c\x6f\x61\x64\x65\x64'](), ANMapManager[_0x48f1b4(0x1c5)](), ANTradeManager[_0x48f1b4(0x1a4)]();
-            if (ANET[_0x48f1b4(0x1fc)][_0x48f1b4(0x155)]()) {
-                if ('\x6e\x72\x4b\x62\x65' === _0x48f1b4(0x16e))
-                    this[_0x48f1b4(0x1c7)](_0x48f1b4(0x1e9));
-                else {
-                    if (this['\x5f\x73\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x4f\x6e\x53\x61\x6d\x65\x4d\x61\x70'] === !![])
-                        this[_0x48f1b4(0x1c7)]('\x70\x6c\x61\x79\x65\x72\x73\x4f\x6e\x4d\x61\x70');
-                    else {
-                        if (_0x48f1b4(0x200) === _0x48f1b4(0x200))
-                            this[_0x48f1b4(0x1e8)]();
-                        else {
-                            var _0x8b5bb0;
-                            _0x8b5bb0 = this[_0x48f1b4(0x1a3)](), this[_0x48f1b4(0x205)] = _0x448856, !this[_0x48f1b4(0x1f2)](_0xd2a65b['\x6d\x79\x49\x64']()) && this[_0x48f1b4(0x205)][_0x48f1b4(0x161)](_0x8b5bb0);
-                        }
-                    }
-                }
-            } else {
-                if (this[_0x48f1b4(0x163)] === !![] || this[_0x48f1b4(0x1cd)] === !![]) {
-                    if ('\x62\x72\x51\x58\x5a' === _0x48f1b4(0x176))
-                        this[_0x48f1b4(0x1c7)](_0x48f1b4(0x1e9));
-                    else
-                        return _0x5a9b6d[_0x48f1b4(0x1f5)]();
-                } else {
-                    if (_0x48f1b4(0x14e) !== _0x48f1b4(0x17e))
-                        this[_0x48f1b4(0x1e7)]();
-                    else
-                        return _0x4950c2['\x55\x49'][_0x48f1b4(0x175)](_0x597664), _0x5040c9['\x55\x49'][_0x48f1b4(0x162)](_0x445b6b);
-                }
-            }
+        break;
+    }
+  };
+  // * Начать игру (когда все уже определились с персонажами)
+  // * just wait manul reset
+  // * Ждёт когда ожидание будет сброшено вручную
+  _.startGame = function() {
+    "READY TO START GAME".p();
+    ANMapManager.sendInitialMapData();
+    if (!ANET.Utils.isLoadGameRoom()) {
+      this.showStartGameChatMessage();
+    }
+  };
+  // * Приветственное сообщение (системное) в чат
+  _.showStartGameChatMessage = function() {
+    var message;
+    if (!ANET.PP.isGameChatAllowed()) {
+      return;
+    }
+    message = ANET.PP.getChatStartMessage();
+    if (!String.any(message)) {
+      return;
+    }
+    ANET.UI.addMessageToChat(ANET.Utils.buildChatMessage(0, 0, message));
+  };
+  // * Когда игрок покидает игру (disconnect)
+  _.anotherPlayerLeaveGame = function(actorId) {
+    var ceId;
+    LOG.p("Player leave game");
+    ceId = ANET.PP.getPlayerLeaveGameCommonEventId();
+    if (ceId > 0) {
+      $gameTemp.reserveCommonEvent(ceId);
+    }
+  };
+  // * После подключения к уже запущенной игре, надо произвести
+  // * корректировки данных
+  _.applyJoinedDataCorrects = function() {
+    var e, ev, j, len, ref, results;
+    try {
+      // * Убираем любое запущенное событие
+      $gameMap._interpreter = new Game_Interpreter();
+      // * Чистим золото и вещи
+      //TODO: Может опцию сделать?
+      $gameParty._gold = 0;
+      $gameParty._weapons = {};
+      $gameParty._armors = {};
+      $gameParty._items = {};
+      $gameParty._inBattle = false;
+      ref = $gameMap._events;
+      // * Отключаем запущенные события
+      results = [];
+      for (j = 0, len = ref.length; j < len; j++) {
+        ev = ref[j];
+        if (ev == null) {
+          continue;
         }
-    }, _0x3c147a[_0x32552d(0x1c7)] = function (_0x38e7cc) {
-        var _0x246971 = _0x32552d;
-        return this[_0x246971(0x1e3)] = _0x38e7cc, HUIManager['\x73\x68\x6f\x77\x4c\x6f\x61\x64\x65\x72'](0x1f4);
-    }, _0x3c147a[_0x32552d(0x1f4)] = function () {
-        var _0x607742 = _0x32552d;
-        return '\x48\x49\x6d\x69\x51' === _0x607742(0x13f) ? (this['\x73\x65\x74\x57\x61\x69\x74'](null), HUIManager[_0x607742(0x1a6)]()) : null;
-    }, _0x3c147a[_0x32552d(0x1eb)] = function () {
-        var _0x71224b = _0x32552d;
-        return this[_0x71224b(0x205)][_0x71224b(0x1df)](function (_0x4545d2) {
-            var _0x4bf99 = _0x71224b;
-            return _0x4545d2['\x6d\x61\x70\x49\x64'] === $gameMap[_0x4bf99(0x1dc)]();
+        results.push(ev._starting = false);
+      }
+      return results;
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _.onPlayerCharacterIsBinded = function() {
+    var d, e, mapId, myActor, params, transferData, x, y;
+    if (!ANET.PP.isCustomStartMap()) {
+      return;
+    }
+    try {
+      myActor = $gameParty.leader().actor();
+      if (KDCore.Utils.hasMeta('nCustomStart', myActor)) {
+        transferData = KDCore.Utils.getValueFromMeta('nCustomStart', myActor);
+        params = transferData.split(",").map(function(i) {
+          return Number(i);
         });
-    }, _0x3c147a[_0x32552d(0x1fe)] = function () {
-        var _0x34d183 = _0x32552d, _0x5d37cb;
-        return _0x5d37cb = this['\x6d\x79\x49\x6e\x64\x65\x78'](), this['\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61'][_0x34d183(0x1e1)](function (_0x3964de) {
-            var _0x1b5593 = _0x34d183;
-            return _0x1b5593(0x20a) === _0x1b5593(0x20a) ? _0x3964de['\x69\x6e\x64\x65\x78'] !== _0x5d37cb : this[_0x1b5593(0x16d)]();
-        });
-    }, _0x3c147a[_0x32552d(0x1ec)] = function () {
-        var _0x384485 = _0x32552d;
-        return this['\x61\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x73']()[_0x384485(0x1e1)](function (_0x378305) {
-            var _0x486399 = _0x384485;
-            if ('\x57\x64\x77\x54\x41' !== _0x486399(0x1b9))
-                return NetPlayerDataWrapper[_0x486399(0x20c)](_0x378305);
-            else
-                _0x1aeca9 = _0x486399(0x1b2);
-        });
-    }, _0x3c147a[_0x32552d(0x197)] = function () {
-        var _0x289c6e = _0x32552d;
-        return this[_0x289c6e(0x205)][_0x289c6e(0x1df)](function (_0x1e22d3) {
-            return _0x1e22d3['\x63\x68\x61\x72\x61\x63\x74\x65\x72\x52\x65\x61\x64\x79'] === !![];
-        });
-    }, _0x3c147a[_0x32552d(0x1ca)] = function () {
-        var _0x4cefd6 = _0x32552d, _0x5624b9, _0x3f90ed, _0x43f01, _0x5e862d, _0x2104f6, _0x2a9b95;
-        if (!ANET['\x50\x50'][_0x4cefd6(0x1d2)]()) {
-            if ('\x70\x6f\x66\x58\x6e' !== '\x70\x6f\x66\x58\x6e')
-                _0x3548bb['\x5f\x6e\x4c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72\x4d\x6f\x64\x65'] = ![], this[_0x4cefd6(0x163)] = _0x377993[_0x4cefd6(0x17b)]();
-            else
-                return;
+        [mapId, x, y, d] = params;
+        if (d == null) {
+          d = 2;
         }
-        _0x2104f6 = this[_0x4cefd6(0x1ec)]();
-        for (_0x3f90ed = 0x0, _0x43f01 = _0x2104f6[_0x4cefd6(0x201)]; _0x3f90ed < _0x43f01; _0x3f90ed++) {
-            if ('\x6e\x64\x53\x43\x71' !== '\x6e\x64\x53\x43\x71')
-                this[_0x4cefd6(0x1cd)] = ![], this[_0x4cefd6(0x1e3)] = null, this[_0x4cefd6(0x205)] = null, _0x55fdcc[_0x4cefd6(0x206)] = null;
-            else {
-                _0x5e862d = _0x2104f6[_0x3f90ed], _0x2a9b95 = NetPlayerDataWrapper[_0x4cefd6(0x1e0)](_0x5e862d), _0x5624b9 = NetPlayerDataWrapper[_0x4cefd6(0x150)](_0x5e862d);
-                if (_0x5624b9 != null) {
-                    if (_0x4cefd6(0x1d8) === '\x75\x68\x6c\x67\x43')
-                        return _0x47f88c = _0x2fcca4, _0x215280['\x77'](_0x578cdb), null;
-                    else
-                        _0x5624b9[_0x4cefd6(0x184)](_0x2a9b95);
-                }
-            }
+        if (x == null) {
+          x = 0;
         }
-    }, _0x3c147a[_0x32552d(0x1e8)] = function () {
-        var _0x80ca44 = _0x32552d;
-        if (_0x80ca44(0x18f) === _0x80ca44(0x15a))
-            return _0x2a3ead[_0x80ca44(0x20c)](_0x45d0f3);
-        else {
-            '\x53\x54\x41\x52\x54\x20\x42\x49\x4e\x44\x49\x4e\x47\x20\x41\x43\x54\x4f\x52\x53'['\x70'](), this[_0x80ca44(0x1cd)] = ![];
-            if (ANET['\x50\x50'][_0x80ca44(0x1b8)]() || ANET[_0x80ca44(0x1fc)][_0x80ca44(0x155)]()) {
-                if ('\x62\x6c\x65\x6a\x6e' !== '\x44\x4f\x56\x77\x4e')
-                    this['\x61\x63\x74\x6f\x72\x42\x69\x6e\x67\x69\x6e\x67\x46\x72\x6f\x6d\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e']();
-                else {
-                    var _0x3018d6;
-                    return _0x3018d6 = this[_0x80ca44(0x205)][_0x80ca44(0x156)](function (_0x5a8267) {
-                        return _0x5a8267['\x69\x64'] === _0x448b9e;
-                    }), _0x3018d6 != null;
-                }
-            } else
-                this['\x73\x74\x61\x74\x69\x63\x41\x63\x74\x6f\x72\x42\x69\x6e\x67\x69\x6e\x67']();
+        if (y == null) {
+          y = 0;
         }
-    }, _0x3c147a[_0x32552d(0x1d1)] = function () {
-        var _0x115990 = _0x32552d;
-        if (_0x115990(0x1ac) === _0x115990(0x1ac))
-            ANPlayersManager[_0x115990(0x185)]();
-        else
-            return _0x37dca7[_0x115990(0x1b3)]() === _0x2468cc;
-    }, _0x3c147a[_0x32552d(0x140)] = function () {
-        var _0x3828b4 = _0x32552d;
-        if (_0x3828b4(0x208) !== _0x3828b4(0x208))
-            this['\x5f\x73\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x4f\x6e\x53\x61\x6d\x65\x4d\x61\x70'] === !![] ? this[_0x3828b4(0x1c7)](_0x3828b4(0x1e9)) : this[_0x3828b4(0x1e8)]();
-        else {
-            var _0x5031f7;
-            _0x5031f7 = ANET['\x50\x50'][_0x3828b4(0x142)]()[this[_0x3828b4(0x1f6)]() - 0x1], ANPlayersManager['\x73\x65\x6e\x64\x42\x69\x6e\x64\x41\x63\x74\x6f\x72\x46\x72\x6f\x6d\x47\x61\x6d\x65'](_0x5031f7);
+        if ((mapId != null) && mapId > 0) {
+          return $gamePlayer.reserveTransfer(mapId, x, y, d, 0);
         }
-    }, _0x3c147a['\x75\x70\x64\x61\x74\x65\x57\x61\x69\x74\x69\x6e\x67'] = function () {
-        var _0x3857c7 = _0x32552d;
-        if (!this['\x69\x73\x53\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72']())
-            return;
-        switch (this[_0x3857c7(0x1e3)]) {
-        case _0x3857c7(0x1e9):
-            if (this['\x69\x73\x41\x6c\x6c\x50\x6c\x61\x79\x65\x72\x4f\x6e\x53\x61\x6d\x65\x4d\x61\x70']()) {
-                this['\x72\x65\x73\x65\x74\x57\x61\x69\x74'](), this[_0x3857c7(0x163)] = ![];
-                if (this[_0x3857c7(0x1cd)] === !![]) {
-                    if (_0x3857c7(0x15f) === '\x46\x6b\x68\x41\x4e')
-                        this[_0x3857c7(0x1e8)]();
-                    else {
-                        var _0x53d0f9;
-                        _0x53d0f9 = {
-                            '\x75\x6e\x69\x71\x75\x65\x53\x61\x76\x65\x49\x44': _0x29bc2a[_0x3857c7(0x1b6)],
-                            '\x73\x61\x76\x65\x66\x69\x6c\x65\x49\x64': _0x221939
-                        }, _0xe19d3b[_0x3857c7(0x17d)](_0x48dfc5['\x47\x61\x6d\x65'](_0x3857c7(0x1ce), _0x53d0f9));
-                    }
-                }
-            }
-            break;
-        case '\x70\x6c\x61\x79\x65\x72\x73\x41\x63\x74\x6f\x72\x73':
-            this[_0x3857c7(0x197)]() && (_0x3857c7(0x1a5) !== _0x3857c7(0x1a5) ? _0x589e02[_0x3857c7(0x1f1)](_0x13860f[_0x3857c7(0x203)]('\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74'), _0x23b0c5, _0x2566db, 0x1388, '\x4a\x6f\x69\x6e\x69\x6e\x67\x20\x74\x6f\x20\x74\x68\x65\x20\x67\x61\x6d\x65\x2e\x2e\x2e') : (this['\x72\x65\x73\x65\x74\x57\x61\x69\x74'](), this[_0x3857c7(0x17f)]()));
-            break;
-        }
-    }, _0x3c147a[_0x32552d(0x17f)] = function () {
-        var _0x4661d5 = _0x32552d;
-        if (_0x4661d5(0x160) === '\x43\x75\x59\x59\x4b')
-            _0x4661d5(0x18c)['\x70'](), ANMapManager[_0x4661d5(0x1c5)](), !ANET[_0x4661d5(0x1fc)][_0x4661d5(0x155)]() && this[_0x4661d5(0x154)]();
-        else
-            return null;
-    }, _0x3c147a['\x73\x68\x6f\x77\x53\x74\x61\x72\x74\x47\x61\x6d\x65\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65'] = function () {
-        var _0x5c0e1e = _0x32552d, _0xd5030f;
-        if (!ANET['\x50\x50'][_0x5c0e1e(0x1f8)]()) {
-            if (_0x5c0e1e(0x15c) !== _0x5c0e1e(0x19c))
-                return;
-            else
-                return _0x2d21f8['\x63\x68\x61\x72\x61\x63\x74\x65\x72\x52\x65\x61\x64\x79'] === !![];
-        }
-        _0xd5030f = ANET['\x50\x50'][_0x5c0e1e(0x13a)]();
-        if (!String[_0x5c0e1e(0x189)](_0xd5030f)) {
-            if (_0x5c0e1e(0x153) !== _0x5c0e1e(0x1aa))
-                return;
-            else
-                return this['\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65'] = _0xd7158b, _0x2fc566[_0x5c0e1e(0x1f9)](0x1f4);
-        }
-        ANET['\x55\x49']['\x61\x64\x64\x4d\x65\x73\x73\x61\x67\x65\x54\x6f\x43\x68\x61\x74'](ANET[_0x5c0e1e(0x1fc)][_0x5c0e1e(0x16a)](0x0, 0x0, _0xd5030f));
-    }, _0x3c147a[_0x32552d(0x20b)] = function (_0x230715) {
-        var _0x4155a7 = _0x32552d;
-        if (_0x4155a7(0x166) !== _0x4155a7(0x177)) {
-            var _0x2a3a37;
-            _0x16df94['\x70'](_0x4155a7(0x1d5)), _0x2a3a37 = ANET['\x50\x50'][_0x4155a7(0x183)](), _0x2a3a37 > 0x0 && $gameTemp[_0x4155a7(0x1b4)](_0x2a3a37);
-        } else
-            this[_0x4155a7(0x205)] = [], this[_0x4155a7(0x205)][_0x4155a7(0x161)](_0x2211c3[_0x4155a7(0x1ef)]());
-    }, _0x3c147a[_0x32552d(0x1c4)] = function () {
-        var _0x54c1e1 = _0x32552d, _0x568b08, _0x225fbe, _0x179e74, _0x4a00e5, _0x1028a1, _0x2c15f1;
-        try {
-            $gameMap[_0x54c1e1(0x1a2)] = new Game_Interpreter(), $gameParty[_0x54c1e1(0x164)] = 0x0, $gameParty[_0x54c1e1(0x1dd)] = {}, $gameParty['\x5f\x61\x72\x6d\x6f\x72\x73'] = {}, $gameParty['\x5f\x69\x74\x65\x6d\x73'] = {}, $gameParty[_0x54c1e1(0x178)] = ![], _0x1028a1 = $gameMap[_0x54c1e1(0x1b0)], _0x2c15f1 = [];
-            for (_0x179e74 = 0x0, _0x4a00e5 = _0x1028a1['\x6c\x65\x6e\x67\x74\x68']; _0x179e74 < _0x4a00e5; _0x179e74++) {
-                _0x225fbe = _0x1028a1[_0x179e74];
-                if (_0x225fbe == null) {
-                    if (_0x54c1e1(0x16b) === '\x63\x44\x56\x51\x4e')
-                        continue;
-                    else
-                        return '';
-                }
-                _0x2c15f1[_0x54c1e1(0x161)](_0x225fbe[_0x54c1e1(0x1d0)] = ![]);
-            }
-            return _0x2c15f1;
-        } catch (_0x5ae15d) {
-            if (_0x54c1e1(0x1c8) !== _0x54c1e1(0x1c8))
-                _0x962bad[_0x54c1e1(0x1b3)] = _0x2f846b;
-            else
-                return _0x568b08 = _0x5ae15d, ANET['\x77'](_0x568b08);
-        }
-    }, _0x3c147a['\x73\x65\x6e\x64\x53\x63\x65\x6e\x65\x43\x68\x61\x6e\x67\x69\x6e\x67'] = function () {
-        var _0x2904c4 = _0x32552d, _0x41cdb8;
-        _0x41cdb8 = '\x75\x6e\x6b\x6e\x6f\x77\x6e';
-        if (!SceneManager[_0x2904c4(0x211)](Scene_Map)) {
-            if (_0x2904c4(0x192) !== _0x2904c4(0x192))
-                return _0x47cfbf = _0x112d25, _0x51c730[_0x2904c4(0x1a9)](_0x331ae0);
-            else
-                _0x41cdb8 = _0x2904c4(0x1b2);
-        }
-        if (SceneManager['\x69\x73\x4e\x65\x78\x74\x53\x63\x65\x6e\x65'](Scene_Battle)) {
-            if ('\x4b\x45\x58\x69\x6e' === _0x2904c4(0x16f))
-                return _0x54da3d = _0x281c57, _0xf60fe5['\x77\x61\x72\x6e\x69\x6e\x67'](_0x57ca23);
-            else
-                _0x41cdb8 = _0x2904c4(0x20d);
-        }
-        SceneManager['\x69\x73\x4e\x65\x78\x74\x53\x63\x65\x6e\x65'](Scene_NetChatInput) && (_0x41cdb8 = '\x63\x68\x61\x74');
-        if (SceneManager[_0x2904c4(0x211)](Scene_NetworkInGameTrade)) {
-            if (_0x2904c4(0x1ea) === _0x2904c4(0x1ae))
-                return _0x10dc26;
-            else
-                _0x41cdb8 = '\x74\x72\x61\x64\x65';
-        }
-        ANNetwork['\x73\x65\x6e\x64'](NMS[_0x2904c4(0x203)](_0x2904c4(0x1d9), _0x41cdb8));
-    }, _0x3c147a[_0x32552d(0x1c1)] = function (_0x5eb263) {
-        var _0xcd2112 = _0x32552d;
-        if (_0xcd2112(0x1a1) !== _0xcd2112(0x188)) {
-            var _0x3a6f00;
-            _0x3a6f00 = {
-                '\x75\x6e\x69\x71\x75\x65\x53\x61\x76\x65\x49\x44': $gameTemp[_0xcd2112(0x1b6)],
-                '\x73\x61\x76\x65\x66\x69\x6c\x65\x49\x64': _0x5eb263
-            }, ANNetwork['\x73\x65\x6e\x64'](NMS[_0xcd2112(0x203)](_0xcd2112(0x1ce), _0x3a6f00));
-        } else
-            this[_0xcd2112(0x205)][_0xcd2112(0x161)](_0x250066);
-    }, _0x3c147a[_0x32552d(0x1f0)] = function () {
-        var _0x3ae10b = _0x32552d;
-        ANNetwork[_0x3ae10b(0x17d)](NMS[_0x3ae10b(0x203)](_0x3ae10b(0x20f), this[_0x3ae10b(0x1ad)]()));
-    }, _0x3c147a[_0x32552d(0x1ed)] = function (_0x346e07, _0x324977) {
-        var _0x448475 = _0x32552d;
-        _0x448475(0x1af) === _0x448475(0x1af) ? this['\x73\x65\x6e\x64\x52\x61\x77\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65'](_0x346e07, this['\x6d\x79\x41\x63\x74\x6f\x72\x49\x64'](), _0x324977) : _0x10088e['\x77'](_0x448475(0x144) + _0x25f263 + _0x448475(0x194));
-    }, _0x3c147a[_0x32552d(0x1ba)] = function (_0x989869, _0x524d8d, _0x2c728a) {
-        var _0x1c1178 = _0x32552d;
-        if (_0x1c1178(0x196) !== '\x58\x53\x69\x4a\x6d') {
-            var _0x305f7d;
-            _0x305f7d = ANET['\x55\x74\x69\x6c\x73'][_0x1c1178(0x16a)](_0x989869, _0x524d8d, _0x2c728a), ANNetwork[_0x1c1178(0x17a)](NMS[_0x1c1178(0x203)](_0x1c1178(0x1a8), _0x305f7d), function () {
-                var _0x387e0a = _0x1c1178;
-                if (_0x387e0a(0x195) === _0x387e0a(0x195))
-                    return ANET['\x55\x49'][_0x387e0a(0x175)](_0x305f7d), ANET['\x55\x49'][_0x387e0a(0x162)](_0x305f7d);
-                else {
-                    var _0x14d5e6;
-                    if (this[_0x387e0a(0x139)]())
-                        _0x14d5e6 = this[_0x387e0a(0x1f2)](_0x1d8e23), _0x14d5e6 != null && (_0x14d5e6[_0x387e0a(0x1b3)] = _0x407e88);
-                    else {
-                    }
-                }
-            });
-        } else
-            return this[_0x1c1178(0x1a3)]()['\x69\x73\x4d\x61\x70\x4d\x61\x73\x74\x65\x72'] === !![];
-    }, _0x3c147a[_0x32552d(0x1da)] = function (_0x59db9d, _0x32d9b9) {
-        var _0x297c1c = _0x32552d;
-        ANClientResponceManager['\x73\x65\x6e\x64\x52\x65\x73\x70\x6f\x6e\x63\x65'](NMS['\x47\x61\x6d\x65'](_0x297c1c(0x1c3)), _0x59db9d, _0x32d9b9, 0x1388, '\x4a\x6f\x69\x6e\x69\x6e\x67\x20\x74\x6f\x20\x74\x68\x65\x20\x67\x61\x6d\x65\x2e\x2e\x2e');
-    }, _0x3c147a[_0x32552d(0x15e)] = function (_0x40c41c) {
-        var _0x5a827f = _0x32552d, _0x1bae67, _0x20b0e5;
-        try {
-            return _0x20b0e5 = DataManager[_0x5a827f(0x198)](), KDCore[_0x5a827f(0x1b1)]() ? StorageManager[_0x5a827f(0x20e)](_0x20b0e5)[_0x5a827f(0x180)](function () {
-                var _0x5ab779 = _0x5a827f;
-                return ANNetwork[_0x5ab779(0x17d)](NMS[_0x5ab779(0x203)](_0x5ab779(0x204), {
-                    '\x77\x68\x6f\x52\x65\x71\x75\x65\x73\x74\x49\x64': _0x40c41c,
-                    '\x67\x61\x6d\x65\x44\x61\x74\x61': $gameTemp[_0x5ab779(0x1c6)]
-                })), $gameTemp[_0x5ab779(0x1c6)] = null;
-            }) : (_0x20b0e5 = JsonEx[_0x5a827f(0x1bd)](DataManager[_0x5a827f(0x198)]()), ANNetwork[_0x5a827f(0x17d)](NMS[_0x5a827f(0x203)](_0x5a827f(0x204), {
-                '\x77\x68\x6f\x52\x65\x71\x75\x65\x73\x74\x49\x64': _0x40c41c,
-                '\x67\x61\x6d\x65\x44\x61\x74\x61': _0x20b0e5
-            })));
-        } catch (_0x191d64) {
-            return _0x1bae67 = _0x191d64, KDCore['\x77\x61\x72\x6e\x69\x6e\x67'](_0x1bae67);
-        }
-    }, _0x3c147a[_0x32552d(0x1a0)] = function () {
-        var _0x16859c = _0x32552d, _0x984ded;
-        try {
-            return ANNetwork[_0x16859c(0x17d)](NMS[_0x16859c(0x203)](_0x16859c(0x168)));
-        } catch (_0x2372b6) {
-            return _0x984ded = _0x2372b6, KDCore[_0x16859c(0x1a9)](_0x984ded);
-        }
-    }, _0x3c147a['\x73\x65\x6e\x64\x55\x73\x65\x49\x74\x65\x6d\x46\x72\x6f\x6d\x4d\x65\x6e\x75\x41\x63\x74\x69\x6f\x6e'] = function (_0xa827cb, _0x4837a4) {
-        var _0x270441 = _0x32552d;
-        if (_0x270441(0x143) !== _0x270441(0x152)) {
-            var _0x4198f9, _0x3d0ba5;
-            try {
-                return '\x4b\x7a\x58\x69\x77' === _0x270441(0x1be) ? (_0x4198f9 = {
-                    '\x61\x63\x74\x69\x6f\x6e': _0xa827cb,
-                    '\x74\x61\x72\x67\x65\x74': ANET['\x55\x74\x69\x6c\x73'][_0x270441(0x174)](_0x4837a4)
-                }, ANNetwork[_0x270441(0x17d)](NMS[_0x270441(0x1c9)](_0x270441(0x1e6), _0x4198f9))) : _0x171520['\x69\x64'] === _0x14fc0e;
-            } catch (_0xc3c12d) {
-                return _0x270441(0x207) === _0x270441(0x149) ? this[_0x270441(0x205)] != null : (_0x3d0ba5 = _0xc3c12d, KDCore[_0x270441(0x1a9)](_0x3d0ba5));
-            }
-        } else
-            return _0x1b8060[_0x270441(0x17d)](_0x496bb0[_0x270441(0x203)](_0x270441(0x168)));
-    }, _0x3c147a[_0x32552d(0x14a)] = function (_0x145246, _0x468b16) {
-        var _0x10c252 = _0x32552d;
-        if ('\x48\x56\x43\x71\x4f' === _0x10c252(0x187)) {
-            var _0x2c0ed4;
-            if (this['\x69\x73\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x45\x78\x69\x73\x74\x73']()) {
-                if (_0x10c252(0x14c) === '\x48\x59\x56\x74\x42')
-                    _0x2c0ed4 = this['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64'](_0x145246), _0x2c0ed4 != null && (_0x2c0ed4[_0x10c252(0x1b3)] = _0x468b16);
-                else {
-                    var _0x185dc6;
-                    if (!_0x198b19['\x50\x50'][_0x10c252(0x1f8)]())
-                        return;
-                    _0x185dc6 = _0x1c202c['\x50\x50'][_0x10c252(0x13a)]();
-                    if (!_0x2b30d1['\x61\x6e\x79'](_0x185dc6))
-                        return;
-                    _0x2cb683['\x55\x49'][_0x10c252(0x175)](_0x1fd964[_0x10c252(0x1fc)][_0x10c252(0x16a)](0x0, 0x0, _0x185dc6));
-                }
-            } else {
-            }
-        } else
-            return;
-    }, _0x3c147a['\x6f\x6e\x52\x6f\x6f\x6d\x50\x6c\x61\x79\x65\x72\x73'] = function (_0x42e12c) {
-        var _0x573653 = _0x32552d, _0x4b3d72;
-        _0x4b3d72 = this[_0x573653(0x1a3)](), this[_0x573653(0x205)] = _0x42e12c;
-        if (!this[_0x573653(0x1f2)](ANNetwork['\x6d\x79\x49\x64']())) {
-            if (_0x573653(0x147) === '\x6e\x64\x72\x63\x42')
-                this[_0x573653(0x205)]['\x70\x75\x73\x68'](_0x4b3d72);
-            else
-                return;
-        }
-    }, _0x3c147a[_0x32552d(0x1bc)] = function (_0xc3db1b) {
-        var _0x47818c = _0x32552d;
-        this[_0x47818c(0x209)](_0xc3db1b), this['\x72\x65\x66\x72\x65\x73\x68\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x74\x65\x73'](), $gameMap[_0x47818c(0x14b)]();
-    }, _0x3c147a[_0x32552d(0x1e7)] = function () {
-        var _0x4fffd6 = _0x32552d;
-        if ('\x57\x46\x6f\x6e\x6e' === '\x78\x48\x47\x5a\x4b') {
-            var _0x3045b4;
-            _0x3a1fc2['\x70']('\x50\x6c\x61\x79\x65\x72\x20\x6c\x65\x61\x76\x65\x20\x67\x61\x6d\x65'), _0x3045b4 = _0x29421f['\x50\x50']['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x4c\x65\x61\x76\x65\x47\x61\x6d\x65\x43\x6f\x6d\x6d\x6f\x6e\x45\x76\x65\x6e\x74\x49\x64'](), _0x3045b4 > 0x0 && _0x30cbb5[_0x4fffd6(0x1b4)](_0x3045b4);
-        } else {
-            var _0x71d8bf, _0x298aa, _0xd185cb, _0x5828da;
-            $gameParty[_0x4fffd6(0x19d)](), _0x5828da = this[_0x4fffd6(0x205)];
-            for (_0x71d8bf = 0x0, _0x298aa = _0x5828da[_0x4fffd6(0x201)]; _0x71d8bf < _0x298aa; _0x71d8bf++) {
-                _0xd185cb = _0x5828da[_0x71d8bf], NetPlayerDataWrapper['\x69\x73\x48\x61\x76\x65\x43\x68\x61\x72\x61\x63\x74\x65\x72\x49\x6e\x47\x61\x6d\x65'](_0xd185cb) && (_0x4fffd6(0x157) !== _0x4fffd6(0x1ee) ? $gameParty['\x5f\x61\x63\x74\x6f\x72\x73']['\x70\x75\x73\x68'](_0xd185cb[_0x4fffd6(0x1b7)]) : _0xdb628e['\x77']('\x50\x6c\x61\x79\x65\x72\x20\x64\x61\x74\x61\x20\x66\x6f\x72\x20' + _0x41151e + _0x4fffd6(0x194)));
-            }
-            $gameParty[_0x4fffd6(0x1fa)](), $gamePlayer['\x72\x65\x66\x72\x65\x73\x68'](), $gameMap['\x6e\x53\x61\x66\x65\x52\x65\x66\x72\x65\x73\x68'](), KDCore['\x47\x45\x76\x65\x6e\x74\x73\x4d\x61\x6e\x61\x67\x65\x72'][_0x4fffd6(0x1fd)](_0x4fffd6(0x141));
-        }
-    }, _0x3c147a[_0x32552d(0x202)] = function () {
-        var _0x559913 = _0x32552d;
-        return this[_0x559913(0x16d)]();
-    }, _0x3c147a[_0x32552d(0x1a7)] = function (_0x914aa6) {
-        var _0x4ea112 = _0x32552d;
-        if (_0x4ea112(0x1bf) === '\x41\x56\x5a\x55\x70')
-            return _0x42fba4;
-        else {
-            var _0x456458;
-            _0x4ea112(0x15d)['\x70'](_0x914aa6);
-            if (_0x914aa6 !== ANNetwork[_0x4ea112(0x1db)]())
-                return;
-            ANET['\x50\x50'][_0x4ea112(0x1b8)]() ? _0x4ea112(0x151) === _0x4ea112(0x18e) ? (_0x1b0130 = this[_0x4ea112(0x1f2)](_0x1fd865), _0x5ad9b8 != null && (_0x278696[_0x4ea112(0x1b3)] = _0x240652)) : this[_0x4ea112(0x1d1)]() : this[_0x4ea112(0x140)](), _0x456458 = ANET['\x50\x50'][_0x4ea112(0x1cc)](), _0x456458 > 0x0 && $gameTemp[_0x4ea112(0x1b4)](_0x456458);
-        }
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  
+  //? КОМАНДЫ ЗАПРОСЫ (посылаются на сервер)
+  // * ===============================================================
+  _.sendSceneChanging = function() {
+    var sceneType;
+    sceneType = "unknown";
+    // * Тут не учитывается наследовательность, определяется точный класс через ===
+    // * Чтобы на всех сценах, кроме карты была иконка, сделал через unless
+    // * Это лучше, чем проверять все все сцены
+    if (!SceneManager.isNextScene(Scene_Map)) {
+      sceneType = "menu";
+    }
+    if (SceneManager.isNextScene(Scene_Battle)) {
+      sceneType = "battle";
+    }
+    if (SceneManager.isNextScene(Scene_NetChatInput)) {
+      sceneType = "chat";
+    }
+    if (SceneManager.isNextScene(Scene_NetworkInGameTrade)) {
+      sceneType = "trade";
+    }
+    ANNetwork.send(NMS.Game("sceneChange", sceneType));
+  };
+  // * Это запрос от мастер клиента на другие клиенты, что надо выполнить сохранение
+  _.sendSaveDataRequest = function(savefileId) {
+    var data;
+    data = {
+      uniqueSaveID: $gameTemp.nUniqueSaveID,
+      savefileId: savefileId
     };
-}()), window[_0x257403(0x1d4)] = ANGameManager);
-function _0x36e2() {
-    var _0x1dbffe = [
-        '\x4b\x7a\x58\x69\x77',
-        '\x49\x57\x46\x4b\x68',
-        '\x61\x63\x74\x6f\x72\x4e\x61\x6d\x65',
-        '\x73\x65\x6e\x64\x53\x61\x76\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x33\x33\x4e\x70\x58\x5a\x55\x59',
-        '\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x61\x70\x70\x6c\x79\x4a\x6f\x69\x6e\x65\x64\x44\x61\x74\x61\x43\x6f\x72\x72\x65\x63\x74\x73',
-        '\x73\x65\x6e\x64\x49\x6e\x69\x74\x69\x61\x6c\x4d\x61\x70\x44\x61\x74\x61',
-        '\x5f\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x73\x70\x6f\x6e\x73\x65',
-        '\x73\x65\x74\x57\x61\x69\x74',
-        '\x44\x78\x66\x78\x78',
-        '\x43\x6f\x6d\x6d\x6f\x6e',
-        '\x72\x65\x66\x72\x65\x73\x68\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x74\x65\x73',
-        '\x66\x63\x73\x54\x69',
-        '\x67\x65\x74\x4a\x6f\x69\x6e\x65\x64\x52\x6f\x6f\x6d\x43\x6f\x6d\x6d\x6f\x6e\x45\x76\x65\x6e\x74',
-        '\x6e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65\x53\x74\x61\x72\x74\x65\x64',
-        '\x73\x61\x76\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x5f\x73\x74\x61\x72\x74\x69\x6e\x67',
-        '\x61\x63\x74\x6f\x72\x42\x69\x6e\x67\x69\x6e\x67\x46\x72\x6f\x6d\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e',
-        '\x69\x73\x53\x68\x6f\x77\x4e\x65\x74\x77\x6f\x72\x6b\x49\x63\x6f\x6e\x73',
-        '\x66\x79\x52\x67\x4f',
-        '\x4e\x47\x41\x4d\x45',
-        '\x50\x6c\x61\x79\x65\x72\x20\x6c\x65\x61\x76\x65\x20\x67\x61\x6d\x65',
-        '\x46\x42\x64\x6b\x72',
-        '\x50\x6c\x61\x79\x65\x72\x20\x64\x61\x74\x61\x20\x66\x6f\x72\x20',
-        '\x4c\x48\x63\x54\x59',
-        '\x73\x63\x65\x6e\x65\x43\x68\x61\x6e\x67\x65',
-        '\x73\x65\x6e\x64\x53\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x6d\x79\x49\x64',
-        '\x6d\x61\x70\x49\x64',
-        '\x5f\x77\x65\x61\x70\x6f\x6e\x73',
-        '\x45\x5a\x50\x50\x4d',
-        '\x65\x76\x65\x72\x79',
-        '\x67\x65\x74\x52\x65\x71\x75\x65\x73\x74\x65\x64\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x74\x65',
-        '\x66\x69\x6c\x74\x65\x72',
-        '\x69\x6e\x64\x65\x78',
-        '\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65',
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x36\x30\x39\x33\x65\x79\x44\x62\x46\x4c',
-        '\x63\x75\x73\x74\x6f\x6d\x5f\x61\x70\x70\x6c\x79\x49\x74\x65\x6d\x46\x72\x6f\x6d\x4d\x65\x6e\x75',
-        '\x6f\x6e\x52\x65\x66\x72\x65\x73\x68\x47\x61\x6d\x65\x50\x61\x72\x74\x79',
-        '\x62\x69\x6e\x64\x69\x6e\x67\x41\x63\x74\x6f\x72\x73',
-        '\x70\x6c\x61\x79\x65\x72\x73\x4f\x6e\x4d\x61\x70',
-        '\x75\x75\x62\x4b\x41',
-        '\x69\x73\x41\x6c\x6c\x50\x6c\x61\x79\x65\x72\x4f\x6e\x53\x61\x6d\x65\x4d\x61\x70',
-        '\x61\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x4d\x61\x70',
-        '\x73\x65\x6e\x64\x4d\x79\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x67\x7a\x6b\x56\x5a',
-        '\x63\x72\x65\x61\x74\x65\x4c\x6f\x63\x61\x6c',
-        '\x73\x65\x6e\x64\x53\x61\x76\x65\x44\x61\x74\x61\x43\x6f\x6d\x70\x6c\x65\x74\x65\x46\x6c\x61\x67',
-        '\x73\x65\x6e\x64\x52\x65\x73\x70\x6f\x6e\x63\x65',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64',
-        '\x74\x72\x61\x64\x65',
-        '\x72\x65\x73\x65\x74\x57\x61\x69\x74',
-        '\x69\x73\x42\x61\x74\x74\x6c\x65\x4d\x61\x73\x74\x65\x72',
-        '\x6d\x79\x49\x6e\x64\x65\x78',
-        '\x69\x6e\x66\x6f',
-        '\x69\x73\x47\x61\x6d\x65\x43\x68\x61\x74\x41\x6c\x6c\x6f\x77\x65\x64',
-        '\x73\x68\x6f\x77\x4c\x6f\x61\x64\x65\x72',
-        '\x6e\x52\x65\x66\x72\x65\x73\x68\x53\x68\x61\x72\x65\x64\x4d\x65\x6d\x62\x65\x72\x73',
-        '\x69\x73\x4d\x61\x70\x4d\x61\x73\x74\x65\x72',
-        '\x55\x74\x69\x6c\x73',
-        '\x63\x61\x6c\x6c',
-        '\x61\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x73',
-        '\x69\x73\x53\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72',
-        '\x6c\x6b\x44\x50\x52',
-        '\x6c\x65\x6e\x67\x74\x68',
-        '\x6f\x6e\x4c\x65\x61\x76\x65\x52\x6f\x6f\x6d',
-        '\x47\x61\x6d\x65',
-        '\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61',
-        '\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61',
-        '\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61',
-        '\x43\x56\x6f\x43\x44',
-        '\x58\x56\x4d\x75\x41',
-        '\x6f\x6e\x52\x6f\x6f\x6d\x50\x6c\x61\x79\x65\x72\x73',
-        '\x53\x50\x4a\x74\x7a',
-        '\x61\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x4c\x65\x61\x76\x65\x47\x61\x6d\x65',
-        '\x69\x73\x43\x68\x61\x72\x4f\x6e\x4d\x61\x70',
-        '\x62\x61\x74\x74\x6c\x65',
-        '\x73\x61\x76\x65\x4f\x62\x6a\x65\x63\x74\x46\x6f\x72\x4e\x65\x74',
-        '\x73\x61\x76\x65\x44\x61\x74\x61\x43\x6f\x6d\x70\x6c\x65\x74\x65',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x49\x6e\x66\x6f',
-        '\x69\x73\x4e\x65\x78\x74\x53\x63\x65\x6e\x65',
-        '\x69\x73\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x45\x78\x69\x73\x74\x73',
-        '\x67\x65\x74\x43\x68\x61\x74\x53\x74\x61\x72\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x6d\x61\x70',
-        '\x72\x65\x73\x65\x74',
-        '\x6f\x6e\x4d\x61\x70\x4c\x6f\x61\x64\x65\x64',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x41\x63\x74\x6f\x72\x49\x64',
-        '\x48\x49\x6d\x69\x51',
-        '\x73\x74\x61\x74\x69\x63\x41\x63\x74\x6f\x72\x42\x69\x6e\x67\x69\x6e\x67',
-        '\x6e\x65\x74\x7a\x52\x65\x66\x72\x65\x73\x68\x4e\x61\x6d\x65\x70\x6c\x61\x74\x65',
-        '\x61\x63\x74\x6f\x72\x73\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x41\x59\x4d\x6c\x74',
-        '\x50\x6c\x61\x79\x65\x72\x20\x64\x61\x74\x61\x20\x66\x6f\x72\x20\x41\x63\x74\x6f\x72\x20\x77\x69\x74\x68\x20\x49\x44\x20',
-        '\x70\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65',
-        '\x73\x65\x74\x75\x70\x4e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65',
-        '\x6e\x64\x72\x63\x42',
-        '\x5f\x6e\x4c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72\x4d\x6f\x64\x65',
-        '\x46\x7a\x69\x55\x54',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65',
-        '\x6e\x53\x61\x66\x65\x52\x65\x66\x72\x65\x73\x68',
-        '\x48\x59\x56\x74\x42',
-        '\x44\x59\x4b\x7a\x6c',
-        '\x44\x50\x54\x59\x4f',
-        '\x50\x78\x79\x56\x74',
-        '\x67\x65\x74\x4e\x65\x74\x43\x68\x61\x72\x61\x63\x74\x65\x72\x46\x6f\x72\x50\x6c\x61\x79\x65\x72',
-        '\x78\x58\x43\x79\x43',
-        '\x44\x65\x59\x73\x4c',
-        '\x59\x62\x73\x45\x47',
-        '\x73\x68\x6f\x77\x53\x74\x61\x72\x74\x47\x61\x6d\x65\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x69\x73\x4c\x6f\x61\x64\x47\x61\x6d\x65\x52\x6f\x6f\x6d',
-        '\x66\x69\x6e\x64',
-        '\x4c\x4b\x6a\x6a\x66',
-        '\x76\x65\x6a\x6e\x56',
-        '\x32\x32\x32\x31\x34\x31\x32\x6e\x65\x6e\x4b\x63\x4b',
-        '\x5a\x72\x7a\x65\x53',
-        '\x36\x37\x38\x37\x35\x38\x30\x44\x57\x43\x5a\x6e\x77',
-        '\x4a\x64\x50\x4d\x4d',
-        '\x4a\x4f\x49\x4e\x45\x44\x20\x54\x4f\x20\x47\x41\x4d\x45',
-        '\x73\x65\x6e\x64\x53\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x44\x61\x74\x61\x52\x65\x73\x70\x6f\x6e\x65',
-        '\x46\x6b\x68\x41\x4e',
-        '\x43\x75\x59\x59\x4b',
-        '\x70\x75\x73\x68',
-        '\x61\x64\x64\x45\x6d\x6f\x74\x69\x6f\x6e\x54\x6f\x43\x68\x61\x74',
-        '\x5f\x73\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x4f\x6e\x53\x61\x6d\x65\x4d\x61\x70',
-        '\x5f\x67\x6f\x6c\x64',
-        '\x42\x4c\x41\x43\x4b',
-        '\x76\x4c\x76\x49\x56',
-        '\x41\x51\x62\x42\x54',
-        '\x73\x6f\x6d\x65\x6f\x6e\x65\x4a\x6f\x69\x6e\x65\x64\x54\x6f\x53\x74\x61\x72\x74\x65\x64\x47\x61\x6d\x65',
-        '\x64\x6d\x6f\x50\x73',
-        '\x62\x75\x69\x6c\x64\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x63\x44\x56\x51\x4e',
-        '\x61\x63\x74\x6f\x72',
-        '\x63\x72\x65\x61\x74\x65\x4d\x79\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61',
-        '\x55\x64\x54\x74\x56',
-        '\x4d\x6e\x76\x58\x51',
-        '\x73\x65\x74\x75\x70\x4e\x65\x77\x4e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65',
-        '\x69\x44\x68\x63\x4c',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x67\x65\x74\x42\x79\x46\x69\x65\x6c\x64',
-        '\x70\x61\x63\x6b\x42\x61\x74\x74\x6c\x65\x72\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x61\x64\x64\x4d\x65\x73\x73\x61\x67\x65\x54\x6f\x43\x68\x61\x74',
-        '\x62\x72\x51\x58\x5a',
-        '\x4f\x46\x46\x55\x4d',
-        '\x5f\x69\x6e\x42\x61\x74\x74\x6c\x65',
-        '\x41\x4e\x47\x61\x6d\x65\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x69\x73\x53\x61\x6d\x65\x4d\x61\x70\x4d\x6f\x64\x65',
-        '\x49\x66\x6d\x6c\x75',
-        '\x73\x65\x6e\x64',
-        '\x53\x67\x66\x67\x72',
-        '\x73\x74\x61\x72\x74\x47\x61\x6d\x65',
-        '\x74\x68\x65\x6e',
-        '\x73\x65\x6e\x64\x50\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65',
-        '\x6e\x65\x74\x49\x64',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x4c\x65\x61\x76\x65\x47\x61\x6d\x65\x43\x6f\x6d\x6d\x6f\x6e\x45\x76\x65\x6e\x74\x49\x64',
-        '\x72\x65\x71\x75\x65\x73\x74\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x74\x65\x49\x63\x6f\x6e',
-        '\x73\x65\x6e\x64\x41\x63\x74\x6f\x72\x52\x65\x61\x64\x79',
-        '\x4e\x75\x6a\x4b\x50',
-        '\x48\x56\x43\x71\x4f',
-        '\x55\x53\x4e\x4d\x75',
-        '\x61\x6e\x79',
-        '\x55\x6c\x48\x51\x73',
-        '\x38\x32\x36\x34\x32\x47\x55\x62\x56\x6e\x51',
-        '\x52\x45\x41\x44\x59\x20\x54\x4f\x20\x53\x54\x41\x52\x54\x20\x47\x41\x4d\x45',
-        '\x34\x34\x33\x35\x32\x32\x35\x64\x65\x77\x4b\x47\x51',
-        '\x4a\x4d\x52\x52\x65',
-        '\x41\x41\x4c\x6f\x58',
-        '\x31\x39\x34\x32\x30\x35\x54\x69\x4c\x74\x6a\x43',
-        '\x4a\x6c\x74\x70\x4f',
-        '\x62\x78\x41\x58\x41',
-        '\x2c\x20\x69\x6e\x66\x6f\x20\x6e\x6f\x74\x20\x66\x69\x6e\x64\x65\x64',
-        '\x20\x6e\x6f\x74\x20\x66\x6f\x75\x6e\x64\x21',
-        '\x42\x65\x4d\x42\x77',
-        '\x57\x70\x53\x51\x6c',
-        '\x69\x73\x41\x6c\x6c\x50\x6c\x61\x79\x65\x72\x73\x41\x63\x74\x6f\x72\x73\x52\x65\x61\x64\x79',
-        '\x6d\x61\x6b\x65\x53\x61\x76\x65\x43\x6f\x6e\x74\x65\x6e\x74\x73',
-        '\x42\x41\x75\x6f\x6b',
-        '\x7a\x48\x42\x51\x4d',
-        '\x32\x33\x32\x6b\x59\x4c\x48\x45\x54',
-        '\x4b\x76\x79\x61\x66',
-        '\x6e\x43\x6c\x65\x61\x72\x42\x65\x66\x6f\x72\x65\x52\x65\x66\x72\x65\x73\x68',
-        '\x4e\x65\x74\x47\x61\x6d\x65',
-        '\x70\x6c\x61\x79\x65\x72\x49\x6e\x64\x65\x78',
-        '\x73\x65\x6e\x64\x4a\x6f\x69\x6e\x65\x64\x54\x6f\x53\x74\x61\x72\x74\x65\x64\x47\x61\x6d\x65',
-        '\x7a\x77\x5a\x41\x6a',
-        '\x5f\x69\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72',
-        '\x6d\x79\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61',
-        '\x6f\x6e\x54\x72\x61\x64\x65\x53\x63\x65\x6e\x65\x45\x6e\x64',
-        '\x57\x72\x66\x70\x42',
-        '\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4a\x6f\x69\x6e\x65\x64\x54\x68\x69\x73\x47\x61\x6d\x65',
-        '\x63\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x77\x61\x72\x6e\x69\x6e\x67',
-        '\x42\x69\x69\x77\x69',
-        '\x69\x6e\x69\x74',
-        '\x4d\x48\x43\x59\x55',
-        '\x6d\x79\x41\x63\x74\x6f\x72\x49\x64',
-        '\x48\x4d\x76\x75\x51',
-        '\x76\x51\x68\x75\x57',
-        '\x5f\x65\x76\x65\x6e\x74\x73',
-        '\x69\x73\x4d\x5a',
-        '\x6d\x65\x6e\x75',
-        '\x6e\x61\x6d\x65',
-        '\x72\x65\x73\x65\x72\x76\x65\x43\x6f\x6d\x6d\x6f\x6e\x45\x76\x65\x6e\x74',
-        '\x32\x30\x30\x30\x38\x36\x77\x5a\x6b\x5a\x4c\x49',
-        '\x6e\x55\x6e\x69\x71\x75\x65\x53\x61\x76\x65\x49\x44',
-        '\x61\x63\x74\x6f\x72\x49\x64',
-        '\x69\x73\x41\x63\x74\x6f\x72\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e\x41\x6c\x6c\x6f\x77\x65\x64',
-        '\x6a\x70\x41\x41\x7a',
-        '\x73\x65\x6e\x64\x52\x61\x77\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x32\x39\x34\x66\x43\x7a\x62\x51\x45',
-        '\x6f\x6e\x47\x61\x6d\x65\x50\x6c\x61\x79\x65\x72\x73',
-        '\x73\x74\x72\x69\x6e\x67\x69\x66\x79'
-    ];
-    _0x36e2 = function () {
-        return _0x1dbffe;
-    };
-    return _0x36e2();
-}
+    ANNetwork.send(NMS.Game("saveDataRequest", data));
+  };
+  // * Это ответ от клиента, что он выполнил сохранение
+  _.sendSaveDataCompleteFlag = function() {
+    ANNetwork.send(NMS.Game("saveDataComplete", this.myActorId()));
+  };
+  // * Отправить сообщение в чат от текущего клиента
+  _.sendMyChatMessage = function(channelId, message) {
+    this.sendRawChatMessage(channelId, this.myActorId(), message);
+  };
+  _.sendRawChatMessage = function(channelId, actorId, message) {
+    var data;
+    data = ANET.Utils.buildChatMessage(channelId, actorId, message);
+    ANNetwork.callback(NMS.Game("chatMessage", data), function() {
+      ANET.UI.addMessageToChat(data);
+      return ANET.UI.addEmotionToChat(data);
+    });
+  };
+  // * Запрос мастера игры (комнаты) на данные игрового мира
+  // * (При подключении к уже запущенной игре)
+  _.sendStartedRoomGameDataRequest = function(onResponce, onTimeout) {
+    ANClientResponceManager.sendResponce(NMS.Game("startedRoomGameDataRequest"), onResponce, onTimeout, 5000, "Joining to the game...");
+  };
+  _.sendStartedRoomDataRespone = function(whoRequestId) {
+    var e, gameData;
+    try {
+      // * Сохраняем данные о текущем мире (игре)
+      gameData = DataManager.makeSaveContents();
+      if (KDCore.isMZ()) {
+        // * Тут нельзя редактировать gameData
+        return StorageManager.saveObjectForNet(gameData).then(function() {
+          // * Отправляем обратно тому кто запросил
+          ANNetwork.send(NMS.Game("startedRoomGameData", {
+            whoRequestId,
+            gameData: $gameTemp._startedRoomGameDataResponse
+          }));
+          return $gameTemp._startedRoomGameDataResponse = null; // * В MV другая реализация сохранения и загрузки данных
+        });
+      } else {
+        gameData = JsonEx.stringify(DataManager.makeSaveContents());
+        return ANNetwork.send(NMS.Game("startedRoomGameData", {whoRequestId, gameData}));
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _.sendJoinedToStartedGame = function() {
+    var e;
+    try {
+      return ANNetwork.send(NMS.Game("someoneJoinedToStartedGame"));
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  // * Когда один игрок применяе предмет (навык) из меню на другого игрока
+  _.sendUseItemFromMenuAction = function(action, target) {
+    var data, e;
+    try {
+      data = {
+        action,
+        target: ANET.Utils.packBattlerForNetwork(target)
+      };
+      return ANNetwork.send(NMS.Common("custom_applyItemFromMenu", data));
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  // * Эти методы отрабатывают тогда, когда игрок (мастер карты) скрывает игру или убирает фокус, чтобы
+  // * мастером карты стал другой и логика продолжалась для остальных игроков
+  // * Вызываются они из метода nUpdatePlayersActivityState (Scen_Base_N)
+  _.sendRefreshActivityWhenInactive = function() {
+    var e;
+    try {
+      if (!$gameTemp.__netBeenDeactivateFromGame) {
+        ANNetwork.send(NMS.Game("refreshPlayerActivity"));
+        $gameTemp.__netBeenDeactivateFromGame = true;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+  };
+  _.sendRefreshActivityWhenActive = function() {
+    var e;
+    try {
+      if ($gameTemp.__netBeenDeactivateFromGame === true) {
+        ANNetwork.send(NMS.Game("refreshPlayerActivity"));
+        $gameTemp.__netBeenDeactivateFromGame = null;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+  };
+  _.sendNetworkOption = function(optionName, optionState) {
+    var e;
+    try {
+      return ANNetwork.send(NMS.Game("networkOption", {optionName, optionState}));
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  //? CALLBACKS ОТ ЗАПРОСОВ НА СЕРВЕР
+  // * ===============================================================
+
+  //? СОБЫТИЯ (обработка событий от сервера, вызываются из NETClientMethodsManager)
+  // * ===============================================================
+  _.onNetworkOption = function(optionData) {
+    var e, optionName, optionState;
+    try {
+      //console.log(optionData)
+      ({optionName, optionState} = optionData);
+      switch (optionName) {
+        case "waitTransferMode":
+          return typeof $gameSystem !== "undefined" && $gameSystem !== null ? $gameSystem.nRefreshWaitTransferMode(optionState, true) : void 0;
+        case 'userDefinedObservers':
+          return typeof $gameSystem !== "undefined" && $gameSystem !== null ? $gameSystem._nModifyUserDefinedObserversFromServer(optionState) : void 0;
+        default:
+          return KDCore.waring('Unknown Network Option ' + optionName);
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _.onPlayerName = function(playerId, name) {
+    var playerData;
+    if (this.isPlayerDataExists()) {
+      playerData = this.getPlayerDataById(playerId);
+      if (playerData != null) {
+        playerData.name = name;
+      }
+    } else {
+
+    }
+  };
+  // * Данные об игроках в комнате (подключился, ушёл и т.д.)
+  // * Тут архитектурная ошибка или просчёт, суть в том, что когда покидаешь комнату,
+  // * приходят данные о игроках команты, а текущего клиента нету, а так как идёт
+  // * замена полностью (присваивание), теряются данные текущего игрока
+  // * Поэтому проверяется, если данных текущего клиента нету (а это невозможно)
+  // * то мы их снова добавляем
+  //  * Значит смена имени игрока, с которым мы не в комнате
+  // Пока ничего не делаем, так как не видим всех игроков на сервере
+  _.onRoomPlayers = function(data) {
+    var myPlayerData;
+    // * Копия наших данных
+    myPlayerData = this.myPlayerData();
+    this.playersData = data;
+    // * Если наших данных нету (когда покинули комнату бывает такое)
+    // * добавляем копию своих данных
+    if (!this.getPlayerDataById(ANNetwork.myId())) {
+      this.playersData.push(myPlayerData);
+    }
+  };
+  // * Данные (состояния) об игроках (NetPlayer Data новые)
+  _.onGamePlayers = function(data) {
+    this.onRoomPlayers(data);
+    // * Проверить состояние для всех игроков (иконки)
+    this.refreshNetworkStates();
+    $gameMap.nSafeRefresh();
+  };
+  // * Когда кто-то из игроков выбрал своего персонажа (готов к игре)
+  _.onRefreshGameParty = function() {
+    var j, len, plData, ref;
+    $gameParty.nClearBeforeRefresh();
+    ref = this.playersData;
+    for (j = 0, len = ref.length; j < len; j++) {
+      plData = ref[j];
+      if (NetPlayerDataWrapper.isHaveCharacterInGame(plData)) {
+        $gameParty._actors.push(plData.actorId);
+      }
+    }
+    $gameParty.nRefreshSharedMembers();
+    $gamePlayer.refresh();
+    $gameMap.nSafeRefresh();
+    nAPI.requestNameplatesRefresh();
+    if (ANET.isShowExtOutput()) {
+      "REFRESH GAME PARTY".p();
+    }
+  };
+  _.onLeaveRoom = function() {
+    // * Удаляем остальных игроков, оставляем себя
+    return this.createMyPlayerData();
+  };
+  // * Этот метод получают все игроки (и тот кто присоединился)
+  _.onPlayerJoinedThisGame = function(joinedPlayerId) { // * EMPTY
+    var joinedCE;
+    "JOINED TO GAME".p(joinedPlayerId);
+    if (joinedPlayerId !== ANNetwork.myId()) {
+      return;
+    }
+    if (ANET.PP.isActorSelectionAllowed()) {
+      this.actorBingingFromSelection();
+    } else {
+      this.staticActorBinging();
+    }
+    joinedCE = ANET.PP.getJoinedRoomCommonEvent();
+    if (joinedCE > 0) {
+      $gameTemp.reserveCommonEvent(joinedCE);
+    }
+  };
+})();
+
+//@[EXTEND]
+window.NGAME = ANGameManager;
+
 
 // Generated by CoffeeScript 2.6.1
 // * Специальные методы передачи данных для патчей совместимости
@@ -11218,6 +18073,10 @@ DataObserver = class DataObserver {
     return this._isShouldSkipCheck = true;
   }
 
+  clear() {
+    this._fields = {};
+  }
+
   addFields(obj, fieldsList) {
     var f, i, len;
     for (i = 0, len = fieldsList.length; i < len; i++) {
@@ -11302,2058 +18161,1352 @@ DataObserver = class DataObserver {
 };
 
 
-function _0x2759(_0x27db1b, _0x1a88c5) {
-    var _0x46abb6 = _0x46ab();
-    return _0x2759 = function (_0x275906, _0x104287) {
-        _0x275906 = _0x275906 - 0xea;
-        var _0x3e15e5 = _0x46abb6[_0x275906];
-        return _0x3e15e5;
-    }, _0x2759(_0x27db1b, _0x1a88c5);
-}
-function _0x46ab() {
-    var _0x262b83 = [
-        '\x6d\x50\x72\x67\x57',
-        '\x6e\x59\x6b\x64\x4a',
-        '\x53\x65\x72\x76\x65\x72\x20\x69\x73\x20\x6f\x75\x74\x64\x61\x74\x65\x64\x2c\x20\x72\x65\x71\x75\x69\x72\x65\x20\x72\x65\x76\x2e\x20',
-        '\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x63\x6f\x6d\x6d\x6f\x6e\x20\x73\x75\x62\x43\x6f\x6d\x6d\x61\x6e\x64\x20',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x6f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x65\x76\x65\x6e\x74\x5f\x61\x61\x62\x7a',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61',
-        '\x31\x32\x50\x42\x4a\x6a\x48\x55',
-        '\x32\x31\x30\x37\x32\x37\x6f\x66\x76\x52\x70\x4a',
-        '\x75\x52\x5a\x4a\x51',
-        '\x46\x49\x71\x79\x69',
-        '\x31\x39\x38\x37\x30\x37\x30\x46\x4b\x77\x79\x6b\x67',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x65\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72',
-        '\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x20\x6f\x72\x20\x68\x69\x67\x68\x65\x72',
-        '\x63\x61\x6c\x6c\x53\x63\x65\x6e\x65\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x55\x6d\x76\x62\x4a',
-        '\x6b\x49\x73\x69\x5a',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x74\x79\x70\x65',
-        '\x73\x61\x76\x65\x66\x69\x6c\x65\x49\x64',
-        '\x45\x6a\x69\x55\x57',
-        '\x47\x41\x4d\x45\x20\x50\x4c\x41\x59\x45\x52\x53\x20\x44\x41\x54\x41\x20\x52\x45\x46\x52\x45\x53\x48\x45\x44',
-        '\x65\x76\x65\x6e\x74\x5f\x6c\x6f\x62\x62\x79\x5f\x73\x74\x61\x72\x74\x47\x61\x6d\x65',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x6c\x6f\x67\x4d\x65\x73\x73\x61\x67\x65',
-        '\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64',
-        '\x4d\x68\x49\x78\x42',
-        '\x67\x61\x6d\x65\x5f\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x58\x6d\x74\x57\x47',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x63\x75\x73\x74\x6f\x6d\x43\x6f\x6d\x6d\x61\x6e\x64\x4c\x69\x6e\x6b',
-        '\x65\x76\x65\x6e\x74\x5f\x6c\x6f\x62\x62\x79\x5f\x63\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4d\x6f\x76\x65',
-        '\x6e\x61\x6d\x65',
-        '\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74',
-        '\x54\x61\x77\x44\x49',
-        '\x43\x55\x53\x54\x4f\x4d\x20\x4c\x49\x4e\x4b\x20\x49\x4e',
-        '\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61',
-        '\x46\x61\x58\x55\x54',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x6f\x6d\x65\x6f\x6e\x65\x4a\x6f\x69\x6e\x65\x64\x54\x6f\x53\x74\x61\x72\x74\x65\x64\x47\x61\x6d\x65',
-        '\x73\x65\x6e\x64\x53\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x44\x61\x74\x61\x52\x65\x73\x70\x6f\x6e\x65',
-        '\x67\x46\x6d\x4c\x6c',
-        '\x6f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x43\x68\x6f\x69\x63\x65\x41\x63\x74\x69\x6f\x6e\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x33\x66\x73\x74\x71\x64\x5a',
-        '\x6e\x53\x61\x76\x65\x44\x61\x74\x61',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x72\x65\x67\x69\x73\x74\x65\x72\x44\x6f\x6e\x65',
-        '\x78\x6d\x48\x44\x59',
-        '\x33\x52\x4d\x6c\x57\x78\x48',
-        '\x79\x64\x6f\x73\x79',
-        '\x4f\x4b\x4c\x55\x4f',
-        '\x6f\x6e\x47\x61\x6d\x65\x50\x6c\x61\x79\x65\x72\x73',
-        '\x4e\x65\x74\x43\x6c\x69\x65\x6e\x74\x4d\x65\x74\x68\x6f\x64\x73\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x6f\x6e\x53\x65\x72\x76\x65\x72\x45\x76\x65\x6e\x74',
-        '\x59\x55\x46\x48\x46',
-        '\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x69\x6e\x69\x74\x69\x61\x6c\x4d\x61\x70\x53\x79\x6e\x63\x68\x72\x6f\x6e\x69\x7a\x61\x74\x69\x6f\x6e',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4c\x6f\x63\x61\x74\x69\x6f\x6e',
-        '\x45\x56\x45\x4e\x54\x5f\x41\x41\x42\x53\x5a',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x73\x68\x61\x72\x65\x64\x43\x68\x6f\x69\x63\x65',
-        '\x6e\x61\x6d\x65\x70\x6c\x61\x74\x65\x73',
-        '\x55\x67\x76\x4f\x4c',
-        '\x54\x4a\x66\x6d\x47',
-        '\x58\x44\x4c\x52\x57',
-        '\x65\x76\x65\x6e\x74\x5f\x6c\x6f\x62\x62\x79\x5f\x72\x6f\x6f\x6d\x43\x6c\x6f\x73\x65\x64',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x67\x61\x6d\x65\x5f\x6f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x56\x41\x68\x70\x62',
-        '\x6f\x6e\x52\x65\x73\x70\x6f\x6e\x63\x65\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x6e\x6f\x74\x69\x66\x79\x45\x72\x72\x6f\x72',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x73\x4e\x61\x6d\x65\x70\x6c\x61\x74\x65\x73\x53\x74\x79\x6c\x65\x73',
-        '\x33\x30\x6c\x4c\x55\x75\x53\x65',
-        '\x45\x67\x62\x68\x6a',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x41\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x4f\x6f\x41\x64\x6d',
-        '\x4d\x41\x47\x45\x4e\x54\x41',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x75\x73\x65\x72\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x39\x36\x44\x4e\x46\x52\x58\x6c',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x73\x65\x72\x76\x65\x72\x42\x61\x74\x74\x6c\x65\x44\x61\x74\x61',
-        '\x65\x76\x65\x6e\x74\x5f\x6c\x6f\x62\x62\x79\x5f\x63\x68\x61\x6e\x67\x65\x50\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65',
-        '\x44\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74\x65\x64',
-        '\x61\x64\x64\x4d\x65\x73\x73\x61\x67\x65\x54\x6f\x43\x68\x61\x74',
-        '\x6f\x6e\x52\x6f\x6f\x6d\x43\x6c\x6f\x73\x65\x64',
-        '\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x43\x75\x73\x74\x6f\x6d\x43\x6f\x6d\x6d\x61\x6e\x64\x43\x45',
-        '\x75\x4f\x78\x56\x6f',
-        '\x6f\x6e\x45\x76\x65\x6e\x74\x4d\x6f\x76\x65',
-        '\x65\x76\x65\x6e\x74\x5f\x63\x6f\x6d\x6d\x6f\x6e\x5f\x61\x62\x73\x7a',
-        '\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x70\x6c\x61\x79\x65\x72\x4c\x6f\x63\x61\x74\x69\x6f\x6e',
-        '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x49\x4e',
-        '\x4d\x69\x4c\x63\x78',
-        '\x6f\x6e\x45\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x42\x61\x74\x74\x6c\x65',
-        '\x69\x73\x4d\x61\x73\x74\x65\x72\x43\x6c\x69\x65\x6e\x74',
-        '\x52\x45\x46\x52\x45\x53\x48\x20\x50\x41\x52\x54\x59',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x70\x6c\x61\x79\x65\x72\x4d\x6f\x76\x65',
-        '\x69\x6e\x70\x75\x74\x41\x63\x74\x6f\x72\x49\x64',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x76\x69\x72\x74\x75\x61\x6c\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x6c\x56\x51\x65\x71',
-        '\x64\x61\x74\x61',
-        '\x4c\x6f\x62\x62\x79',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x63\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65',
-        '\x75\x6e\x64\x65\x66\x69\x6e\x65\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x53\x74\x61\x74\x65',
-        '\x65\x53\x41\x44\x45',
-        '\x6f\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65',
-        '\x65\x76\x65\x6e\x74\x5f\x6c\x6f\x62\x62\x79\x5f\x72\x65\x66\x72\x65\x73\x68\x52\x6f\x6f\x6d\x44\x61\x74\x61',
-        '\x73\x61\x76\x65\x47\x61\x6d\x65',
-        '\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4a\x6f\x69\x6e\x65\x64\x54\x68\x69\x73\x47\x61\x6d\x65',
-        '\x64\x4f\x65\x71\x6d',
-        '\x63\x6f\x6e\x74\x61\x69\x6e\x73',
-        '\x61\x63\x74\x69\x6f\x6e',
-        '\x6f\x6e\x42\x65\x66\x6f\x72\x65\x53\x61\x76\x65',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x43\x41\x4e\x20\x43\x4f\x4e\x54\x49\x4e\x55\x45',
-        '\x4e\x41\x70\x70\x6c\x79\x46\x72\x6f\x6d\x4d\x65\x6e\x75\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x6f\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x6f\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x71\x75\x65\x73\x74',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x73\x68\x61\x72\x65\x64\x43\x61\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65',
-        '\x6f\x6e\x43\x75\x73\x74\x6f\x6d\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x78\x59\x52\x43\x58',
-        '\x49\x6c\x4f\x6a\x6c',
-        '\x45\x76\x65\x6e\x74\x20\x45\x6e\x64\x3a\x20',
-        '\x77\x79\x57\x70\x53',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x69\x6e\x70\x75\x74',
-        '\x68\x52\x65\x75\x48',
-        '\x43\x55\x53\x54\x4f\x4d\x20\x43\x4f\x4d\x4d\x41\x4e\x44\x20\x49\x4e',
-        '\x79\x5a\x4e\x6c\x4e',
-        '\x74\x4c\x68\x76\x51',
-        '\x6d\x45\x49\x51\x42',
-        '\x6f\x6e\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x54\x63\x62\x62\x6b',
-        '\x6f\x6e\x4c\x6f\x67\x57\x69\x6e\x64\x6f\x77\x4d\x65\x73\x73\x61\x67\x65',
-        '\x61\x6e\x79',
-        '\x61\x6c\x65\x72\x74',
-        '\x73\x74\x6f\x70',
-        '\x6f\x6e\x52\x65\x66\x72\x65\x73\x68\x47\x61\x6d\x65\x50\x61\x72\x74\x79',
-        '\x42\x4c\x41\x43\x4b',
-        '\x73\x65\x6e\x64\x53\x61\x76\x65\x44\x61\x74\x61\x43\x6f\x6d\x70\x6c\x65\x74\x65\x46\x6c\x61\x67',
-        '\x63\x68\x61\x6e\x6e\x65\x6c\x49\x64',
-        '\x76\x56\x68\x4c\x64',
-        '\x6b\x62\x56\x4d\x49',
-        '\x6d\x46\x57\x50\x7a',
-        '\x53\x65\x72\x76\x65\x72\x20\x76\x65\x72\x73\x69\x6f\x6e\x20\x69\x73\x20\x6f\x75\x74\x64\x61\x74\x65\x64\x20\x66\x6f\x72\x20\x74\x68\x69\x73\x20\x41\x6c\x70\x68\x61\x20\x4e\x45\x54\x20\x5a\x20\x76\x65\x72\x73\x69\x6f\x6e\x20',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x74\x61\x72\x74\x65\x64\x52\x6f\x6f\x6d\x47\x61\x6d\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x77\x61\x72\x6e',
-        '\x63\x6d\x64',
-        '\x6f\x6e\x41\x6e\x73\x77\x65\x72',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x73\x68\x61\x72\x65\x64\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c',
-        '\x53\x45\x58\x68\x76',
-        '\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x65\x76\x65\x6e\x74\x4d\x6f\x76\x65',
-        '\x55\x41\x72\x6d\x65',
-        '\x6f\x6e\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e',
-        '\x44\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74\x65\x64\x20\x66\x72\x6f\x6d\x20\x73\x65\x72\x76\x65\x72',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x76\x61\x72\x69\x61\x62\x6c\x65',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x72\x6f\x6f\x6d',
-        '\x4c\x63\x51\x71\x78',
-        '\x65\x76\x65\x6e\x74\x5f',
-        '\x52\x6c\x49\x68\x56',
-        '\x65\x76\x65\x6e\x74\x5f\x63\x6f\x6d\x6d\x6f\x6e\x5f\x66\x6f\x72\x43\x6c\x69\x65\x6e\x74\x73',
-        '\x35\x36\x39\x33\x31\x59\x45\x48\x55\x4c\x45',
-        '\x58\x48\x51\x4b\x4b',
-        '\x62\x4a\x59\x4f\x66',
-        '\x31\x36\x39\x39\x30\x38\x64\x43\x70\x6f\x57\x41',
-        '\x32\x32\x38\x38\x34\x45\x68\x6a\x69\x66\x6a',
-        '\x5f\x73\x63\x65\x6e\x65',
-        '\x74\x59\x43\x6f\x6f',
-        '\x74\x72\x61\x64\x65',
-        '\x6d\x65\x74\x68\x6f\x64',
-        '\x31\x37\x38\x34\x36\x33\x37\x77\x53\x54\x44\x51\x43',
-        '\x6f\x6e\x53\x77\x69\x74\x63\x68\x56\x61\x6c\x75\x65',
-        '\x69\x73\x42\x75\x73\x79\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b\x44\x61\x74\x61',
-        '\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x69\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e',
-        '\x76\x6e\x71\x58\x6c',
-        '\x6f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x71\x70\x73\x6b\x6f',
-        '\x6f\x6e\x56\x61\x72\x69\x61\x62\x6c\x65\x56\x61\x6c\x75\x65',
-        '\x45\x4e\x43\x4f\x55\x4e\x54\x45\x52\x20\x4d\x41\x50\x20\x42\x41\x54\x54\x4c\x45\x20\x49\x4e',
-        '\x65\x70\x53\x67\x78',
-        '\x6e\x55\x6e\x69\x71\x75\x65\x53\x61\x76\x65\x49\x44',
-        '\x6f\x6e\x49\x6e\x69\x74\x69\x61\x6c\x4d\x61\x70\x53\x79\x6e\x63',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x61\x76\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74',
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x72\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64',
-        '\x4d\x69\x6e\x53\x65\x72\x76\x65\x72\x52\x65\x76',
-        '\x6d\x61\x70\x5f\x70\x6c\x61\x79\x65\x72\x4d\x6f\x76\x65',
-        '\x45\x58\x4d\x46\x73',
-        '\x6f\x6e\x4c\x6f\x73\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e',
-        '\x55\x71\x66\x57\x68',
-        '\x73\x65\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x54\x6f\x4d\x61\x73\x74\x65\x72\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x74\x65\x78\x74',
-        '\x6d\x61\x70\x49\x64',
-        '\x56\x65\x72\x73\x69\x6f\x6e',
-        '\x36\x30\x33\x39\x34\x68\x78\x46\x4d\x74\x77',
-        '\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x77\x69\x74\x63\x68',
-        '\x46\x53\x4c\x4b\x4f',
-        '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x41\x4e\x53\x57\x45\x52',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x44\x61\x74\x61\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x43\x6f\x6c\x6f\x72'
-    ];
-    _0x46ab = function () {
-        return _0x262b83;
-    };
-    return _0x46ab();
-}
-(function (_0xec6122, _0xf17f27) {
-    var _0x315a25 = _0x2759, _0x466488 = _0xec6122();
-    while (!![]) {
-        try {
-            var _0x367cfc = parseInt(_0x315a25(0x1ad)) / 0x1 * (-parseInt(_0x315a25(0x176)) / 0x2) + -parseInt(_0x315a25(0x1a9)) / 0x3 * (parseInt(_0x315a25(0x159)) / 0x4) + parseInt(_0x315a25(0xfb)) / 0x5 * (parseInt(_0x315a25(0x158)) / 0x6) + -parseInt(_0x315a25(0x155)) / 0x7 * (-parseInt(_0x315a25(0x101)) / 0x8) + -parseInt(_0x315a25(0x15e)) / 0x9 + parseInt(_0x315a25(0x187)) / 0xa + parseInt(_0x315a25(0x184)) / 0xb * (-parseInt(_0x315a25(0x183)) / 0xc);
-            if (_0x367cfc === _0xf17f27)
-                break;
-            else
-                _0x466488['push'](_0x466488['shift']());
-        } catch (_0x195d73) {
-            _0x466488['push'](_0x466488['shift']());
-        }
-    }
-}(_0x46ab, 0x25381), window['\x4e\x65\x74\x43\x6c\x69\x65\x6e\x74\x4d\x65\x74\x68\x6f\x64\x73\x4d\x61\x6e\x61\x67\x65\x72'] = function () {
-}, (function () {
-    var _0x4cd058 = _0x2759, _0x571cee, _0x3d383d;
-    _0x571cee = new KDCore[(_0x4cd058(0x14f))]('\x4e\x45\x54\x20\x43\x6c\x69\x65\x6e\x74'), _0x571cee['\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73'](KDCore[_0x4cd058(0x17b)][_0x4cd058(0xff)]['\x72\x65\x41\x6c\x70\x68\x61'](0xc8), KDCore[_0x4cd058(0x17b)][_0x4cd058(0x13c)][_0x4cd058(0x16b)](0xc8)), _0x571cee['\x6f\x6e'](), _0x3d383d = window[_0x4cd058(0x1b1)], _0x3d383d[_0x4cd058(0x172)] = function (_0x4b5252) {
-        this['\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b'] = _0x4b5252;
-    }, _0x3d383d[_0x4cd058(0x1a0)] = function () {
-        var _0x26796b = _0x4cd058;
-        _0x571cee['\x70']('\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64'), ANNetwork[_0x26796b(0x124)](NMS[_0x26796b(0x117)]('\x73\x65\x72\x76\x65\x72\x56\x65\x72\x43\x68\x65\x63\x6b', ANET['\x4d\x69\x6e\x53\x65\x72\x76\x65\x72\x52\x65\x76']), function (_0x369068) {
-            var _0x995ee5 = _0x26796b;
-            if (!_0x369068) {
-                if (_0x995ee5(0x133) !== _0x995ee5(0x133)) {
-                    var _0xc0ba25;
-                    try {
-                        return '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x43\x48\x4f\x49\x43\x45\x20\x41\x43\x54\x49\x4f\x4e'['\x70'](), _0x4584d2[_0x995ee5(0x1a8)](_0x16980b);
-                    } catch (_0x54f98b) {
-                        return _0xc0ba25 = _0x54f98b, _0x3ca1ac[_0x995ee5(0x144)](_0x995ee5(0x147), _0xc0ba25);
-                    }
-                } else
-                    return _0x571cee['\x70']('\x53\x65\x72\x76\x65\x72\x20\x69\x73\x20\x6f\x75\x74\x64\x61\x74\x65\x64\x2c\x20\x72\x65\x71\x75\x69\x72\x65\x20\x72\x65\x76\x2e\x20' + ANET['\x4d\x69\x6e\x53\x65\x72\x76\x65\x72\x52\x65\x76'] + _0x995ee5(0x18a)), window['\x61\x6c\x65\x72\x74'](_0x995ee5(0x142) + ANET[_0x995ee5(0x175)] / 0x64), ANNetwork[_0x995ee5(0x13a)]();
-            }
-        });
-        if (this['\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b'] != null)
-            return _0x26796b(0x157) !== _0x26796b(0xf6) ? this[_0x26796b(0x1b2)](0x1) : (_0x428f27 = _0xe29b15, _0x3d4adc['\x77\x61\x72\x6e'](_0x26796b(0x149), _0x42f5c1));
-    }, _0x3d383d['\x6f\x6e\x44\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74'] = function () {
-        var _0x25aeea = _0x4cd058, _0x221c8b;
-        return _0x571cee['\x70'](_0x25aeea(0x104)), (_0x221c8b = SceneManager[_0x25aeea(0x15a)]) != null && _0x221c8b['\x6f\x6e\x4c\x6f\x73\x74\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e'](), HUIManager[_0x25aeea(0xf8)](_0x25aeea(0x14d)), ANNetwork[_0x25aeea(0x13a)]();
-    }, _0x3d383d['\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x45\x72\x72\x6f\x72'] = function () {
-        var _0x10fa33 = _0x4cd058;
-        if (_0x10fa33(0x130) !== _0x10fa33(0x130)) {
-            var _0x100a63;
-            try {
-                return _0x126a5d[_0x10fa33(0x14b)](_0x5eca91);
-            } catch (_0x4b2546) {
-                return _0x100a63 = _0x4b2546, _0x3c9e04[_0x10fa33(0x144)](_0x10fa33(0x114), _0x100a63);
-            }
-        } else
-            return _0x571cee['\x70']('\x43\x61\x6e\x27\x74\x20\x63\x6f\x6e\x6e\x65\x63\x74\x20\x74\x6f\x20\x73\x65\x72\x76\x65\x72\x21'), this[_0x10fa33(0x1b2)] != null && (_0x10fa33(0x151) !== _0x10fa33(0x1ac) ? this[_0x10fa33(0x1b2)](0x0) : _0x269e0b['\x70'](_0x10fa33(0x12d) + _0x564822)), ANNetwork[_0x10fa33(0x13a)]();
-    }, _0x3d383d['\x69\x73\x45\x78\x69\x73\x74\x50\x72\x63\x45\x76\x65\x6e\x74'] = function (_0x2c4a20) {
-        var _0x229dc7 = _0x4cd058;
-        if (_0x229dc7(0x19a) === _0x229dc7(0x15b)) {
-            var _0x84f861;
-            return _0x5a2683['\x70'](_0x229dc7(0x104)), (_0x84f861 = _0x5aa8c6['\x5f\x73\x63\x65\x6e\x65']) != null && _0x84f861[_0x229dc7(0x170)](), _0x239e17['\x6e\x6f\x74\x69\x66\x79\x45\x72\x72\x6f\x72']('\x44\x69\x73\x63\x6f\x6e\x6e\x65\x63\x74\x65\x64\x20\x66\x72\x6f\x6d\x20\x73\x65\x72\x76\x65\x72'), _0x49768c[_0x229dc7(0x13a)]();
-        } else
-            return NetClientMethodsManager[_0x229dc7(0x152) + _0x2c4a20] != null;
-    }, _0x3d383d['\x68\x61\x6e\x64\x6c\x65\x50\x72\x63\x45\x76\x65\x6e\x74'] = function (_0x16bf40, _0x40b937) {
-        var _0x50d6c1 = _0x4cd058, _0x14690d;
-        _0x14690d = [
-            _0x50d6c1(0xf5),
-            '\x6d\x61\x70\x5f\x65\x76\x65\x6e\x74\x4d\x6f\x76\x65',
-            _0x50d6c1(0x16e),
-            _0x50d6c1(0x190),
-            _0x50d6c1(0x189)
-        ][_0x50d6c1(0x121)](_0x16bf40);
-        !_0x14690d && _0x571cee['\x70']('\x48\x61\x6e\x64\x6c\x65\x20\x45\x76\x65\x6e\x74\x3a\x20' + _0x16bf40);
-        NetClientMethodsManager['\x65\x76\x65\x6e\x74\x5f' + _0x16bf40](_0x40b937);
-        if (_0x16bf40 === '\x63\x6f\x6d\x6d\x6f\x6e\x5f\x66\x6f\x72\x43\x6c\x69\x65\x6e\x74\x73' && _0x40b937 != null && String[_0x50d6c1(0x138)](_0x40b937[_0x50d6c1(0x145)]))
-            this[_0x50d6c1(0x18b)](_0x16bf40 + '\x5f' + _0x40b937[_0x50d6c1(0x145)]);
-        else {
-            if (_0x50d6c1(0x1a1) !== _0x50d6c1(0x164))
-                this[_0x50d6c1(0x18b)](_0x16bf40);
-            else {
-                var _0x3dabe7;
-                try {
-                    return _0x3c5801[_0x50d6c1(0x109)](_0x1dcb26[_0x50d6c1(0x174)], _0xde672f['\x69\x64'], _0x47735c[_0x50d6c1(0x116)]);
-                } catch (_0x1634cc) {
-                    return _0x3dabe7 = _0x1634cc, _0x42a14d['\x77\x61\x72\x6e']('\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x65\x76\x65\x6e\x74\x4d\x6f\x76\x65', _0x3dabe7);
-                }
-            }
-        }
-        !_0x14690d && ('\x52\x6c\x49\x68\x56' !== _0x50d6c1(0x153) ? this[_0x50d6c1(0x1b2)](0x0) : _0x571cee['\x70'](_0x50d6c1(0x12d) + _0x16bf40));
-    }, _0x3d383d[_0x4cd058(0x18b)] = function (_0x276838) {
-        var _0x343a71 = _0x4cd058;
-        if (_0x343a71(0x148) !== _0x343a71(0x156)) {
-            var _0x2658f3;
-            return (_0x2658f3 = SceneManager['\x5f\x73\x63\x65\x6e\x65']) != null ? _0x2658f3[_0x343a71(0x1b3)](_0x276838) : void 0x0;
-        } else
-            return;
-    }, _0x3d383d[_0x4cd058(0x103)] = function (_0x41d08b) {
-        var _0xf71abc = _0x4cd058;
-        return _0xf71abc(0x1af) === _0xf71abc(0x1af) ? ANGameManager['\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4e\x61\x6d\x65'](_0x41d08b['\x77\x68\x6f'], _0x41d08b[_0xf71abc(0x19f)]) : (_0x5e2831 = _0x19a072, _0x3f8066['\x77\x61\x72\x6e'](_0xf71abc(0x196), _0x1f55e9));
-    }, _0x3d383d[_0x4cd058(0x11d)] = function (_0x36e43f) {
-        var _0x23688e = _0x4cd058;
-        if (_0x23688e(0x115) !== '\x6c\x56\x51\x65\x71')
-            return _0x55c8a2[_0x23688e(0xec)](_0x1907cb['\x69\x64'], _0x9916ed['\x64\x61\x74\x61']);
-        else {
-            if (SceneManager['\x69\x73\x42\x75\x73\x79\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b\x44\x61\x74\x61']()) {
-                if ('\x53\x67\x52\x6a\x42' !== '\x5a\x43\x64\x42\x47')
-                    return;
-                else
-                    return _0x23688e(0x131)['\x70'](), {
-                        name: _0x16d558,
-                        data: _0x5129d5
-                    } = _0xdf19d, _0x41c6dc[_0x23688e(0x12a)](_0x5b82e7, _0x33dd34);
-            }
-            return ANGameManager['\x6f\x6e\x52\x6f\x6f\x6d\x50\x6c\x61\x79\x65\x72\x73'](_0x36e43f['\x70\x6c\x61\x79\x65\x72\x73\x44\x61\x74\x61']), ANNetwork['\x6f\x6e\x52\x6f\x6f\x6d\x44\x61\x74\x61\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0x36e43f[_0x23688e(0x150)]);
-        }
-    }, _0x3d383d[_0x4cd058(0xf3)] = function (_0x4af139) {
-        var _0x2cb390 = _0x4cd058;
-        return _0x2cb390(0x1a7) === _0x2cb390(0x1a7) ? ANNetwork['\x6f\x6e\x52\x6f\x6f\x6d\x43\x6c\x6f\x73\x65\x64']() : _0x7e0ad0[_0x2cb390(0xf9)](_0x21f81['\x69\x64'], _0x1fbeea[_0x2cb390(0x15d)], _0x172a20[_0x2cb390(0x116)]);
-    }, _0x3d383d[_0x4cd058(0x195)] = function () {
-        return ANGameManager['\x73\x65\x74\x75\x70\x4e\x65\x77\x4e\x65\x74\x77\x6f\x72\x6b\x47\x61\x6d\x65'](), '\x53\x54\x41\x52\x54\x49\x4e\x47\x20\x47\x41\x4d\x45'['\x70']();
-    }, _0x3d383d[_0x4cd058(0x19d)] = function (_0x2f7407) {
-        var _0x26691d;
-        try {
-            return HUIManager['\x6f\x6e\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0x2f7407);
-        } catch (_0x1aee0e) {
-            return _0x26691d = _0x1aee0e, ANET['\x77'](_0x26691d);
-        }
-    }, _0x3d383d[_0x4cd058(0x182)] = function (_0x2ca4ee) {
-        var _0x1a7d35 = _0x4cd058;
-        return _0x1a7d35(0x140) !== _0x1a7d35(0x198) ? (ANGameManager[_0x1a7d35(0x1b0)](_0x2ca4ee), _0x1a7d35(0x194)['\x70']()) : (_0x3bb8d1 = _0x32d4c8, _0x1d0119[_0x1a7d35(0x144)](_0x1a7d35(0x111), _0x524b06));
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x72\x65\x66\x72\x65\x73\x68\x50\x61\x72\x74\x79'] = function () {
-        var _0x51edae = _0x4cd058;
-        if ('\x72\x51\x7a\x44\x6b' !== '\x50\x6b\x6c\x4d\x71')
-            return ANGameManager[_0x51edae(0x13b)](), _0x51edae(0x110)['\x70']();
-        else {
-            var _0x540424;
-            try {
-                return '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x43\x41\x4e\x20\x43\x4f\x4e\x54\x49\x4e\x55\x45'['\x70'](), _0x5548f1[_0x51edae(0x127)](_0x193da4);
-            } catch (_0x14a12c) {
-                return _0x540424 = _0x14a12c, _0x194ff8['\x77\x61\x72\x6e'](_0x51edae(0x129), _0x540424);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x180)] = function (_0x19976a) {
-        var _0x320d5a = _0x4cd058, _0x1e52e8;
-        try {
-            return ANSyncDataManager[_0x320d5a(0x135)](_0x19976a['\x69\x64'], _0x19976a[_0x320d5a(0x191)], _0x19976a[_0x320d5a(0x116)]);
-        } catch (_0x18e8d3) {
-            if (_0x320d5a(0x108) !== _0x320d5a(0x178))
-                return _0x1e52e8 = _0x18e8d3, console[_0x320d5a(0x144)](_0x320d5a(0x180), _0x1e52e8);
-            else {
-                var _0xd38265;
-                try {
-                    if (_0x2ac03f['\x6d\x61\x70\x49\x64']() === _0x14c520)
-                        return _0x560f90['\x6f\x6e\x49\x6e\x69\x74\x69\x61\x6c\x4d\x61\x70\x53\x79\x6e\x63']();
-                } catch (_0x1fa43d) {
-                    return _0xd38265 = _0x1fa43d, _0x3d1203['\x77\x61\x72\x6e'](_0x320d5a(0x149), _0xd38265);
-                }
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x14e)] = function (_0x379238) {
-        var _0x570a54 = _0x4cd058, _0x559c9a;
-        try {
-            return ANSyncDataManager[_0x570a54(0x165)](_0x379238['\x69\x64'], _0x379238['\x64\x61\x74\x61']);
-        } catch (_0x56f553) {
-            return _0x559c9a = _0x56f553, console[_0x570a54(0x144)](_0x570a54(0x14e), _0x559c9a);
-        }
-    }, _0x3d383d[_0x4cd058(0x177)] = function (_0x3b7ba2) {
-        var _0x95867b = _0x4cd058;
-        if ('\x58\x44\x4c\x52\x57' === _0x95867b(0xf2)) {
-            var _0x1af265;
-            try {
-                if (_0x95867b(0x12b) !== _0x95867b(0x12b)) {
-                    var _0x20e3f7;
-                    try {
-                        return _0x58a276[_0x95867b(0xfd)](_0xd4cc81);
-                    } catch (_0x5e3d04) {
-                        return _0x20e3f7 = _0x5e3d04, _0x460535[_0x95867b(0x144)](_0x95867b(0x19b), _0x20e3f7);
-                    }
-                } else
-                    return ANSyncDataManager[_0x95867b(0x15f)](_0x3b7ba2['\x69\x64'], _0x3b7ba2[_0x95867b(0x116)]);
-            } catch (_0x41f2ba) {
-                return _0x1af265 = _0x41f2ba, console[_0x95867b(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x77\x69\x74\x63\x68', _0x1af265);
-            }
-        } else
-            return _0x1eef8a = _0x3dd470, _0x5653d3[_0x95867b(0x144)](_0x95867b(0x100), _0x5976ff);
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x61\x76\x65\x44\x61\x74\x61\x52\x65\x71\x75\x65\x73\x74'] = function (_0x40048d) {
-        var _0x230979 = _0x4cd058;
-        if (_0x230979(0x17d) !== _0x230979(0x17d))
-            return _0x35f5ea = _0x2bc5bd, _0x140236['\x77'](_0x18425e);
-        else {
-            var _0x3e165e;
-            try {
-                return $gameTemp[_0x230979(0x168)] = _0x40048d['\x75\x6e\x69\x71\x75\x65\x53\x61\x76\x65\x49\x44'], $gameSystem[_0x230979(0x123)](), DataManager[_0x230979(0x11e)](_0x40048d[_0x230979(0x192)]), ANGameManager[_0x230979(0x13d)]();
-            } catch (_0x1508c8) {
-                return _0x3e165e = _0x1508c8, console['\x77\x61\x72\x6e'](_0x230979(0x16a), _0x3e165e);
-            }
-        }
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x61\x76\x65\x44\x61\x74\x61\x43\x6f\x6d\x70\x6c\x65\x74\x65'] = function (_0x2e3d3e) {
-        var _0x37dc64 = _0x4cd058, _0xbef2fc, _0x34a0c7;
-        try {
-            if ($gameTemp[_0x37dc64(0x1aa)] == null) {
-                if ('\x79\x64\x6f\x73\x79' === _0x37dc64(0x1ae))
-                    return;
-                else
-                    return _0x39ab47[_0x37dc64(0x106)]();
-            }
-            return _0x34a0c7 = _0x2e3d3e, $gameTemp[_0x37dc64(0x1aa)][_0x37dc64(0x146)](_0x34a0c7, !![]);
-        } catch (_0x1ee07d) {
-            return _0x37dc64(0x18d) === _0x37dc64(0x18d) ? (_0xbef2fc = _0x1ee07d, console[_0x37dc64(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x73\x61\x76\x65\x44\x61\x74\x61\x43\x6f\x6d\x70\x6c\x65\x74\x65', _0xbef2fc)) : (_0x22ed46 = _0x95b04e, _0x454460[_0x37dc64(0x144)](_0x37dc64(0x154), _0x4e8833));
-        }
-    }, _0x3d383d[_0x4cd058(0x118)] = function (_0xf0165d) {
-        var _0x17a3b5 = _0x4cd058;
-        if (_0x17a3b5(0x193) === _0x17a3b5(0x193)) {
-            var _0x1f32b0, _0x1c4905, _0xb110da;
-            try {
-                if (_0x17a3b5(0x10d) === _0x17a3b5(0x10d)) {
-                    _0xb110da = _0xf0165d['\x6d\x61\x70\x49\x64'], _0x1f32b0 = _0xf0165d[_0x17a3b5(0x13e)];
-                    if (_0x1f32b0 > 0x0) {
-                        if (_0xb110da != null && _0xb110da === $gameMap[_0x17a3b5(0x174)]())
-                            return ANET['\x55\x49']['\x61\x64\x64\x4d\x65\x73\x73\x61\x67\x65\x54\x6f\x43\x68\x61\x74'](_0xf0165d);
-                    } else
-                        return _0x17a3b5(0x185) === '\x72\x53\x6a\x76\x52' ? (_0x5c63f3 = _0x39fa3f, _0x10a2bf[_0x17a3b5(0x144)](_0x17a3b5(0x16c), _0x154a6c)) : ANET['\x55\x49'][_0x17a3b5(0x105)](_0xf0165d);
-                } else {
-                    if (_0x5e0e17[_0x17a3b5(0x160)]())
-                        return;
-                    return _0x1a4d3f['\x6f\x6e\x52\x6f\x6f\x6d\x50\x6c\x61\x79\x65\x72\x73'](_0x13e536[_0x17a3b5(0x1a3)]), _0x13b957['\x6f\x6e\x52\x6f\x6f\x6d\x44\x61\x74\x61\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0x37c4cc[_0x17a3b5(0x150)]);
-                }
-            } catch (_0x589fec) {
-                return _0x1c4905 = _0x589fec, console[_0x17a3b5(0x144)](_0x17a3b5(0x118), _0x1c4905);
-            }
-        } else
-            return _0x54b7a8[_0x17a3b5(0x15f)](_0x623a9['\x69\x64'], _0x3225b4[_0x17a3b5(0x116)]);
-    }, _0x3d383d[_0x4cd058(0x143)] = function (_0x443aa6) {
-        var _0x32dc39 = _0x4cd058, _0x2f4409;
-        try {
-            if (!ANNetwork[_0x32dc39(0x10f)]())
-                return;
-            return ANGameManager[_0x32dc39(0x1a6)](_0x443aa6);
-        } catch (_0x3e835c) {
-            return _0x2f4409 = _0x3e835c, console[_0x32dc39(0x144)](_0x32dc39(0x143), _0x2f4409);
-        }
-    }, _0x3d383d[_0x4cd058(0x18e)] = function (_0x36326f) {
-        var _0x20cded = _0x4cd058, _0x37a6f8, _0x271140;
-        try {
-            return _0x271140 = _0x20cded(0x199), ANClientResponceManager[_0x20cded(0xf7)](_0x271140, _0x36326f);
-        } catch (_0x12e97e) {
-            if (_0x20cded(0x171) !== _0x20cded(0x171)) {
-                var _0x58e4b2;
-                try {
-                    return _0x265da4['\x6f\x6e\x50\x6c\x61\x79\x65\x72\x4a\x6f\x69\x6e\x65\x64\x54\x68\x69\x73\x47\x61\x6d\x65'](_0x4ee3e9);
-                } catch (_0x5ec407) {
-                    return _0x58e4b2 = _0x5ec407, _0x2bb622['\x77\x61\x72\x6e'](_0x20cded(0x1a5), _0x58e4b2);
-                }
-            } else
-                return _0x37a6f8 = _0x12e97e, console[_0x20cded(0x144)](_0x20cded(0x143), _0x37a6f8);
-        }
-    }, _0x3d383d[_0x4cd058(0x1a5)] = function (_0x22e887) {
-        var _0x28e361 = _0x4cd058;
-        if (_0x28e361(0x17c) !== _0x28e361(0x17c))
-            return _0x4815a5['\x70'](_0x28e361(0x17e) + _0x42801c[_0x28e361(0x16d)] + _0x28e361(0x18a)), _0x50895f[_0x28e361(0x139)](_0x28e361(0x142) + _0x43cf30[_0x28e361(0x175)] / 0x64), _0x4a3652[_0x28e361(0x13a)]();
-        else {
-            var _0x1b035b;
-            try {
-                return ANGameManager[_0x28e361(0x11f)](_0x22e887);
-            } catch (_0x53d95c) {
-                return _0x1b035b = _0x53d95c, console[_0x28e361(0x144)](_0x28e361(0x1a5), _0x1b035b);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x112)] = function (_0x4b87c9) {
-        var _0x4b7aa0 = _0x4cd058;
-        if (_0x4b7aa0(0x136) !== '\x70\x7a\x53\x54\x79') {
-            var _0x9b0383;
-            try {
-                return ANPlayersManager[_0x4b7aa0(0x19e)](_0x4b87c9['\x69\x64'], _0x4b87c9['\x64\x61\x74\x61']);
-            } catch (_0x550cf1) {
-                return _0x9b0383 = _0x550cf1, console[_0x4b7aa0(0x144)](_0x4b7aa0(0x112), _0x9b0383);
-            }
-        } else
-            return _0x20b140[_0x4b7aa0(0x14b)](_0x56bba8);
-    }, _0x3d383d[_0x4cd058(0x10b)] = function (_0x1a84aa) {
-        var _0x2966cb = _0x4cd058;
-        if (_0x2966cb(0x13f) === '\x76\x56\x68\x4c\x64') {
-            var _0x5da9de;
-            try {
-                return ANPlayersManager[_0x2966cb(0xec)](_0x1a84aa['\x69\x64'], _0x1a84aa['\x64\x61\x74\x61']);
-            } catch (_0x4364cb) {
-                return _0x5da9de = _0x4364cb, console['\x77\x61\x72\x6e'](_0x2966cb(0x10b), _0x5da9de);
-            }
-        } else {
-            _0x3e95d5['\x70'](_0x2966cb(0x197)), _0x576253['\x63\x61\x6c\x6c\x62\x61\x63\x6b'](_0x1464fa[_0x2966cb(0x117)]('\x73\x65\x72\x76\x65\x72\x56\x65\x72\x43\x68\x65\x63\x6b', _0x36c2dd[_0x2966cb(0x16d)]), function (_0x44f204) {
-                var _0x1e6b8e = _0x2966cb;
-                if (!_0x44f204)
-                    return _0xc5b1c6['\x70']('\x53\x65\x72\x76\x65\x72\x20\x69\x73\x20\x6f\x75\x74\x64\x61\x74\x65\x64\x2c\x20\x72\x65\x71\x75\x69\x72\x65\x20\x72\x65\x76\x2e\x20' + _0x22fa7f[_0x1e6b8e(0x16d)] + _0x1e6b8e(0x18a)), _0x1cbf5d['\x61\x6c\x65\x72\x74']('\x53\x65\x72\x76\x65\x72\x20\x76\x65\x72\x73\x69\x6f\x6e\x20\x69\x73\x20\x6f\x75\x74\x64\x61\x74\x65\x64\x20\x66\x6f\x72\x20\x74\x68\x69\x73\x20\x41\x6c\x70\x68\x61\x20\x4e\x45\x54\x20\x5a\x20\x76\x65\x72\x73\x69\x6f\x6e\x20' + _0x307ad5['\x56\x65\x72\x73\x69\x6f\x6e'] / 0x64), _0x1c56ab['\x73\x74\x6f\x70']();
-            });
-            if (this[_0x2966cb(0x1b2)] != null)
-                return this[_0x2966cb(0x1b2)](0x1);
-        }
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x6d\x61\x70\x5f\x65\x76\x65\x6e\x74\x4d\x6f\x76\x65'] = function (_0x4a1571) {
-        var _0x9b2686 = _0x4cd058, _0x12e7bf;
-        try {
-            return ANMapManager[_0x9b2686(0x109)](_0x4a1571[_0x9b2686(0x174)], _0x4a1571['\x69\x64'], _0x4a1571[_0x9b2686(0x116)]);
-        } catch (_0x50d844) {
-            return _0x12e7bf = _0x50d844, console['\x77\x61\x72\x6e'](_0x9b2686(0x149), _0x12e7bf);
-        }
-    }, _0x3d383d[_0x4cd058(0xeb)] = function (_0x21b98f) {
-        var _0x52c5ba = _0x4cd058;
-        if (_0x52c5ba(0x12c) !== _0x52c5ba(0x12c))
-            return _0x1e8a89[_0x52c5ba(0x11f)](_0x3e931b);
-        else {
-            var _0x11ad69;
-            try {
-                if ('\x48\x4d\x45\x73\x53' !== _0x52c5ba(0x16f)) {
-                    if ($gameMap['\x6d\x61\x70\x49\x64']() === _0x21b98f)
-                        return ANMapManager[_0x52c5ba(0x169)]();
-                } else
-                    return _0x4ce928['\x6f\x6e\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0x21d8ff);
-            } catch (_0x1477ac) {
-                return _0x52c5ba(0xea) !== _0x52c5ba(0xea) ? (_0x530af7 = _0x4e5ca2, _0x5b7784[_0x52c5ba(0x144)]('\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x73\x68\x61\x72\x65\x64\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c', _0x5bbd46)) : (_0x11ad69 = _0x1477ac, console['\x77\x61\x72\x6e'](_0x52c5ba(0x149), _0x11ad69));
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x114)] = function (_0x27fde5) {
-        var _0x59bfb8 = _0x4cd058, _0x35406c;
-        try {
-            return ANInterpreterManager['\x6f\x6e\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64'](_0x27fde5);
-        } catch (_0x41a35f) {
-            return _0x35406c = _0x41a35f, console[_0x59bfb8(0x144)]('\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x76\x69\x72\x74\x75\x61\x6c\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64', _0x35406c);
-        }
-    }, _0x3d383d[_0x4cd058(0xf4)] = function (_0x6960d8) {
-        var _0x4f95f6 = _0x4cd058;
-        if ('\x52\x4b\x69\x4a\x54' !== '\x52\x4b\x69\x4a\x54')
-            return _0x1cc44f = _0x4910ef, _0x5aab9a[_0x4f95f6(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x63\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65', _0x10841e);
-        else {
-            var _0x363239;
-            try {
-                return ANBattleManager[_0x4f95f6(0xf9)](_0x6960d8['\x69\x64'], _0x6960d8[_0x4f95f6(0x15d)], _0x6960d8['\x64\x61\x74\x61']);
-            } catch (_0x197392) {
-                return _0x363239 = _0x197392, console['\x77\x61\x72\x6e']('\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64', _0x363239);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x19b)] = function (_0x2f5d5b) {
-        var _0xcbbe20 = _0x4cd058, _0x108f2d;
-        try {
-            return ANBattleManager['\x6f\x6e\x42\x61\x74\x74\x6c\x65\x41\x6e\x69\x6d\x61\x74\x69\x6f\x6e'](_0x2f5d5b);
-        } catch (_0x4b2fd2) {
-            return _0x108f2d = _0x4b2fd2, console[_0xcbbe20(0x144)]('\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e', _0x108f2d);
-        }
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64'] = function (_0x10e99d) {
-        var _0x5b4af8 = _0x4cd058;
-        if (_0x5b4af8(0x132) === _0x5b4af8(0x132)) {
-            var _0x57ff68;
-            try {
-                return ANBattleManager[_0x5b4af8(0x18f)]();
-            } catch (_0x156b14) {
-                if (_0x5b4af8(0x1a4) !== _0x5b4af8(0x1a4))
-                    this['\x63\x61\x6c\x6c\x53\x63\x65\x6e\x65\x43\x61\x6c\x6c\x62\x61\x63\x6b'](_0x28e1a4);
-                else
-                    return _0x57ff68 = _0x156b14, console['\x77\x61\x72\x6e'](_0x5b4af8(0x111), _0x57ff68);
-            }
-        } else {
-            var _0x287f54;
-            try {
-                if (!_0x42d8c5[_0x5b4af8(0x10f)]())
-                    return;
-                return _0xbe38c9[_0x5b4af8(0x1a6)](_0x54ae82);
-            } catch (_0x101e19) {
-                return _0x287f54 = _0x101e19, _0x3be810['\x77\x61\x72\x6e'](_0x5b4af8(0x143), _0x287f54);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x196)] = function (_0x57e792) {
-        var _0x8bbd13 = _0x4cd058;
-        if (_0x8bbd13(0x11b) !== _0x8bbd13(0x11b))
-            return _0x9b2ca1[_0x8bbd13(0x152) + _0x4af576] != null;
-        else {
-            var _0x430f40;
-            try {
-                return ANBattleManager[_0x8bbd13(0x137)](_0x57e792[_0x8bbd13(0x145)], _0x57e792[_0x8bbd13(0x173)]);
-            } catch (_0x4fe717) {
-                return _0x430f40 = _0x4fe717, console['\x77\x61\x72\x6e']('\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x6c\x6f\x67\x4d\x65\x73\x73\x61\x67\x65', _0x430f40);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x12f)] = function (_0x543eb3) {
-        var _0x3ac8b9 = _0x4cd058;
-        if ('\x55\x6d\x76\x62\x4a' !== _0x3ac8b9(0x18c)) {
-            var _0x4291bb;
-            try {
-                return _0x49e424[_0x3ac8b9(0xf9)](_0x798b08['\x69\x64'], _0x19bf83[_0x3ac8b9(0x15d)], _0x5cc153[_0x3ac8b9(0x116)]);
-            } catch (_0x12a184) {
-                return _0x4291bb = _0x12a184, _0x3ce3f0[_0x3ac8b9(0x144)]('\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64', _0x4291bb);
-            }
-        } else {
-            var _0x32c938;
-            try {
-                return _0x3ac8b9(0x134) === _0x3ac8b9(0x134) ? ANBattleManager[_0x3ac8b9(0x11a)](_0x543eb3['\x69\x6e\x70\x75\x74\x53\x74\x61\x74\x65'], _0x543eb3[_0x3ac8b9(0x113)]) : _0x36aafc[_0x3ac8b9(0x19e)](_0x286e22['\x69\x64'], _0x52cf27[_0x3ac8b9(0x116)]);
-            } catch (_0x6f87c7) {
-                return _0x32c938 = _0x6f87c7, console[_0x3ac8b9(0x144)](_0x3ac8b9(0x12f), _0x32c938);
-            }
-        }
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x69\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e'] = function (_0x3e2d2f) {
-        var _0x2975bf = _0x4cd058, _0x22b407;
-        try {
-            return ANBattleManager[_0x2975bf(0x14c)](_0x3e2d2f[_0x2975bf(0x113)], _0x3e2d2f[_0x2975bf(0x122)]);
-        } catch (_0x1b7b2c) {
-            if (_0x2975bf(0xfe) === _0x2975bf(0xfe))
-                return _0x22b407 = _0x1b7b2c, console[_0x2975bf(0x144)](_0x2975bf(0x161), _0x22b407);
-            else {
-                var _0x333946, _0x283c7d;
-                try {
-                    return _0x283c7d = _0x2975bf(0x199), _0x52fc80['\x6f\x6e\x52\x65\x73\x70\x6f\x6e\x63\x65\x52\x65\x63\x65\x69\x76\x65\x64'](_0x283c7d, _0x28a4ce);
-                } catch (_0x2dddf1) {
-                    return _0x333946 = _0x2dddf1, _0x332949[_0x2975bf(0x144)](_0x2975bf(0x143), _0x333946);
-                }
-            }
-        }
-    }, _0x3d383d['\x65\x76\x65\x6e\x74\x5f\x62\x61\x74\x74\x6c\x65\x5f\x73\x65\x72\x76\x65\x72\x42\x61\x74\x74\x6c\x65\x44\x61\x74\x61'] = function (_0x5ef9a6) {
-        var _0x29d64d = _0x4cd058, _0x2a8809;
-        try {
-            return ANBattleManager[_0x29d64d(0x17a)](_0x5ef9a6);
-        } catch (_0x4174bf) {
-            return _0x29d64d(0x167) === '\x4e\x4d\x41\x4e\x42' ? (_0x29d64d(0x125)['\x70'](), _0x5cfed1[_0x29d64d(0x127)](_0x134292)) : (_0x2a8809 = _0x4174bf, console[_0x29d64d(0x144)](_0x29d64d(0x102), _0x2a8809));
-        }
-    }, _0x3d383d[_0x4cd058(0x188)] = function (_0x462319) {
-        var _0x3845c0 = _0x4cd058;
-        if (_0x3845c0(0x120) === '\x64\x4f\x65\x71\x6d') {
-            var _0x56745f;
-            try {
-                return _0x3845c0(0x162) !== _0x3845c0(0x162) ? _0x215ec0[_0x3845c0(0x165)](_0x533061['\x69\x64'], _0x3bd7bd[_0x3845c0(0x116)]) : (_0x3845c0(0x166)['\x70'](), ANBattleManager[_0x3845c0(0x10e)](_0x462319));
-            } catch (_0x42e863) {
-                return _0x56745f = _0x42e863, console['\x77\x61\x72\x6e'](_0x3845c0(0x188), _0x56745f);
-            }
-        } else {
-            var _0x184c91;
-            try {
-                return _0x21401f['\x6f\x6e\x56\x61\x72\x69\x61\x62\x6c\x65\x56\x61\x6c\x75\x65'](_0x3e2732['\x69\x64'], _0xf2a7e8[_0x3845c0(0x116)]);
-            } catch (_0x255964) {
-                return _0x184c91 = _0x255964, _0x505c77[_0x3845c0(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x76\x61\x72\x69\x61\x62\x6c\x65', _0x184c91);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x16c)] = function (_0x5bc6d2) {
-        var _0xd07b04 = _0x4cd058, _0x17bb7c;
-        try {
-            return _0xd07b04(0x10c)['\x70'](), ANInterpreterManager[_0xd07b04(0x128)](_0x5bc6d2);
-        } catch (_0x1a604f) {
-            return _0x17bb7c = _0x1a604f, console[_0xd07b04(0x144)]('\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x72\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64', _0x17bb7c);
-        }
-    }, _0x3d383d[_0x4cd058(0x1ab)] = function (_0x2de7c3) {
-        var _0x36b7bf = _0x4cd058, _0x11bf60;
-        try {
-            return _0x36b7bf(0x179)['\x70'](), ANInterpreterManager[_0x36b7bf(0x11c)](_0x2de7c3);
-        } catch (_0x506402) {
-            return _0x11bf60 = _0x506402, console[_0x36b7bf(0x144)]('\x65\x76\x65\x6e\x74\x5f\x65\x76\x65\x6e\x74\x5f\x72\x65\x67\x69\x73\x74\x65\x72\x44\x6f\x6e\x65', _0x11bf60);
-        }
-    }, _0x3d383d[_0x4cd058(0x129)] = function (_0x30fce1) {
-        var _0x2837dc = _0x4cd058;
-        if ('\x56\x78\x68\x6b\x4a' !== _0x2837dc(0x12e)) {
-            var _0x2556d7;
-            try {
-                return '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x43\x41\x4e\x20\x43\x4f\x4e\x54\x49\x4e\x55\x45'['\x70'](), ANInterpreterManager[_0x2837dc(0x127)](_0x30fce1);
-            } catch (_0x2e5fd0) {
-                return _0x2556d7 = _0x2e5fd0, console[_0x2837dc(0x144)](_0x2837dc(0x129), _0x2556d7);
-            }
-        } else {
-            if (!_0x4b3655[_0x2837dc(0x10f)]())
-                return;
-            return _0x310578[_0x2837dc(0x1a6)](_0x592773);
-        }
-    }, _0x3d383d[_0x4cd058(0x147)] = function (_0x3c0ab0) {
-        var _0x22276d = _0x4cd058;
-        if (_0x22276d(0x14a) === _0x22276d(0xf1))
-            return _0x214c03['\x55\x49'][_0x22276d(0x105)](_0x5ac444);
-        else {
-            var _0x5491c5;
-            try {
-                return '\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x46\x4f\x52\x43\x45\x20\x43\x41\x4e\x43\x45\x4c\x4c\x45\x44'['\x70'](), ANInterpreterManager[_0x22276d(0x163)](_0x3c0ab0);
-            } catch (_0x7d6509) {
-                return _0x5491c5 = _0x7d6509, console['\x77\x61\x72\x6e'](_0x22276d(0x147), _0x5491c5);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0xee)] = function (_0x554246) {
-        var _0x321b94 = _0x4cd058, _0x463cdc;
-        try {
-            return _0x321b94(0xfc) !== _0x321b94(0xfc) ? (_0x510e = _0x36405f, _0x3e6bbd[_0x321b94(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x75\x73\x65\x72\x43\x6f\x6d\x6d\x61\x6e\x64', _0x1faa68)) : ('\x53\x48\x41\x52\x45\x44\x20\x45\x56\x45\x4e\x54\x20\x43\x48\x4f\x49\x43\x45\x20\x41\x43\x54\x49\x4f\x4e'['\x70'](), ANInterpreterManager[_0x321b94(0x1a8)](_0x554246));
-        } catch (_0x43b8b5) {
-            return _0x463cdc = _0x43b8b5, console[_0x321b94(0x144)](_0x321b94(0x147), _0x463cdc);
-        }
-    }, _0x3d383d[_0x4cd058(0x100)] = function (_0x335308) {
-        var _0x1101f1 = _0x4cd058, _0x3cf2db, _0x3eb5cc, _0x196031;
-        try {
-            return _0x1101f1(0x141) === '\x6d\x46\x57\x50\x7a' ? (_0x1101f1(0x131)['\x70'](), {
-                name: _0x196031,
-                data: _0x3cf2db
-            } = _0x335308, nAPI['\x6f\x6e\x43\x75\x73\x74\x6f\x6d\x43\x6f\x6d\x6d\x61\x6e\x64'](_0x196031, _0x3cf2db)) : (_0x1f110c[_0x1101f1(0x13b)](), _0x1101f1(0x110)['\x70']());
-        } catch (_0x400c8f) {
-            return _0x3eb5cc = _0x400c8f, console['\x77\x61\x72\x6e'](_0x1101f1(0x100), _0x3eb5cc);
-        }
-    }, _0x3d383d[_0x4cd058(0x19c)] = function (_0xf1664b) {
-        var _0x23e087 = _0x4cd058;
-        if ('\x6e\x52\x55\x7a\x57' !== '\x62\x44\x65\x44\x77') {
-            var _0x364a41, _0x329d83, _0x35a685;
-            try {
-                return _0x23e087(0x1a2)['\x70'](), {
-                    name: _0x35a685,
-                    commonEventId: _0x364a41
-                } = _0xf1664b, typeof $gameSystem !== _0x23e087(0x119) && $gameSystem !== null ? $gameSystem[_0x23e087(0x107)](_0x35a685, _0x364a41) : void 0x0;
-            } catch (_0x49dc90) {
-                return _0x329d83 = _0x49dc90, console[_0x23e087(0x144)]('\x65\x76\x65\x6e\x74\x5f\x67\x61\x6d\x65\x5f\x75\x73\x65\x72\x43\x6f\x6d\x6d\x61\x6e\x64', _0x329d83);
-            }
-        } else
-            return _0x430b15 = _0x2ce3a9, _0x267c52[_0x23e087(0x144)](_0x23e087(0x10a), _0xf30de0);
-    }, _0x3d383d[_0x4cd058(0x154)] = function (_0xb26802) {
-        var _0x56499e = _0x4cd058, _0x2b7bbe, _0x100b3e, _0x42612e;
-        try {
-            ({
-                cmd: _0x2b7bbe,
-                data: _0x100b3e
-            } = _0xb26802);
-            if (_0x2b7bbe[_0x56499e(0x121)](_0x56499e(0x15c)))
-                return ANTradeManager['\x6f\x6e\x43\x6f\x6d\x6d\x6f\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'](_0x2b7bbe, _0x100b3e);
-            else {
-                if (_0x2b7bbe[_0x56499e(0x121)]('\x61\x70\x70\x6c\x79\x49\x74\x65\x6d\x46\x72\x6f\x6d\x4d\x65\x6e\x75'))
-                    return Game_Action[_0x56499e(0x126)](_0x100b3e);
-                else
-                    return _0x2b7bbe[_0x56499e(0x121)](_0x56499e(0xef)) ? ANPlayersManager[_0x56499e(0xfa)](_0x100b3e) : console[_0x56499e(0x144)](_0x56499e(0x17f) + _0x2b7bbe);
-            }
-        } catch (_0xd8b483) {
-            return _0x56499e(0xf0) === _0x56499e(0xf0) ? (_0x42612e = _0xd8b483, console[_0x56499e(0x144)]('\x65\x76\x65\x6e\x74\x5f\x63\x6f\x6d\x6d\x6f\x6e\x5f\x66\x6f\x72\x43\x6c\x69\x65\x6e\x74\x73', _0x42612e)) : this['\x6f\x6e\x43\x6f\x6e\x6e\x65\x63\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b'](0x1);
-        }
-    }, _0x3d383d[_0x4cd058(0x10a)] = function (_0x936392) {
-        var _0x58f3f6 = _0x4cd058;
-        if ('\x46\x49\x71\x79\x69' !== _0x58f3f6(0x186))
-            return _0x684e59['\x6f\x6e\x45\x76\x65\x6e\x74\x4d\x6f\x76\x65'](_0x5d352b['\x6d\x61\x70\x49\x64'], _0x16f5c3['\x69\x64'], _0x377e17[_0x58f3f6(0x116)]);
-        else {
-            var _0x459bd0, _0x950faf, _0x59a4e8;
-            try {
-                return '\x6c\x63\x50\x73\x47' !== '\x6c\x63\x50\x73\x47' ? (_0x58f3f6(0x179)['\x70'](), _0x45b942['\x6f\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65'](_0x3b5315)) : ({
-                    cmd: _0x459bd0,
-                    data: _0x950faf
-                } = _0x936392, NetClientMethodsManager[_0x58f3f6(0x181)](_0x459bd0, _0x950faf));
-            } catch (_0x224068) {
-                if ('\x63\x74\x68\x42\x6a' !== '\x63\x74\x68\x42\x6a') {
-                    var _0x5ceb2f;
-                    return (_0x5ceb2f = _0x355a88[_0x58f3f6(0x15a)]) != null ? _0x5ceb2f['\x6f\x6e\x53\x65\x72\x76\x65\x72\x45\x76\x65\x6e\x74'](_0x29735d) : void 0x0;
-                } else
-                    return _0x59a4e8 = _0x224068, console[_0x58f3f6(0x144)](_0x58f3f6(0x10a), _0x59a4e8);
-            }
-        }
-    }, _0x3d383d[_0x4cd058(0x181)] = function (_0x296424, _0x5b8064) {
-        var _0x57eb2f = _0x4cd058;
-        return _0x57eb2f(0xed)['\x70'](_0x296424);
-    };
-}()));
+// Generated by CoffeeScript 2.6.1
+//$[ENCODE]
 
-function _0x4aaf() {
-    var _0x525326 = [
-        '\x6c\x65\x61\x64\x65\x72',
-        '\x64\x78\x56\x56\x6b',
-        '\x72\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x4c\x6f\x63\x61\x6c\x42\x61\x74\x74\x6c\x65',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x73\x65\x6c\x65\x63\x74\x4e\x65\x78\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x75\x70\x64\x61\x74\x65',
-        '\x73\x65\x74\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x5f\x77\x61\x69\x74\x54\x69\x6d\x65\x6f\x75\x74',
-        '\x53\x45\x54\x55\x50',
-        '\x74\x61\x72\x67\x65\x74\x73',
-        '\x63\x64\x4e\x6c\x70',
-        '\x75\x70\x64\x61\x74\x65\x57\x61\x69\x74\x69\x6e\x67',
-        '\x41\x4e\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x73\x65\x6e\x64\x57\x69\x6e\x64\x6f\x77\x4c\x6f\x67\x4d\x65\x73\x73\x61\x67\x65',
-        '\x5f\x77\x61\x69\x74\x50\x6f\x6f\x6c',
-        '\x70\x61\x63\x6b\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x6d\x57\x73\x47\x76',
-        '\x5f\x72\x65\x67\x69\x73\x74\x65\x72\x54\x6f\x45\x78\x69\x73\x74\x73\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65',
-        '\x6f\x61\x77\x42\x4b',
-        '\x69\x73\x42\x61\x74\x74\x6c\x65\x4d\x61\x73\x74\x65\x72',
-        '\x73\x65\x6e\x64\x49\x6e\x70\x75\x74\x53\x74\x61\x74\x65',
-        '\x6d\x61\x6b\x65\x49\x64',
-        '\x72\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x42\x61\x74\x74\x6c\x65',
-        '\x70\x78\x68\x72\x78',
-        '\x73\x65\x74\x45\x76\x65\x6e\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x57\x77\x68\x45\x4c',
-        '\x52\x55\x4d\x74\x71',
-        '\x31\x30\x37\x39\x31\x38\x39\x33\x6e\x62\x52\x76\x58\x7a',
-        '\x67\x74\x4c\x59\x58',
-        '\x4e\x4a\x72\x44\x53',
-        '\x45\x68\x73\x42\x71',
-        '\x69\x73\x46\x6f\x72\x63\x65\x42\x61\x74\x74\x6c\x65\x53\x79\x6e\x63\x4d\x6f\x64\x65',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x45\x6e\x64\x65\x64',
-        '\x69\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e',
-        '\x63\x42\x7a\x52\x65',
-        '\x61\x63\x74\x6f\x72\x73',
-        '\x69\x73\x4c\x6f\x61\x64\x65\x72\x41\x63\x74\x69\x76\x65',
-        '\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x49\x64',
-        '\x62\x61\x74\x74\x6c\x65\x4d\x65\x6d\x62\x65\x72\x73',
-        '\x76\x79\x4a\x4b\x49',
-        '\x72\x65\x73\x65\x74\x57\x61\x69\x74',
-        '\x73\x65\x74\x75\x70',
-        '\x65\x6e\x64\x65\x64',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x4f\x64\x48\x71\x49',
-        '\x4e\x65\x74\x42\x61\x74\x74\x6c\x65',
-        '\x6f\x70\x74\x69\x6f\x6e\x73',
-        '\x69\x66\x45\x52\x77',
-        '\x63\x4c\x51\x43\x66',
-        '\x79\x43\x72\x48\x45',
-        '\x4e\x6b\x56\x52\x63',
-        '\x56\x58\x6c\x58\x53',
-        '\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x42\x69\x66\x53\x5a',
-        '\x75\x53\x72\x64\x72',
-        '\x5f\x6c\x61\x73\x74\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72\x49\x6e\x70\x75\x74\x41\x63\x74\x6f\x72',
-        '\x72\x61\x6e\x64\x6f\x6d',
-        '\x35\x34\x39\x35\x39\x30\x34\x52\x48\x55\x48\x7a\x4d',
-        '\x79\x64\x56\x4d\x47',
-        '\x63\x6c\x65\x61\x72',
-        '\x52\x45\x44',
-        '\x38\x74\x79\x62\x6d\x71\x69',
-        '\x69\x73\x4f\x6e\x65\x42\x61\x74\x74\x6c\x65\x72',
-        '\x6e\x55\x68\x4e\x6e',
-        '\x6c\x65\x6e\x67\x74\x68',
-        '\x61\x63\x74\x6f\x72',
-        '\x64\x73\x4d\x57\x66',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x50\x4e\x45\x78\x6c',
-        '\x32\x33\x38\x35\x30\x32\x34\x46\x4e\x48\x41\x67\x56',
-        '\x51\x52\x41\x55\x69',
-        '\x42\x4c\x41\x43\x4b',
-        '\x5f\x6c\x61\x73\x74\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65',
-        '\x65\x78\x65\x63\x75\x74\x65\x4d\x61\x70\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x42\x61\x74\x74\x6c\x65',
-        '\x50\x6e\x46\x54\x5a',
-        '\x6f\x72\x4a\x73\x75',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x53\x74\x61\x72\x74\x65\x64',
-        '\x33\x34\x32\x35\x39\x32\x32\x6a\x63\x62\x54\x59\x46',
-        '\x5a\x75\x6c\x6f\x68',
-        '\x4e\x6d\x73\x6d\x57',
-        '\x69\x73\x42\x61\x74\x74\x6c\x65\x4c\x6f\x63\x61\x6c',
-        '\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x44\x61\x74\x61\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x5a\x4d\x76\x75\x57',
-        '\x62\x43\x61\x4d\x53',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x53\x74\x61\x72\x74\x65\x64',
-        '\x5f\x65\x76\x65\x6e\x74\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x69\x6e\x66\x6f',
-        '\x62\x61\x74\x74\x6c\x65\x49\x64',
-        '\x42\x61\x74\x74\x6c\x65',
-        '\x73\x45\x66\x71\x47',
-        '\x6d\x61\x6b\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x43\x6f\x75\x6e\x74',
-        '\x69\x6e\x70\x75\x74',
-        '\x4e\x6f\x72\x68\x57',
-        '\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61',
-        '\x75\x6e\x70\x61\x63\x6b\x42\x61\x74\x74\x6c\x65\x72\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x62\x44\x5a\x74\x4a',
-        '\x69\x73\x4c\x6f\x63\x61\x6c',
-        '\x32\x31\x31\x31\x32\x32\x31\x32\x59\x6d\x62\x53\x63\x76',
-        '\x61\x64\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x53\x74\x61\x74\x65',
-        '\x72\x6e\x66\x63\x6f',
-        '\x69\x6e\x42\x61\x74\x74\x6c\x65',
-        '\x43\x41\x4c\x4c\x20\x42\x41\x54\x54\x4c\x45\x20\x4d\x45\x54\x48\x4f\x44',
-        '\x54\x61\x6c\x73\x67',
-        '\x55\x74\x69\x6c\x73',
-        '\x4e\x48\x4f\x67\x47',
-        '\x61\x63\x74\x6f\x72\x49\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x41\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x72\x65\x71\x75\x65\x73\x74\x41\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x6b\x75\x76\x6b\x46',
-        '\x73\x65\x6e\x64\x45\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x42\x61\x74\x74\x6c\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x61\x64\x64\x54\x65\x78\x74',
-        '\x4d\x53\x63\x4e\x79',
-        '\x6f\x6e\x4c\x6f\x67\x57\x69\x6e\x64\x6f\x77\x4d\x65\x73\x73\x61\x67\x65',
-        '\x70\x74\x58\x70\x53',
-        '\x69\x73\x53\x68\x6f\x75\x6c\x64\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72',
-        '\x73\x74\x61\x72\x74\x65\x64',
-        '\x69\x73\x42\x61\x74\x74\x6c\x65\x52\x65\x67\x69\x73\x74\x72\x65\x64',
-        '\x43\x62\x4b\x47\x70',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x52\x65\x67\x69\x73\x74\x65\x72\x52\x65\x73\x75\x6c\x74',
-        '\x6d\x61\x70',
-        '\x77\x42\x70\x4e\x44',
-        '\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65',
-        '\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x5f\x70\x72\x65\x76\x69\x6f\x75\x73\x4e\x65\x74\x42\x61\x74\x74\x6c\x65\x41\x63\x74\x6f\x72\x73',
-        '\x54\x49\x4d\x45\x20\x4f\x55\x54',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e',
-        '\x72\x65\x67\x69\x73\x74\x65\x72',
-        '\x75\x53\x63\x4a\x75',
-        '\x6d\x67\x55\x53\x50',
-        '\x56\x45\x6b\x64\x7a',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64',
-        '\x4e\x61\x66\x63\x57',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72',
-        '\x68\x69\x64\x65\x4c\x6f\x61\x64\x65\x72',
-        '\x62\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e\x44\x6f\x6e\x65',
-        '\x5f\x69\x6e\x70\x75\x74\x74\x69\x6e\x67',
-        '\x5f\x63\x61\x6c\x6c\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x4f\x6e\x53\x65\x72\x76\x65\x72',
-        '\x63\x61\x6c\x6c\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x52\x45\x47\x49\x53\x54\x45\x52\x20\x53\x55\x43\x43\x45\x53\x53',
-        '\x75\x61\x63\x6f\x7a',
-        '\x53\x54\x41\x52\x54\x45\x44\x20\x4c\x4f\x43\x41\x4c\x20\x42\x41\x54\x54\x4c\x45',
-        '\x32\x30\x67\x7a\x41\x68\x62\x66',
-        '\x73\x65\x6e\x64',
-        '\x6f\x6e\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64',
-        '\x5f\x6c\x6f\x67\x57\x69\x6e\x64\x6f\x77',
-        '\x4e\x7a\x62\x76\x4c',
-        '\x6d\x61\x70\x49\x64',
-        '\x5f\x69\x73\x44\x61\x74\x61\x43\x68\x61\x6e\x67\x65\x64',
-        '\x6e\x53\x65\x74\x4e\x65\x74\x77\x6f\x72\x6b\x42\x61\x74\x74\x6c\x65',
-        '\x31\x30\x36\x36\x38\x38\x32\x55\x52\x53\x52\x4f\x45',
-        '\x65\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72',
-        '\x31\x30\x72\x4f\x70\x62\x46\x64',
-        '\x51\x48\x68\x65\x65',
-        '\x69\x73\x4d\x56',
-        '\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x73\x50\x6f\x6f\x6c',
-        '\x59\x4e\x68\x59\x53',
-        '\x76\x46\x6b\x6a\x78',
-        '\x46\x6c\x69\x78\x4a',
-        '\x5f\x72\x65\x71\x75\x65\x73\x74\x49\x6e\x69\x74\x69\x61\x6c\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65\x52\x65\x66\x72\x65\x73\x68',
-        '\x6d\x79\x41\x63\x74\x6f\x72\x49\x64',
-        '\x5f\x63\x75\x72\x72\x65\x6e\x74\x41\x63\x74\x6f\x72',
-        '\x73\x65\x6e\x64\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x42\x61\x74\x74\x6c\x65',
-        '\x32\x4f\x44\x42\x44\x44\x50',
-        '\x73\x65\x74\x57\x61\x69\x74',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x41\x6e\x69\x6d\x61\x74\x69\x6f\x6e',
-        '\x69\x6e\x70\x75\x74\x74\x69\x6e\x67\x41\x63\x74\x69\x6f\x6e',
-        '\x4a\x6f\x69\x6e\x20\x53\x68\x61\x72\x65\x64\x20\x62\x61\x74\x74\x6c\x65',
-        '\x6e\x43\x6c\x65\x61\x72\x43\x6c\x69\x65\x6e\x74\x49\x6e\x70\x75\x74',
-        '\x77\x61\x72\x6e\x69\x6e\x67',
-        '\x43\x6e\x6a\x45\x59',
-        '\x73\x68\x69\x66\x74',
-        '\x33\x37\x32\x39\x34\x31\x31\x6b\x47\x71\x4a\x6f\x67',
-        '\x6f\x57\x54\x43\x56',
-        '\x70\x75\x73\x68',
-        '\x65\x79\x76\x64\x6e',
-        '\x67\x65\x74',
-        '\x73\x68\x6f\x77\x4c\x6f\x61\x64\x65\x72',
-        '\x6c\x6f\x67\x4d\x65\x73\x73\x61\x67\x65',
-        '\x75\x70\x64\x61\x74\x65\x49\x6e\x70\x75\x74\x43\x68\x61\x6e\x67\x65',
-        '\x6e\x53\x65\x74\x43\x75\x72\x72\x65\x6e\x74\x43\x6c\x69\x65\x6e\x74\x49\x6e\x70\x75\x74',
-        '\x73\x4e\x69\x5a\x51',
-        '\x54\x72\x79\x20\x72\x65\x67\x69\x73\x74\x65\x72\x20\x62\x61\x74\x74\x6c\x65\x3a\x20',
-        '\x65\x68\x78\x51\x6d',
-        '\x61\x50\x64\x42\x73'
-    ];
-    _0x4aaf = function () {
-        return _0x525326;
-    };
-    return _0x4aaf();
-}
-function _0x1649(_0x208c92, _0x258a73) {
-    var _0x4aaf21 = _0x4aaf();
-    return _0x1649 = function (_0x16491f, _0x51778a) {
-        _0x16491f = _0x16491f - 0x1be;
-        var _0x2bacfa = _0x4aaf21[_0x16491f];
-        return _0x2bacfa;
-    }, _0x1649(_0x208c92, _0x258a73);
-}
-var _0x429283 = _0x1649;
-(function (_0x332b3d, _0x402dfe) {
-    var _0x2db483 = _0x1649, _0x12d673 = _0x332b3d();
-    while (!![]) {
-        try {
-            var _0x697996 = -parseInt(_0x2db483(0x1ce)) / 0x1 + parseInt(_0x2db483(0x1db)) / 0x2 * (-parseInt(_0x2db483(0x23e)) / 0x3) + -parseInt(_0x2db483(0x236)) / 0x4 * (-parseInt(_0x2db483(0x1d0)) / 0x5) + -parseInt(_0x2db483(0x22a)) / 0x6 + -parseInt(_0x2db483(0x20c)) / 0x7 * (parseInt(_0x2db483(0x22e)) / 0x8) + parseInt(_0x2db483(0x1e4)) / 0x9 + parseInt(_0x2db483(0x1c6)) / 0xa * (parseInt(_0x2db483(0x253)) / 0xb);
-            if (_0x697996 === _0x402dfe)
-                break;
-            else
-                _0x12d673['push'](_0x12d673['shift']());
-        } catch (_0x338f28) {
-            _0x12d673['push'](_0x12d673['shift']());
-        }
-    }
-}(_0x4aaf, 0xbe2b8), window[_0x429283(0x1fd)] = function () {
-}, (function () {
-    var _0x1fe615 = _0x429283, _0x3005ac, _0x1c00ea;
-    _0x3005ac = new KDCore[(_0x1fe615(0x21c))](_0x1fe615(0x21e)), _0x3005ac[_0x1fe615(0x1f4)](KDCore[_0x1fe615(0x1c2)][_0x1fe615(0x22d)], KDCore[_0x1fe615(0x1c2)][_0x1fe615(0x238)]['\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72'](0x87)), _0x3005ac['\x6f\x6e'](), _0x1c00ea = window['\x41\x4e\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72'], _0x1c00ea[_0x1fe615(0x204)] = function () {
-        var _0x3098ad = _0x1fe615;
-        return _0x3098ad(0x1e5) === '\x6f\x57\x54\x43\x56' ? this[_0x3098ad(0x24f)] != null ? this[_0x3098ad(0x24f)][_0x3098ad(0x214)][0x0] === ANGameManager[_0x3098ad(0x1d8)]() : '\x6d\x6b\x45\x6e\x46' === _0x3098ad(0x23b) ? _0x522e79[_0x3098ad(0x257)]() : $gameParty[_0x3098ad(0x257)]() : _0x58fde9[_0x3098ad(0x1c7)](_0x1d3f4c[_0x3098ad(0x24a)](_0x3098ad(0x1cf), _0x2886d4));
-    }, _0x1c00ea['\x69\x73\x42\x61\x74\x74\x6c\x65\x52\x65\x67\x69\x73\x74\x72\x65\x64'] = function () {
-        var _0x680f4c = _0x1fe615;
-        if (_0x680f4c(0x1d5) !== _0x680f4c(0x1d5))
-            _0x2e2174 = _0x16e125[_0x680f4c(0x1fa)][_0x680f4c(0x26a)](function (_0x546c9f) {
-                var _0x36cd9d = _0x680f4c;
-                return _0x115368[_0x36cd9d(0x25a)][_0x36cd9d(0x250)](_0x546c9f);
-            }), _0x16e484[_0x680f4c(0x25e)](_0x3da808, _0x5e1c2d[_0x680f4c(0x216)], _0x71a3f6['\x6d\x69\x72\x72\x6f\x72']);
-        else
-            return this['\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61'] != null;
-    }, _0x1c00ea[_0x1fe615(0x241)] = function () {
-        var _0x28dd4a = _0x1fe615;
-        if (_0x28dd4a(0x237) !== _0x28dd4a(0x274))
-            return this['\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61'] != null ? this[_0x28dd4a(0x24f)]['\x69\x73\x4c\x6f\x63\x61\x6c'] : !![];
-        else
-            _0x168593 = _0x26c21c, _0x5b1320['\x77'](_0x348dcd);
-    }, _0x1c00ea[_0x1fe615(0x265)] = function () {
-        var _0x3e52a5 = _0x1fe615;
-        return this[_0x3e52a5(0x26c)] != null;
-    }, _0x1c00ea[_0x1fe615(0x217)] = function () {
-        var _0x5a4b0d = _0x1fe615;
-        if (_0x5a4b0d(0x273) !== _0x5a4b0d(0x273))
-            this['\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x73\x50\x6f\x6f\x6c'] == null && (this['\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x73\x50\x6f\x6f\x6c'] = []), this['\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x73\x50\x6f\x6f\x6c']['\x70\x75\x73\x68']([
-                _0x4fa539,
-                _0x146a36,
-                _0x518242
-            ]);
-        else
-            return this[_0x5a4b0d(0x267)]() ? _0x5a4b0d(0x25b) === _0x5a4b0d(0x25b) ? this[_0x5a4b0d(0x24f)][_0x5a4b0d(0x214)][_0x5a4b0d(0x26a)](function (_0x1be6b9) {
-                var _0x240784 = _0x5a4b0d;
-                return _0x240784(0x1d1) !== '\x51\x48\x68\x65\x65' ? this[_0x240784(0x24f)] != null ? this[_0x240784(0x24f)][_0x240784(0x214)][0x0] === _0x299b7e[_0x240784(0x1d8)]() : _0x291669[_0x240784(0x257)]() : $gameActors[_0x240784(0x232)](_0x1be6b9);
-            }) : (_0x2d00bd['\x70'](_0x5a4b0d(0x1ee) + _0x1cd1aa[_0x5a4b0d(0x249)]), this[_0x5a4b0d(0x1da)](_0x35bde0)) : [$gameParty[_0x5a4b0d(0x1f1)]()];
-    }, _0x1c00ea[_0x1fe615(0x1dc)] = function (_0x46b2de) {
-        var _0x112fdd = _0x1fe615;
-        return _0x112fdd(0x1e7) !== _0x112fdd(0x1e7) ? (this['\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65'] = _0x3e9f09, this[_0x112fdd(0x1ff)] = 0x0, this[_0x112fdd(0x1f8)] = 0x168, _0x4e9b94[_0x112fdd(0x1e9)](0x3e8)) : (this[_0x112fdd(0x26c)] = _0x46b2de, this[_0x112fdd(0x1ff)] = 0x0, this['\x5f\x77\x61\x69\x74\x54\x69\x6d\x65\x6f\x75\x74'] = 0x168, HUIManager[_0x112fdd(0x1e9)](0x3e8));
-    }, _0x1c00ea[_0x1fe615(0x219)] = function () {
-        var _0x324e33 = _0x1fe615;
-        return this['\x73\x65\x74\x57\x61\x69\x74'](null), HUIManager[_0x324e33(0x278)]();
-    }, _0x1c00ea[_0x1fe615(0x1f6)] = function () {
-        var _0xd594a2 = _0x1fe615;
-        if (this[_0xd594a2(0x265)]()) {
-            if ('\x63\x64\x4e\x6c\x70' === _0xd594a2(0x1fb)) {
-                if (this['\x5f\x77\x61\x69\x74\x54\x69\x6d\x65\x6f\x75\x74'] <= 0x0)
-                    _0x3005ac['\x70'](_0xd594a2(0x26f)), this[_0xd594a2(0x219)]();
-                else {
-                    if (_0xd594a2(0x20e) !== _0xd594a2(0x272))
-                        this[_0xd594a2(0x1f8)]--, this[_0xd594a2(0x1fc)]();
-                    else
-                        return;
-                }
-            } else
-                return this[_0xd594a2(0x267)]() ? this[_0xd594a2(0x24f)][_0xd594a2(0x214)][_0xd594a2(0x26a)](function (_0x5e8bde) {
-                    var _0x4f06b3 = _0xd594a2;
-                    return _0x58d34c[_0x4f06b3(0x232)](_0x5e8bde);
-                }) : [_0x54b7a2['\x6c\x65\x61\x64\x65\x72']()];
-        } else {
-            if ('\x59\x43\x59\x4d\x69' !== _0xd594a2(0x203))
-                this[_0xd594a2(0x1d3)][_0xd594a2(0x231)] > 0x0 && this[_0xd594a2(0x1c0)](...this[_0xd594a2(0x1d3)][_0xd594a2(0x1e3)]()), HUIManager[_0xd594a2(0x215)]() && HUIManager[_0xd594a2(0x278)]();
-            else
-                return;
-        }
-    }, _0x1c00ea['\x75\x70\x64\x61\x74\x65\x57\x61\x69\x74\x69\x6e\x67'] = function () {
-        var _0x4e0cda = _0x1fe615;
-        if (_0x4e0cda(0x240) === _0x4e0cda(0x240)) {
-            if (!this[_0x4e0cda(0x265)]())
-                return;
-            '\x57\x41\x49\x54'['\x70'](this[_0x4e0cda(0x1ff)]);
-            switch (this[_0x4e0cda(0x26c)]) {
-            case '\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64':
-                if (this[_0x4e0cda(0x1ff)] === $gameParty[_0x4e0cda(0x217)]()[_0x4e0cda(0x231)]) {
-                    if (_0x4e0cda(0x259) === _0x4e0cda(0x1d4))
-                        return this[_0x4e0cda(0x24f)] != null ? this[_0x4e0cda(0x24f)][_0x4e0cda(0x252)] : !![];
-                    else
-                        this[_0x4e0cda(0x219)]();
-                }
-            }
-        } else
-            this[_0x4e0cda(0x202)]();
-    }, _0x1c00ea[_0x1fe615(0x1eb)] = function () {
-        var _0x27499d = _0x1fe615;
-        if ($gameParty['\x69\x73\x4f\x6e\x65\x42\x61\x74\x74\x6c\x65\x72']())
-            return;
-        if (this[_0x27499d(0x228)] !== BattleManager[_0x27499d(0x1d9)]) {
-            if ('\x4d\x53\x63\x4e\x79' === _0x27499d(0x262))
-                this[_0x27499d(0x228)] = BattleManager['\x5f\x63\x75\x72\x72\x65\x6e\x74\x41\x63\x74\x6f\x72'], this[_0x27499d(0x205)]();
-            else
-                return _0x21359c['\x55\x74\x69\x6c\x73'][_0x27499d(0x250)](_0x2b5381);
-        } else
-            this['\x5f\x6c\x61\x73\x74\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65'] !== BattleManager['\x5f\x69\x6e\x70\x75\x74\x74\x69\x6e\x67'] && (this[_0x27499d(0x239)] = BattleManager[_0x27499d(0x1bf)], this[_0x27499d(0x205)]());
-    }, _0x1c00ea[_0x1fe615(0x1f3)] = function () {
-        var _0x4cfc0f = _0x1fe615;
-        if ('\x63\x55\x5a\x62\x6e' === _0x4cfc0f(0x20a)) {
-            var _0x227bdd, _0x5331bd;
-            try {
-                _0x5331bd = _0x13f7ed['\x74\x61\x72\x67\x65\x74\x73'][_0x4cfc0f(0x26a)](function (_0x16a745) {
-                    var _0x4ee858 = _0x4cfc0f;
-                    return _0x2e4b05['\x55\x74\x69\x6c\x73'][_0x4ee858(0x250)](_0x16a745);
-                }), _0x55749a[_0x4cfc0f(0x25e)](_0x5331bd, _0x266abb[_0x4cfc0f(0x216)], _0x112d58['\x6d\x69\x72\x72\x6f\x72']);
-            } catch (_0x5348c0) {
-                _0x227bdd = _0x5348c0, _0x226d3b['\x77'](_0x227bdd);
-            }
-        } else
-            this[_0x4cfc0f(0x24f)] = {
-                '\x69\x73\x4c\x6f\x63\x61\x6c': !![],
-                '\x62\x61\x74\x74\x6c\x65\x49\x64': '\x6c\x6f\x63\x61\x6c',
-                '\x61\x63\x74\x6f\x72\x73': [ANGameManager[_0x4cfc0f(0x1d8)]()]
-            }, _0x3005ac['\x70'](_0x4cfc0f(0x1c5));
-    }, _0x1c00ea[_0x1fe615(0x246)] = function () {
-        var _0x456d45 = _0x1fe615;
-        _0x456d45(0x1f0) === _0x456d45(0x1f0) ? (this[_0x456d45(0x1d3)] = [], this[_0x456d45(0x239)] = ![], this[_0x456d45(0x228)] = null, this[_0x456d45(0x23d)]()) : (_0xd80dee = _0x53dbf4, _0x446320['\x77'](_0xb6f67f));
-    }, _0x1c00ea['\x6f\x6e\x42\x61\x74\x74\x6c\x65\x45\x6e\x64'] = function () {
-        var _0x2d8b0 = _0x1fe615;
-        if ('\x6b\x75\x76\x6b\x46' === _0x2d8b0(0x25f))
-            !this['\x69\x73\x42\x61\x74\x74\x6c\x65\x4c\x6f\x63\x61\x6c']() && this[_0x2d8b0(0x211)](), this['\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61'] = null;
-        else {
-            if (_0xd44f8b[_0x2d8b0(0x22f)]())
-                return;
-            if (this[_0x2d8b0(0x228)] !== _0x41068e[_0x2d8b0(0x1d9)])
-                this[_0x2d8b0(0x228)] = _0x4e000a[_0x2d8b0(0x1d9)], this[_0x2d8b0(0x205)]();
-            else
-                this['\x5f\x6c\x61\x73\x74\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65'] !== _0x5ea65f[_0x2d8b0(0x1bf)] && (this['\x5f\x6c\x61\x73\x74\x42\x61\x74\x74\x6c\x65\x4d\x61\x6e\x61\x67\x65\x72\x49\x6e\x70\x75\x74\x56\x61\x6c\x75\x65'] = _0x4fc94b[_0x2d8b0(0x1bf)], this['\x73\x65\x6e\x64\x49\x6e\x70\x75\x74\x53\x74\x61\x74\x65']());
-        }
-    }, _0x1c00ea[_0x1fe615(0x1c1)] = function (_0x31e0cc, _0x40d75f, _0x36eed1) {
-        var _0x5ca5e4 = _0x1fe615;
-        if (_0x5ca5e4(0x221) === _0x5ca5e4(0x208))
-            return this[_0x5ca5e4(0x1dc)](null), _0xc1a2d6[_0x5ca5e4(0x278)]();
-        else {
-            if ($gameParty[_0x5ca5e4(0x22f)]()) {
-                if ('\x75\x61\x63\x6f\x7a' === _0x5ca5e4(0x1c4))
-                    return;
-                else
-                    this[_0x5ca5e4(0x1dc)]('\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64'), this['\x5f\x77\x61\x69\x74\x50\x6f\x6f\x6c'] += 0x1;
-            }
-            ANET['\x50\x50']['\x69\x73\x46\x6f\x72\x63\x65\x42\x61\x74\x74\x6c\x65\x53\x79\x6e\x63\x4d\x6f\x64\x65']() ? (this[_0x5ca5e4(0x1d3)] == null && (this['\x5f\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x73\x50\x6f\x6f\x6c'] = []), this[_0x5ca5e4(0x1d3)][_0x5ca5e4(0x1e6)]([
-                _0x31e0cc,
-                _0x40d75f,
-                _0x36eed1
-            ])) : this[_0x5ca5e4(0x1c0)](_0x31e0cc, _0x40d75f, _0x36eed1);
-        }
-    }, _0x1c00ea['\x5f\x63\x61\x6c\x6c\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x4f\x6e\x53\x65\x72\x76\x65\x72'] = function (_0x3bb9cb, _0x1e7604, _0x3d8e15) {
-        var _0x287e6a = _0x1fe615;
-        '\x43\x41\x4c\x4c\x20\x42\x41\x54\x54\x4c\x45\x20\x4d\x45\x54\x48\x4f\x44'['\x70'](), ANSyncDataManager[_0x287e6a(0x277)](_0x3bb9cb), _0x3bb9cb['\x6e\x65\x74\x44\x61\x74\x61\x4f\x62\x73\x65\x72\x76\x65\x72'][_0x287e6a(0x1cc)] = !![], this['\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64'](_0x1e7604, _0x3bb9cb[_0x287e6a(0x200)](), _0x3d8e15), ANET['\x50\x50']['\x69\x73\x46\x6f\x72\x63\x65\x42\x61\x74\x74\x6c\x65\x53\x79\x6e\x63\x4d\x6f\x64\x65']() && (_0x287e6a(0x23c) !== '\x77\x73\x69\x4f\x70' ? (this['\x73\x65\x74\x57\x61\x69\x74']('\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64'), this[_0x287e6a(0x1ff)] += 0x1) : (_0x555be9 = _0xc3d256, _0x5b7d51['\x77'](_0x315b27)));
-    }, _0x1c00ea[_0x1fe615(0x25e)] = function (_0x3f2b87, _0x420595, _0x4d6891 = ![]) {
-        var _0x45ad45 = _0x1fe615, _0xd738f0, _0x52f386;
-        if ($gameParty[_0x45ad45(0x22f)]()) {
-            if (_0x45ad45(0x24e) !== _0x45ad45(0x24e))
-                return this[_0x45ad45(0x24f)] != null;
-            else
-                return;
-        }
-        _0xd738f0 = _0x3f2b87[_0x45ad45(0x26a)](function (_0x1653e4) {
-            var _0x6c3c6a = _0x45ad45;
-            return _0x1653e4[_0x6c3c6a(0x200)]();
-        }), _0x52f386 = {
-            '\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x49\x64': _0x420595,
-            '\x6d\x69\x72\x72\x6f\x72': _0x4d6891,
-            '\x74\x61\x72\x67\x65\x74\x73': _0xd738f0
-        }, this[_0x45ad45(0x1dd)](_0x52f386);
-    }, _0x1c00ea[_0x1fe615(0x1be)] = function () {
-        var _0x360b54 = _0x1fe615;
-        if (_0x360b54(0x244) === _0x360b54(0x244)) {
-            var _0xa9aa9b;
-            _0xa9aa9b = BattleManager[_0x360b54(0x1de)]();
-            if (KDCore[_0x360b54(0x1d2)]()) {
-                if ('\x54\x54\x4a\x4e\x49' !== _0x360b54(0x233)) {
-                    if (_0xa9aa9b == null) {
-                        if (_0x360b54(0x1f2) === _0x360b54(0x213)) {
-                            var _0x44fe19;
-                            _0x44fe19 = {
-                                '\x6d\x65\x74\x68\x6f\x64': _0x49308e,
-                                '\x69\x64': _0x1f14d6,
-                                '\x64\x61\x74\x61': _0x310a45
-                            }, _0x33e0e9[_0x360b54(0x1c7)](_0x475016[_0x360b54(0x24a)](_0x360b54(0x242), _0x44fe19), !![]);
-                        } else
-                            return;
-                    }
-                } else
-                    _0x115051 = _0x564a8b[_0x360b54(0x1d9)][_0x360b54(0x25c)]();
-            }
-            this[_0x360b54(0x270)](ANGameManager[_0x360b54(0x1d8)](), _0xa9aa9b);
-        } else
-            return;
-    }, _0x1c00ea[_0x1fe615(0x207)] = function (_0x585d0f) {
-        var _0x309a89 = _0x1fe615;
-        if ('\x4b\x75\x72\x79\x73' === _0x309a89(0x24b)) {
-            if (!_0x843c92[_0x309a89(0x257)]())
-                return;
-            return _0x24097e[_0x309a89(0x1bf)] = _0x55e7d9, _0x501d0e === _0x446577['\x6d\x79\x41\x63\x74\x6f\x72\x49\x64']() ? _0x20f980[_0x309a89(0x1ec)]() : _0x13c722['\x6e\x43\x6c\x65\x61\x72\x43\x6c\x69\x65\x6e\x74\x49\x6e\x70\x75\x74']();
-        } else
-            return _0x3005ac['\x70'](_0x309a89(0x1ee) + _0x585d0f[_0x309a89(0x249)]), this['\x73\x65\x6e\x64\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x42\x61\x74\x74\x6c\x65'](_0x585d0f);
-    }, _0x1c00ea[_0x1fe615(0x202)] = function () {
-        var _0x5400c2 = _0x1fe615;
-        _0x3005ac['\x70'](_0x5400c2(0x1df)), $gameTemp['\x5f\x72\x65\x71\x75\x65\x73\x74\x49\x6e\x69\x74\x69\x61\x6c\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65\x52\x65\x66\x72\x65\x73\x68'] = !![];
-    }, _0x1c00ea[_0x1fe615(0x23a)] = function (_0x525358) {
-        var _0xaca118 = _0x1fe615;
-        if (_0xaca118(0x227) === _0xaca118(0x227)) {
-            var _0x268ab6, _0x388097;
-            try {
-                if ('\x43\x62\x4b\x47\x70' === _0xaca118(0x268))
-                    return _0x268ab6 = KDCore['\x6d\x61\x6b\x65\x49\x64'](0x4), BattleManager[_0xaca118(0x1cd)](_0x268ab6), this[_0xaca118(0x260)]({
-                        '\x62\x61\x74\x74\x6c\x65\x49\x64': _0x268ab6,
-                        '\x6d\x61\x70\x49\x64': $gameMap[_0xaca118(0x1cb)](),
-                        '\x74\x72\x6f\x6f\x70\x49\x64': _0x525358
-                    });
-                else {
-                    if (!this[_0xaca118(0x265)]())
-                        return;
-                    '\x57\x41\x49\x54'['\x70'](this[_0xaca118(0x1ff)]);
-                    switch (this['\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65']) {
-                    case '\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64':
-                        this['\x5f\x77\x61\x69\x74\x50\x6f\x6f\x6c'] === _0x1d0c71[_0xaca118(0x217)]()[_0xaca118(0x231)] && this[_0xaca118(0x219)]();
-                    }
-                }
-            } catch (_0x1da5dd) {
-                return _0x388097 = _0x1da5dd, KDCore[_0xaca118(0x1e1)](_0x388097);
-            }
-        } else
-            return _0x50f795[_0xaca118(0x1e0)]();
-    }, _0x1c00ea[_0x1fe615(0x270)] = function (_0x18b449, _0x4318da) {
-        var _0x2fda72 = _0x1fe615;
-        ANNetwork[_0x2fda72(0x1c7)](NMS[_0x2fda72(0x24a)](_0x2fda72(0x212), {
-            '\x61\x63\x74\x69\x6f\x6e': _0x4318da,
-            '\x69\x6e\x70\x75\x74\x41\x63\x74\x6f\x72\x49\x64': _0x18b449
-        }));
-    }, _0x1c00ea[_0x1fe615(0x205)] = function () {
-        var _0x437314 = _0x1fe615, _0x23fd61, _0xa119ea;
-        _0xa119ea = BattleManager[_0x437314(0x1bf)];
-        if (BattleManager['\x5f\x63\x75\x72\x72\x65\x6e\x74\x41\x63\x74\x6f\x72'] != null) {
-            if (_0x437314(0x220) === _0x437314(0x264)) {
-                if (!this['\x69\x73\x42\x61\x74\x74\x6c\x65\x52\x65\x67\x69\x73\x74\x72\x65\x64']())
-                    return;
-                if (this[_0x437314(0x241)]())
-                    return;
-                this[_0x437314(0x24f)][_0x437314(0x249)] === _0x14e78f['\x62\x61\x74\x74\x6c\x65\x49\x64'] && (_0x52fab0[_0x437314(0x26e)] = [...this[_0x437314(0x24f)][_0x437314(0x214)]], this[_0x437314(0x24f)] = _0x377341);
-            } else
-                _0x23fd61 = BattleManager[_0x437314(0x1d9)][_0x437314(0x25c)]();
-        } else
-            _0x23fd61 = null;
-        ANNetwork[_0x437314(0x1c7)](NMS[_0x437314(0x24a)](_0x437314(0x24d), {
-            '\x69\x6e\x70\x75\x74\x53\x74\x61\x74\x65': _0xa119ea,
-            '\x69\x6e\x70\x75\x74\x41\x63\x74\x6f\x72\x49\x64': _0x23fd61
-        }));
-    }, _0x1c00ea[_0x1fe615(0x1fe)] = function (_0x309d97, _0x4d9ad4) {
-        var _0xd977f7 = _0x1fe615;
-        if (_0xd977f7(0x21d) !== _0xd977f7(0x21d))
-            return;
-        else
-            ANNetwork[_0xd977f7(0x1c7)](NMS[_0xd977f7(0x24a)](_0xd977f7(0x1ea), {
-                '\x63\x6d\x64': _0x309d97,
-                '\x74\x65\x78\x74': _0x4d9ad4
-            }));
-    }, _0x1c00ea[_0x1fe615(0x23d)] = function () {
-        var _0x3b8aa3 = _0x1fe615;
-        if (_0x3b8aa3(0x201) === _0x3b8aa3(0x201))
-            return ANNetwork[_0x3b8aa3(0x1c7)](NMS[_0x3b8aa3(0x24a)](_0x3b8aa3(0x266)));
-        else
-            return;
-    }, _0x1c00ea[_0x1fe615(0x211)] = function () {
-        var _0x573963 = _0x1fe615;
-        if (_0x573963(0x226) === _0x573963(0x226))
-            return ANNetwork[_0x573963(0x1c7)](NMS[_0x573963(0x24a)](_0x573963(0x21b)));
-        else
-            _0x573963(0x258)['\x70'](), _0x5613ea['\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72'](_0x2c4a2d), _0x512636['\x6e\x65\x74\x44\x61\x74\x61\x4f\x62\x73\x65\x72\x76\x65\x72']['\x5f\x69\x73\x44\x61\x74\x61\x43\x68\x61\x6e\x67\x65\x64'] = !![], this[_0x573963(0x234)](_0x437622, _0x286ddb[_0x573963(0x200)](), _0x1e40bf), _0x660652['\x50\x50'][_0x573963(0x210)]() && (this['\x73\x65\x74\x57\x61\x69\x74']('\x62\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64'), this[_0x573963(0x1ff)] += 0x1);
-    }, _0x1c00ea[_0x1fe615(0x234)] = function (_0x1c66fd, _0x1929af, _0x53b87d) {
-        var _0x2a6199 = _0x1fe615;
-        if ('\x4e\x61\x66\x63\x57' !== _0x2a6199(0x276))
-            this[_0x2a6199(0x1ff)] += 0x1;
-        else {
-            var _0x33b663;
-            _0x33b663 = {
-                '\x6d\x65\x74\x68\x6f\x64': _0x1c66fd,
-                '\x69\x64': _0x1929af,
-                '\x64\x61\x74\x61': _0x53b87d
-            }, ANNetwork[_0x2a6199(0x1c7)](NMS[_0x2a6199(0x24a)](_0x2a6199(0x242), _0x33b663), !![]);
-        }
-    }, _0x1c00ea[_0x1fe615(0x1dd)] = function (_0xd9dd03) {
-        var _0x4b90c1 = _0x1fe615;
-        if (_0x4b90c1(0x1ef) !== '\x65\x68\x78\x51\x6d') {
-            var _0x25c650, _0x3c1c8a;
-            try {
-                return _0x25c650 = _0x3920a5[_0x4b90c1(0x206)](0x4), _0x5795b6['\x6e\x53\x65\x74\x4e\x65\x74\x77\x6f\x72\x6b\x42\x61\x74\x74\x6c\x65'](_0x25c650), this['\x73\x65\x6e\x64\x45\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x42\x61\x74\x74\x6c\x65\x52\x65\x71\x75\x65\x73\x74']({
-                    '\x62\x61\x74\x74\x6c\x65\x49\x64': _0x25c650,
-                    '\x6d\x61\x70\x49\x64': _0x25c829[_0x4b90c1(0x1cb)](),
-                    '\x74\x72\x6f\x6f\x70\x49\x64': _0x4e8525
-                });
-            } catch (_0x1828ca) {
-                return _0x3c1c8a = _0x1828ca, _0x1c2ab8['\x77\x61\x72\x6e\x69\x6e\x67'](_0x3c1c8a);
-            }
-        } else
-            ANNetwork['\x73\x65\x6e\x64'](NMS[_0x4b90c1(0x24a)](_0x4b90c1(0x225), _0xd9dd03));
-    }, _0x1c00ea[_0x1fe615(0x275)] = function () {
-        var _0xf47883 = _0x1fe615;
-        if (_0xf47883(0x20d) !== _0xf47883(0x20d))
-            return;
-        else
-            ANNetwork[_0xf47883(0x1c7)](NMS[_0xf47883(0x24a)](_0xf47883(0x26d)));
-    }, _0x1c00ea[_0x1fe615(0x1da)] = function (_0x49acf3) {
-        var _0x5128e9 = _0x1fe615;
-        if (_0x5128e9(0x223) !== _0x5128e9(0x230))
-            ANNetwork[_0x5128e9(0x1e8)](NMS[_0x5128e9(0x24a)](_0x5128e9(0x271), _0x49acf3), function (_0x4e6483) {
-                var _0x56052c = _0x5128e9;
-                return ANBattleManager[_0x56052c(0x269)](_0x4e6483);
-            }, function () {
-                var _0x18e172 = _0x5128e9;
-                if (_0x18e172(0x20f) !== _0x18e172(0x256))
-                    return BattleManager[_0x18e172(0x1cd)](null), ANBattleManager[_0x18e172(0x1f3)]();
-                else
-                    !this[_0x18e172(0x241)]() && this[_0x18e172(0x211)](), this[_0x18e172(0x24f)] = null;
-            });
-        else
-            return _0x4396e1 = _0x276404, _0x4019c8[_0x5128e9(0x1e1)](_0x1062d9);
-    }, _0x1c00ea[_0x1fe615(0x260)] = function (_0x1365d9) {
-        var _0x5cf61d = _0x1fe615;
-        return ANNetwork[_0x5cf61d(0x1c7)](NMS[_0x5cf61d(0x24a)](_0x5cf61d(0x1cf), _0x1365d9));
-    }, _0x1c00ea[_0x1fe615(0x243)] = function (_0x343d59) {
-        var _0x4581bd = _0x1fe615;
-        if (_0x4581bd(0x218) === '\x65\x49\x6f\x43\x65') {
-            var _0x46c1b2;
-            try {
-                return _0x2de10c['\x6e\x53\x65\x74\x4e\x65\x74\x77\x6f\x72\x6b\x42\x61\x74\x74\x6c\x65'](_0x118b3e), _0x44015a['\x73\x65\x74\x75\x70'](_0x101fb3, !![], ![]), _0x47b225[_0x4581bd(0x1e6)](_0x5a0d02);
-            } catch (_0x4a2f2c) {
-                return _0x46c1b2 = _0x4a2f2c, _0xd66e80[_0x4581bd(0x1e1)](_0x46c1b2);
-            }
-        } else {
-            if (!this[_0x4581bd(0x267)]())
-                return;
-            if (this[_0x4581bd(0x241)]())
-                return;
-            this[_0x4581bd(0x24f)]['\x62\x61\x74\x74\x6c\x65\x49\x64'] === _0x343d59['\x62\x61\x74\x74\x6c\x65\x49\x64'] && (_0x4581bd(0x1e2) === _0x4581bd(0x1e2) ? ($gameTemp[_0x4581bd(0x26e)] = [...this[_0x4581bd(0x24f)][_0x4581bd(0x214)]], this[_0x4581bd(0x24f)] = _0x343d59) : _0x260fe4 = null);
-        }
-    }, _0x1c00ea[_0x1fe615(0x269)] = function (_0x5ddb65) {
-        var _0x9129a7 = _0x1fe615, _0x454a49;
-        '\x52\x45\x47\x49\x53\x54\x45\x52\x20\x53\x55\x43\x43\x45\x53\x53'['\x70'](), this[_0x9129a7(0x24f)] = _0x5ddb65, _0x454a49 = BattleManager[_0x9129a7(0x247)], BattleManager[_0x9129a7(0x21a)](..._0x5ddb65['\x6f\x70\x74\x69\x6f\x6e\x73']), _0x454a49 != null && BattleManager[_0x9129a7(0x209)](_0x454a49), _0x9129a7(0x1f9)['\x70'](_0x5ddb65['\x6f\x70\x74\x69\x6f\x6e\x73']), console['\x69\x6e\x66\x6f'](_0x5ddb65), !this[_0x9129a7(0x204)]() && ('\x46\x6c\x69\x78\x4a' !== _0x9129a7(0x1d6) ? _0x5d5786[_0x9129a7(0x1c7)](_0x2cb8b5[_0x9129a7(0x24a)](_0x9129a7(0x1ea), {
-            '\x63\x6d\x64': _0x2e195a,
-            '\x74\x65\x78\x74': _0x18dd06
-        })) : this[_0x9129a7(0x202)]());
-    }, _0x1c00ea[_0x1fe615(0x25d)] = function (_0x5f15c1) {
-        var _0x507cc6 = _0x1fe615, _0x33975f, _0x421ff9;
-        try {
-            if (_0x507cc6(0x1ca) !== '\x4d\x6b\x51\x45\x74')
-                _0x421ff9 = _0x5f15c1[_0x507cc6(0x1fa)][_0x507cc6(0x26a)](function (_0x2f6c5c) {
-                    var _0x37f8ca = _0x507cc6;
-                    if (_0x37f8ca(0x222) === _0x37f8ca(0x222))
-                        return ANET[_0x37f8ca(0x25a)][_0x37f8ca(0x250)](_0x2f6c5c);
-                    else
-                        _0x4effc1['\x70'](_0x37f8ca(0x1df)), _0x322c8b[_0x37f8ca(0x1d7)] = !![];
-                }), $gameTemp[_0x507cc6(0x25e)](_0x421ff9, _0x5f15c1['\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x49\x64'], _0x5f15c1['\x6d\x69\x72\x72\x6f\x72']);
-            else
-                return _0x18e501 = _0x2254cc, _0x3aa0d4['\x77\x61\x72\x6e\x69\x6e\x67'](_0xd4c563);
-        } catch (_0x279ad8) {
-            _0x33975f = _0x279ad8, ANET['\x77'](_0x33975f);
-        }
-    }, _0x1c00ea[_0x1fe615(0x1c8)] = function (_0x1d2b22, _0x5050b9, _0x1204ae) {
-        var _0x38af9a = _0x1fe615, _0x57514e, _0x328efd;
-        try {
-            ANET['\x50\x50'][_0x38af9a(0x210)]() && this[_0x38af9a(0x275)](), _0x57514e = ANET[_0x38af9a(0x25a)][_0x38af9a(0x250)](_0x1d2b22), _0x57514e[_0x5050b9] != null && (_0x38af9a(0x235) === _0x38af9a(0x1ed) ? this['\x5f\x63\x61\x6c\x6c\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x4f\x6e\x53\x65\x72\x76\x65\x72'](_0x1a501c, _0x1f028d, _0x3abe56) : _0x57514e[_0x5050b9](_0x1204ae));
-        } catch (_0x118be1) {
-            _0x328efd = _0x118be1, ANET['\x77'](_0x328efd);
-        }
-    }, _0x1c00ea['\x6f\x6e\x42\x61\x74\x74\x6c\x65\x4d\x65\x74\x68\x6f\x64\x52\x65\x63\x65\x69\x76\x65\x64'] = function () {
-        var _0x463541 = _0x1fe615;
-        if ('\x43\x67\x44\x55\x4c' === _0x463541(0x20b))
-            _0xa4ce9f[_0x463541(0x26e)] = [...this[_0x463541(0x24f)][_0x463541(0x214)]], this['\x62\x61\x74\x74\x6c\x65\x44\x61\x74\x61'] = _0x5b78d1;
-        else {
-            var _0x980985;
-            try {
-                this[_0x463541(0x1ff)] += 0x1;
-            } catch (_0x2df179) {
-                _0x980985 = _0x2df179, ANET['\x77'](_0x980985);
-            }
-        }
-    }, _0x1c00ea[_0x1fe615(0x255)] = function (_0x483614, _0x5546c2) {
-        var _0x25b4cb = _0x1fe615;
-        if (_0x25b4cb(0x26b) !== '\x77\x42\x70\x4e\x44')
-            _0x4924af = _0x39b29c, _0x17607d['\x77'](_0x28a335);
-        else {
-            var _0x37e6dd;
-            try {
-                if (!$gameParty[_0x25b4cb(0x257)]()) {
-                    if ('\x4c\x70\x6e\x4e\x59' !== _0x25b4cb(0x22b))
-                        return;
-                    else
-                        return _0x561e0f[_0x25b4cb(0x232)](_0x5ec8c0);
-                }
-                BattleManager[_0x25b4cb(0x1bf)] = _0x483614;
-                if (_0x5546c2 === ANGameManager[_0x25b4cb(0x1d8)]()) {
-                    if ('\x78\x71\x44\x46\x70' === _0x25b4cb(0x23f))
-                        return;
-                    else
-                        return BattleManager[_0x25b4cb(0x1ec)]();
-                } else
-                    return BattleManager[_0x25b4cb(0x1e0)]();
-            } catch (_0x2b1078) {
-                _0x37e6dd = _0x2b1078, ANET['\x77'](_0x37e6dd);
-            }
-        }
-    }, _0x1c00ea['\x6f\x6e\x42\x61\x74\x74\x6c\x65\x49\x6e\x70\x75\x74\x41\x63\x74\x69\x6f\x6e'] = function (_0x1cb5a1, _0x47909f) {
-        var _0x9c1119 = _0x1fe615, _0x36332c;
-        try {
-            if (!ANGameManager[_0x9c1119(0x204)]())
-                return;
-            return BattleManager[_0x9c1119(0x1de)]()[_0x9c1119(0x1f7)](_0x47909f), BattleManager[_0x9c1119(0x1f5)]();
-        } catch (_0x3c3fef) {
-            _0x36332c = _0x3c3fef, ANET['\x77'](_0x36332c);
-        }
-    }, _0x1c00ea[_0x1fe615(0x263)] = function (_0x557fcb, _0x408fa3) {
-        var _0x129bc0 = _0x1fe615, _0x4a3366, _0x59eb59, _0x2c9469;
-        try {
-            if (!$gameParty[_0x129bc0(0x257)]())
-                return;
-            switch (_0x557fcb) {
-            case _0x129bc0(0x254):
-                (_0x59eb59 = BattleManager['\x5f\x6c\x6f\x67\x57\x69\x6e\x64\x6f\x77']) != null && _0x59eb59[_0x129bc0(0x261)](_0x408fa3);
-                break;
-            default:
-                (_0x2c9469 = BattleManager[_0x129bc0(0x1c9)]) != null && _0x2c9469[_0x129bc0(0x22c)]();
-            }
-        } catch (_0x193e91) {
-            _0x4a3366 = _0x193e91, ANET['\x77'](_0x4a3366);
-        }
-    }, _0x1c00ea['\x6f\x6e\x45\x78\x65\x63\x75\x74\x65\x45\x6e\x63\x6f\x75\x6e\x74\x65\x72\x42\x61\x74\x74\x6c\x65'] = function (_0x4a3959) {
-        var _0xec233d = _0x1fe615, _0xa75ba8, _0x2b4387, _0x1eb41f, _0x5a948a, _0x1d36c2;
-        try {
-            if (_0xec233d(0x251) === '\x62\x44\x5a\x74\x4a') {
-                if ($gameMap['\x69\x73\x45\x76\x65\x6e\x74\x52\x75\x6e\x6e\x69\x6e\x67']())
-                    return;
-                if (KDCore[_0xec233d(0x25a)]['\x69\x73\x53\x63\x65\x6e\x65\x42\x61\x74\x74\x6c\x65']())
-                    return;
-                if (_0x4a3959 == null)
-                    return;
-                ({
-                    battleId: _0xa75ba8,
-                    mapId: _0x1eb41f,
-                    troopId: _0x1d36c2
-                } = _0x4a3959);
-                if ($gameMap[_0xec233d(0x1cb)]() !== _0x1eb41f) {
-                    if ('\x46\x47\x65\x69\x4e' !== _0xec233d(0x245))
-                        return;
-                    else
-                        return !![];
-                }
-                return $gamePlayer[_0xec233d(0x24c)](), _0x5a948a = Math[_0xec233d(0x229)]() * 0xc8, setTimeout(function () {
-                    var _0x4ff677 = _0xec233d, _0x25d407;
-                    try {
-                        if (_0x4ff677(0x224) !== _0x4ff677(0x224))
-                            return;
-                        else
-                            return BattleManager[_0x4ff677(0x1cd)](_0xa75ba8), BattleManager['\x73\x65\x74\x75\x70'](_0x1d36c2, !![], ![]), SceneManager['\x70\x75\x73\x68'](Scene_Battle);
-                    } catch (_0x3a40aa) {
-                        return _0x25d407 = _0x3a40aa, KDCore['\x77\x61\x72\x6e\x69\x6e\x67'](_0x25d407);
-                    }
-                }, _0x5a948a);
-            } else {
-                var _0x252c10;
-                _0xec233d(0x1c3)['\x70'](), this[_0xec233d(0x24f)] = _0xee4720, _0x252c10 = _0x68962c[_0xec233d(0x247)], _0x112076[_0xec233d(0x21a)](..._0x213bd7[_0xec233d(0x21f)]), _0x252c10 != null && _0x4b1886[_0xec233d(0x209)](_0x252c10), _0xec233d(0x1f9)['\x70'](_0x405c3b[_0xec233d(0x21f)]), _0x49a7b0[_0xec233d(0x248)](_0x47a8fa), !this['\x69\x73\x42\x61\x74\x74\x6c\x65\x4d\x61\x73\x74\x65\x72']() && this[_0xec233d(0x202)]();
-            }
-        } catch (_0x108fd0) {
-            return _0x2b4387 = _0x108fd0, KDCore['\x77\x61\x72\x6e\x69\x6e\x67'](_0x2b4387);
-        }
-    };
-}()));
+//@[GLOBAL]
+window.NetClientMethodsManager = function() {};
 
-function _0xc641(_0x528f60, _0x359b70) {
-    var _0x5a332f = _0x5a33();
-    return _0xc641 = function (_0xc641d9, _0x397fb8) {
-        _0xc641d9 = _0xc641d9 - 0xda;
-        var _0x1ff200 = _0x5a332f[_0xc641d9];
-        return _0x1ff200;
-    }, _0xc641(_0x528f60, _0x359b70);
-}
-function _0x5a33() {
-    var _0x5742eb = [
-        '\x37\x34\x39\x35\x32\x30\x32\x4a\x79\x41\x47\x46\x57',
-        '\x54\x6e\x4d\x50\x6b',
-        '\x66\x76\x77\x48\x56',
-        '\x61\x6a\x72\x4b\x6e',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x5a\x46\x4c\x6c\x78',
-        '\x34\x48\x68\x58\x64\x50\x68',
-        '\x69\x6e\x64\x65\x78',
-        '\x6b\x6c\x48\x54\x6b',
-        '\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x54\x56\x6e\x65\x75',
-        '\x4e\x65\x74\x49\x6e\x74\x72',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x6c\x69\x73\x74',
-        '\x50\x72\x65\x73\x73\x20\x45\x53\x43\x20\x74\x6f\x20\x63\x61\x6e\x63\x65\x6c',
-        '\x65\x78\x65\x63\x75\x74\x65\x4d\x6f\x64\x65',
-        '\x4e\x71\x59\x57\x52',
-        '\x31\x30\x4a\x73\x66\x45\x59\x41',
-        '\x6d\x79\x41\x63\x74\x6f\x72\x49\x64',
-        '\x69\x73\x45\x76\x65\x6e\x74\x52\x75\x6e\x6e\x69\x6e\x67',
-        '\x4e\x48\x7a\x53\x52',
-        '\x45\x71\x65\x65\x74',
-        '\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73',
-        '\x68\x69\x64\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x72\x65\x73\x65\x72\x76\x65\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x6f\x6e\x45\x76\x65\x6e\x74',
-        '\x31\x30\x30\x33\x33\x36\x30\x77\x4a\x6b\x77\x43\x48',
-        '\x53\x68\x61\x72\x65\x64\x20\x65\x76\x65\x6e\x74\x20\x72\x65\x67\x69\x73\x74\x72\x65\x64\x20',
-        '\x75\x6e\x64\x65\x66\x69\x6e\x65\x64',
-        '\x56\x69\x72\x74\x75\x61\x6c',
-        '\x65\x76\x65\x6e\x74\x49\x64',
-        '\x35\x35\x32\x37\x32\x37\x48\x75\x4c\x54\x4b\x44',
-        '\x73\x65\x6e\x64\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x67\x69\x73\x74\x65\x72\x65\x64\x44\x6f\x6e\x65',
-        '\x73\x65\x6e\x64',
-        '\x79\x56\x5a\x6e\x7a',
-        '\x5f\x69\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72',
-        '\x42\x42\x4b\x54\x64',
-        '\x69\x73\x4f\x6e\x41\x6e\x79\x45\x76\x65\x6e\x74',
-        '\x72\x65\x73\x65\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x37\x36\x38\x30\x32\x34\x39\x52\x79\x5a\x65\x47\x65',
-        '\x65\x76\x65\x6e\x74',
-        '\x6f\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x71\x75\x65\x73\x74',
-        '\x67\x76\x58\x59\x4e',
-        '\x73\x65\x6e\x64\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x45\x6e\x64\x65\x64',
-        '\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x49\x73\x52\x75\x6e\x6e\x69\x6e\x67',
-        '\x69\x73\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x44\x72\x67\x52\x52',
-        '\x41\x79\x42\x5a\x61',
-        '\x53\x68\x61\x72\x65\x64\x20\x65\x76\x65\x6e\x74\x20\x66\x6f\x72\x63\x65\x20\x63\x61\x6e\x63\x65\x6c\x6c\x65\x64',
-        '\x4e\x6f\x6e\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x4c\x69\x73\x74',
-        '\x73\x68\x6f\x77\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f',
-        '\x76\x69\x72\x74\x75\x61\x6c\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x78\x51\x69\x76\x52',
-        '\x6f\x70\x74\x69\x6f\x6e\x73',
-        '\x55\x74\x69\x6c\x73',
-        '\x45\x76\x65\x6e\x74',
-        '\x61\x4e\x7a\x49\x6e',
-        '\x76\x6f\x75\x74\x7a',
-        '\x5f\x73\x68\x6f\x75\x6c\x64\x46\x6f\x72\x63\x65\x45\x78\x69\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x73\x65\x6e\x64\x43\x68\x6f\x69\x63\x65\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e',
-        '\x72\x65\x73\x65\x72\x76\x65\x4e\x65\x74\x77\x6f\x72\x6b\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x64\x51\x64\x6f\x74',
-        '\x53\x45\x4e\x44\x20\x41\x4c\x4c\x20\x43\x41\x4e\x43\x45\x4c\x20\x45\x56\x45\x4e\x54',
-        '\x69\x6e\x64\x65\x6e\x74',
-        '\x72\x65\x74\x72\x69\x65\x76\x65\x4e\x65\x74\x77\x6f\x72\x6b\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x65\x78\x65\x63\x75\x74\x65\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x75\x6b\x6e\x44\x6d',
-        '\x6a\x6d\x53\x72\x56',
-        '\x48\x54\x72\x6c\x74',
-        '\x36\x31\x32\x31\x31\x37\x6b\x6a\x45\x53\x50\x48',
-        '\x54\x74\x65\x58\x42',
-        '\x6d\x79\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61',
-        '\x73\x65\x74\x56\x61\x6c\x75\x65',
-        '\x6b\x43\x51\x6f\x44',
-        '\x6d\x4b\x72\x6e\x4d',
-        '\x72\x65\x67\x69\x73\x74\x65\x72\x44\x6f\x6e\x65',
-        '\x6e\x53\x65\x6c\x65\x63\x74\x69\x6f\x6e\x41\x63\x74\x69\x6f\x6e\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x6f\x6e\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x73\x65\x74\x75\x70\x53\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72',
-        '\x69\x73\x4e\x65\x74\x77\x6f\x72\x6b\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x73\x65\x72\x76\x65\x64',
-        '\x46\x65\x66\x72\x67',
-        '\x68\x69\x64\x65\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f',
-        '\x69\x73\x50\x61\x73\x73\x45\x76\x65\x6e\x74\x46\x69\x6c\x74\x65\x72\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x53\x61\x6d\x65\x20\x6d\x61\x70',
-        '\x38\x55\x74\x6e\x5a\x50\x71',
-        '\x63\x6f\x6e\x74\x61\x69\x6e\x73',
-        '\x69\x73\x42\x75\x73\x79',
-        '\x42\x4c\x41\x43\x4b',
-        '\x65\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x65\x64',
-        '\x6d\x61\x70\x49\x64',
-        '\x53\x68\x61\x72\x65\x64\x20\x43\x68\x6f\x69\x63\x65\x20\x61\x63\x63\x65\x70\x74\x65\x64\x20\x66\x72\x6f\x6d\x20\x73\x65\x72\x76\x65\x72',
-        '\x77\x63\x59\x41\x44',
-        '\x72\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64',
-        '\x35\x36\x36\x34\x30\x30\x6f\x4b\x53\x71\x48\x71',
-        '\x6f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61',
-        '\x53\x79\x73\x74\x65\x6d',
-        '\x65\x76\x65\x6e\x74\x50\x72\x6f\x63\x65\x73\x73\x45\x78\x69\x74',
-        '\x6f\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x54\x73\x62\x67\x77',
-        '\x48\x5a\x63\x64\x6e',
-        '\x39\x34\x37\x31\x31\x32\x77\x78\x68\x72\x79\x70',
-        '\x32\x30\x63\x4a\x56\x4e\x5a\x63',
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x78\x57\x63\x41\x45',
-        '\x6f\x6e\x52\x65\x67\x69\x73\x74\x65\x72\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x73\x70\x6f\x6e\x73\x65',
-        '\x73\x68\x61\x72\x65\x64\x43\x68\x6f\x69\x63\x65',
-        '\x5f\x72\x65\x73\x65\x72\x76\x65\x64\x4e\x65\x74\x77\x6f\x72\x6b\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x45\x56\x57\x72\x79',
-        '\x66\x6f\x47\x41\x6d',
-        '\x63\x68\x65\x63\x6b\x45\x76\x65\x6e\x74\x52\x75\x6e\x6e\x69\x6e\x67',
-        '\x5f\x73\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72',
-        '\x73\x74\x61\x72\x74\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x63\x6f\x64\x65',
-        '\x59\x45\x4c\x4c\x4f\x57',
-        '\x6a\x65\x71\x4c\x4e',
-        '\x73\x77\x52\x4a\x6d',
-        '\x4b\x5a\x66\x49\x73',
-        '\x65\x76\x65\x6e\x74\x45\x6e\x64\x65\x64',
-        '\x6e\x4f\x6e\x53\x79\x6e\x63\x65\x64\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x52\x65\x73\x70\x6f\x6e\x73\x65',
-        '\x73\x65\x74\x75\x70',
-        '\x4b\x6c\x53\x45\x50',
-        '\x5f\x73\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72',
-        '\x6e\x53\x65\x74\x45\x6e\x64\x43\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x65\x64',
-        '\x61\x64\x47\x76\x56',
-        '\x4b\x65\x58\x6b\x43',
-        '\x6d\x6a\x70\x58\x4f',
-        '\x43\x6f\x6d\x6d\x6f\x6e\x20\x45\x76\x65\x6e\x74',
-        '\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72'
-    ];
-    _0x5a33 = function () {
-        return _0x5742eb;
-    };
-    return _0x5a33();
-}
-(function (_0x10dceb, _0x624244) {
-    var _0x109044 = _0xc641, _0x5c3831 = _0x10dceb();
-    while (!![]) {
-        try {
-            var _0xeed5fa = -parseInt(_0x109044(0x124)) / 0x1 + parseInt(_0x109044(0xf8)) / 0x2 + -parseInt(_0x109044(0x144)) / 0x3 * (-parseInt(_0x109044(0xe5)) / 0x4) + -parseInt(_0x109044(0x145)) / 0x5 * (-parseInt(_0x109044(0x13c)) / 0x6) + -parseInt(_0x109044(0xfd)) / 0x7 * (-parseInt(_0x109044(0x133)) / 0x8) + -parseInt(_0x109044(0x105)) / 0x9 * (parseInt(_0x109044(0xf0)) / 0xa) + parseInt(_0x109044(0xdf)) / 0xb;
-            if (_0xeed5fa === _0x624244)
-                break;
-            else
-                _0x5c3831['push'](_0x5c3831['shift']());
-        } catch (_0x27877e) {
-            _0x5c3831['push'](_0x5c3831['shift']());
+(function() {  //╒═════════════════════════════════════════════════════════════════════════╛
+  // ■ NetClientMethodsManager.coffee
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  //---------------------------------------------------------------------------
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("NET Client");
+  LOG.setColors(KDCore.Color.MAGENTA.reAlpha(200), KDCore.Color.BLACK.getLightestColor(200));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.NetClientMethodsManager;
+  _.setConnectionToMasterCallback = function(onConnectCallback) {
+    this.onConnectCallback = onConnectCallback;
+  };
+  _.onConnect = function() {
+    LOG.p("Connected");
+    // * Проверка версии сервера и клиента на соответствие
+    ANNetwork.callback(NMS.Lobby("serverVerCheck", ANET.MinServerRev), function(result) {
+      if (!result) {
+        LOG.p("Server is outdated, require rev. " + ANET.MinServerRev + " or higher");
+        window.alert("Server version is outdated for this Alpha NET Z version " + (ANET.Version / 100));
+        return ANNetwork.stop();
+      }
+    });
+    if (this.onConnectCallback != null) {
+      return this.onConnectCallback(1);
+    }
+  };
+  _.onDisconnect = function() {
+    var ref;
+    LOG.p("Disconnected");
+    if (!$gameTemp.__netShouldDisconnectAfterLocalModeScene) {
+      if ((ref = SceneManager._scene) != null) {
+        ref.onLostConnection();
+      }
+    }
+    HUIManager.notifyError("Disconnected from server");
+    return ANNetwork.stop();
+  };
+  _.onConnectionError = function() {
+    LOG.p("Can't connect to server!");
+    if (this.onConnectCallback != null) {
+      this.onConnectCallback(0);
+    }
+    return ANNetwork.stop();
+  };
+  // * Существует ли метод для обработки команды от сервера?
+  _.isExistPrcEvent = function(eventHandlerMethodName) {
+    return NetClientMethodsManager["event_" + eventHandlerMethodName] != null;
+  };
+  // * Выполнить команду от сервера
+  _.handlePrcEvent = function(eventHandlerMethodName, content) {
+    var noLog;
+    noLog = true;
+    if (ANET.isShowExtOutput()) {
+      noLog = ["game_observerData", "map_eventMove", "map_playerMove", "battle_battleMethod", "battle_battleMethodReceived"].contains(eventHandlerMethodName);
+      if (!noLog) {
+        LOG.p("Handle Event: " + eventHandlerMethodName);
+      }
+    }
+    NetClientMethodsManager["event_" + eventHandlerMethodName](content);
+    // * Вызвать метод на сцене, если он существует
+    // * Сцена уже сама знает, надо ей обновить (перерисовать) что-то или нет,
+    // * определяет по имени метода
+    // * С версии 0.7 появились общие комманды, их можно обрабатывать на сцене с учётом имени самой команды
+    if (eventHandlerMethodName === "common_forClients" && (content != null) && String.any(content.cmd)) {
+      this.callSceneCallback(eventHandlerMethodName + "_" + content.cmd);
+    } else {
+      this.callSceneCallback(eventHandlerMethodName);
+    }
+    if (ANET.isShowExtOutput()) {
+      if (!noLog) {
+        LOG.p("Event End: " + eventHandlerMethodName);
+      }
+    }
+  };
+  _.callSceneCallback = function(eventName) {
+    var ref;
+    return (ref = SceneManager._scene) != null ? ref.onServerEvent(eventName) : void 0;
+  };
+  //? ОБРАБОТКА КОМАНД ОТ СЕРВЕРА
+  // * =========================================================================
+
+  //TODO: Это возможно и не нужно, так как игрок имя может поменять только перед входом в комнату( созданием)
+  _.event_lobby_changePlayerName = function(content) {
+    return ANGameManager.onPlayerName(content.who, content.name);
+  };
+  _.event_lobby_refreshRoomData = function(content) {
+    if (SceneManager.isBusyForNetworkData()) {
+      return;
+    }
+    ANGameManager.onRoomPlayers(content.playersData);
+    return ANNetwork.onRoomDataFromServer(content.room);
+  };
+  _.event_lobby_roomClosed = function(content) {
+    return ANNetwork.onRoomClosed();
+  };
+  _.event_lobby_startGame = function() {
+    ANGameManager.setupNewNetworkGame();
+    return "STARTING GAME".p();
+  };
+  _.event_lobby_chatMessage = function(content) {
+    var e;
+    try {
+      return HUIManager.onChatMessageFromServer(content);
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _.event_game_playersData = function(content) {
+    ANGameManager.onGamePlayers(content);
+    if (ANET.isShowExtOutput()) {
+      return "GAME PLAYERS DATA REFRESHED".p();
+    }
+  };
+  _.event_game_refreshParty = function() {
+    ANGameManager.onRefreshGameParty();
+    if (ANET.isShowExtOutput()) {
+      return "REFRESH PARTY".p();
+    }
+  };
+  _.event_game_observerData = function(content) {
+    var e;
+    try {
+      return ANSyncDataManager.onObserverData(content.id, content.type, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_observerData", e);
+    }
+  };
+  _.event_game_variable = function(content) {
+    var e;
+    try {
+      return ANSyncDataManager.onVariableValue(content.id, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_variable", e);
+    }
+  };
+  _.event_game_switch = function(content) {
+    var e;
+    try {
+      return ANSyncDataManager.onSwitchValue(content.id, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_switch", e);
+    }
+  };
+  _.event_game_saveDataRequest = function(content) {
+    var e;
+    try {
+      $gameTemp.nUniqueSaveID = content.uniqueSaveID;
+      // * Сохранение выполненно
+      $gameSystem.onBeforeSave();
+      DataManager.saveGame(content.savefileId);
+      //TODO: Тут желательно ждать положительный результат, но пока сразу отправим флаг
+      return ANGameManager.sendSaveDataCompleteFlag();
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_saveDataRequest", e);
+    }
+  };
+  _.event_game_saveDataComplete = function(content) {
+    var e, savedActorId;
+    try {
+      // * Если данный клиент не запускал сохранение, то игнор
+      if ($gameTemp.nSaveData == null) {
+        return;
+      }
+      savedActorId = content;
+      //console.log(savedActorId)
+      return $gameTemp.nSaveData.onAnswer(savedActorId, true);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_saveDataComplete", e);
+    }
+  };
+  _.event_game_chatMessage = function(content) {
+    var channelId, e, mapId;
+    try {
+      mapId = content.mapId;
+      channelId = content.channelId;
+      if (channelId > 0) { // * MAP
+        if ((mapId != null) && mapId === $gameMap.mapId()) {
+          return ANET.UI.addMessageToChat(content);
+        }
+      } else {
+        return ANET.UI.addMessageToChat(content);
+      }
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_chatMessage", e);
+    }
+  };
+  _.event_game_startedRoomGameDataRequest = function(content) {
+    var e;
+    try {
+      // * Эта проверка не обязательная, сервер только матеру отправляет
+      if (!ANNetwork.isMasterClient()) {
+        return;
+      }
+      return ANGameManager.sendStartedRoomDataRespone(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_startedRoomGameDataRequest", e);
+    }
+  };
+  _.event_game_startedRoomGameData = function(content) {
+    var e, id;
+    try {
+      // * Тут через ANClientResponceManager
+      id = "game_startedRoomGameDataRequest";
+      return ANClientResponceManager.onResponceReceived(id, content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_startedRoomGameDataRequest", e);
+    }
+  };
+  _.event_game_someoneJoinedToStartedGame = function(content) {
+    var e;
+    try {
+      return ANGameManager.onPlayerJoinedThisGame(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_someoneJoinedToStartedGame", e);
+    }
+  };
+  _.event_game_refreshMasterClient = function(content) {
+    var e;
+    try {
+      if (ANET.PP.isEndGameWhenHostIsLeave()) {
+        return SceneManager.goto(Scene_Title);
+      } else {
+        if (ANNetwork.myId() === content) {
+          return ANNetwork._isHost = true;
+        }
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _.event_map_playerMove = function(content) {
+    var e;
+    try {
+      return ANPlayersManager.onPlayerMove(content.id, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_map_playerMove", e);
+    }
+  };
+  _.event_map_playerLocation = function(content) {
+    var e;
+    try {
+      return ANPlayersManager.onPlayerLocation(content.id, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_map_playerLocation", e);
+    }
+  };
+  _.event_map_eventMove = function(content) {
+    var e;
+    try {
+      return ANMapManager.onEventMove(content.mapId, content.id, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_map_eventMove", e);
+    }
+  };
+  // * Если пришёл этот метод, то надо отправить данные свои на карте, для синхронизации
+  _.event_map_initialMapSynchronization = function(content) {
+    var e;
+    try {
+      if ($gameMap.mapId() === content) {
+        return ANMapManager.onInitialMapSync();
+      }
+    } catch (error) {
+      e = error;
+      return console.warn("event_map_eventMove", e);
+    }
+  };
+  _.event_event_virtualEventCommand = function(content) {
+    var e;
+    try {
+      return ANInterpreterManager.onVirtualCommand(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_virtualEventCommand", e);
+    }
+  };
+  _.event_battle_battleMethod = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onBattleMethod(content.id, content.method, content.data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_battleMethod", e);
+    }
+  };
+  _.event_battle_animation = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onBattleAnimation(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_animation", e);
+    }
+  };
+  _.event_battle_battleMethodReceived = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onBattleMethodReceived();
+    } catch (error) {
+      e = error;
+      return console.warn("event_battleMethodReceived", e);
+    }
+  };
+  _.event_battle_logMessage = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onLogWindowMessage(content.cmd, content.text);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_logMessage", e);
+    }
+  };
+  _.event_battle_input = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onBattleInputState(content.inputState, content.inputActorId);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_input", e);
+    }
+  };
+  _.event_battle_inputAction = function(content) {
+    var e;
+    try {
+      return ANBattleManager.onBattleInputAction(content.inputActorId, content.action);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_inputAction", e);
+    }
+  };
+  _.event_battle_serverBattleData = function(content) {
+    var e;
+    try {
+      // * Обновляем данные, затем вызывается уже event сцены битвы
+      return ANBattleManager.onBattleDataFromServer(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_serverBattleData", e);
+    }
+  };
+  _.event_battle_executeEncounter = function(content) {
+    var e;
+    try {
+      "ENCOUNTER MAP BATTLE IN".p();
+      return ANBattleManager.onExecuteEncounterBattle(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_battle_executeEncounter", e);
+    }
+  };
+  _.event_event_registerOnShared = function(content) {
+    var e;
+    try {
+      "SHARED EVENT IN".p();
+      return ANInterpreterManager.onRegisterOnSharedEventRequest(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_registerOnShared", e);
+    }
+  };
+  _.event_event_registerDone = function(content) {
+    var e;
+    try {
+      "SHARED EVENT ANSWER".p();
+      return ANInterpreterManager.onRegisterOnSharedEventResponse(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_registerDone", e);
+    }
+  };
+  _.event_event_sharedCanContinue = function(content) {
+    var e;
+    try {
+      "SHARED EVENT CAN CONTINUE".p();
+      return ANInterpreterManager.onContinueSharedEvent(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_sharedCanContinue", e);
+    }
+  };
+  _.event_event_sharedForceCancel = function(content) {
+    var e;
+    try {
+      "SHARED EVENT FORCE CANCELLED".p();
+      return ANInterpreterManager.onSharedEventForceCancelFromServer(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_sharedForceCancel", e);
+    }
+  };
+  _.event_event_sharedChoice = function(content) {
+    var e;
+    try {
+      "SHARED EVENT CHOICE ACTION".p();
+      return ANInterpreterManager.onSharedEventChoiceActionFromServer(content);
+    } catch (error) {
+      e = error;
+      return console.warn("event_event_sharedForceCancel", e);
+    }
+  };
+  _.event_game_userCommand = function(content) {
+    var data, e, name;
+    try {
+      "CUSTOM COMMAND IN".p();
+      ({name, data} = content);
+      return nAPI.onCustomCommand(name, data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_userCommand", e);
+    }
+  };
+  _.event_game_customCommandLink = function(content) {
+    var commonEventId, e, name;
+    try {
+      "CUSTOM LINK IN".p();
+      ({name, commonEventId} = content);
+      return typeof $gameSystem !== "undefined" && $gameSystem !== null ? $gameSystem.nRegisterCustomCommandCE(name, commonEventId) : void 0;
+    } catch (error) {
+      e = error;
+      return console.warn("event_game_userCommand", e);
+    }
+  };
+  _.event_game_networkOption = function(content) {
+    var e;
+    try {
+      return ANGameManager.onNetworkOption(content);
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  // * Обработка общих команд, которые имеют внутренний флаг cmd
+  // * См. реализацию NMS.Common в NetMessages.coffee
+  //? ТОЛЬКО НА ДРУГИХ КЛИЕНТАХ, а не на том кто отправил!
+  _.event_common_forClients = function(content) {
+    var cmd, data, e;
+    try {
+      ({cmd, data} = content);
+      //TODO: Более удобную структуру чем else if
+      if (cmd.contains("trade")) {
+        return ANTradeManager.onCommonCommandFromServer(cmd, data);
+      } else if (cmd.contains("applyItemFromMenu")) {
+        return Game_Action.NApplyFromMenuFromNetwork(data);
+      } else if (cmd.contains("nameplates")) {
+        return ANPlayersManager.onPlayersNameplatesStyles(data);
+      } else {
+        return console.warn("Unknown common subCommand " + cmd);
+      }
+    } catch (error) {
+      e = error;
+      return console.warn("event_common_forClients", e);
+    }
+  };
+  // * Обработка выделенной общей команды для плагина Alpha ABS Z
+  _.event_common_absz = function(content) {
+    var cmd, data, e;
+    try {
+      ({cmd, data} = content);
+      return NetClientMethodsManager.event_aabz(cmd, data);
+    } catch (error) {
+      e = error;
+      return console.warn("event_common_absz", e);
+    }
+  };
+  //@[FOR OVERRIDE]
+  // * Отдельный метод, который должен быть переопределён в плагине AABSZ
+  _.event_aabz = function(name, data) { // * for AABS Z plugin implementation
+    return "EVENT_AABSZ".p(name);
+  };
+})();
+
+// ■ END NetClientMethodsManager.coffee
+//---------------------------------------------------------------------------
+//console.log(name)
+//console.info(data)
+
+
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за синхронизацию и обработку данных в бою
+
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANBattleManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("NetBattle");
+  LOG.setColors(KDCore.Color.RED, KDCore.Color.BLACK.getLightestColor(135));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANBattleManager;
+  _.isBattleMaster = function() {
+    if (this.battleData != null) {
+      return this.battleData.actors[0] === ANGameManager.myActorId();
+    } else {
+      return $gameParty.inBattle();
+    }
+  };
+  _.isBattleRegistred = function() {
+    return this.battleData != null;
+  };
+  _.isBattleLocal = function() {
+    if (this.battleData != null) {
+      return this.battleData.isLocal;
+    } else {
+      return true;
+    }
+  };
+  _.isShouldWaitServer = function() {
+    return this._waitMode != null;
+  };
+  _.battleMembers = function() {
+    if (this.isBattleRegistred()) {
+      return this.battleData.actors.map(function(a) {
+        return $gameActors.actor(a);
+      });
+    } else {
+      return [$gameParty.leader()];
+    }
+  };
+  _.setWait = function(_waitMode) {
+    this._waitMode = _waitMode;
+    this._waitPool = 0;
+    this._waitTimeout = 360;
+    return HUIManager.showLoader(1000);
+  };
+  _.resetWait = function() {
+    this.setWait(null);
+    return HUIManager.hideLoader();
+  };
+  _.update = function() {
+    if (this.isShouldWaitServer()) {
+      if (this._waitTimeout <= 0) {
+        LOG.p("TIME OUT");
+        this.resetWait();
+      } else {
+        this._waitTimeout--;
+        this.updateWaiting();
+      }
+    } else {
+      if (this._battleMethodsPool.length > 0) {
+        this._callBattleMethodOnServer(...this._battleMethodsPool.shift());
+      }
+      if (HUIManager.isLoaderActive()) {
+        HUIManager.hideLoader();
+      }
+    }
+  };
+  // * Ожидание данных (игроков) от сервера
+  _.updateWaiting = function() {
+    if (!this.isShouldWaitServer()) {
+      return;
+    }
+    "WAIT".p(this._waitPool);
+    switch (this._waitMode) {
+      case 'battleMethod':
+        if (this._waitPool === $gameParty.battleMembers().length) {
+          this.resetWait();
         }
     }
-}(_0x5a33, 0x77979), window['\x41\x4e\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72\x4d\x61\x6e\x61\x67\x65\x72'] = function () {
-}, (function () {
-    var _0x555067 = _0xc641, _0x2f172b, _0x1afc92;
-    _0x2f172b = new KDCore[(_0x555067(0x147))](_0x555067(0xea)), _0x2f172b[_0x555067(0xeb)](KDCore[_0x555067(0xe3)][_0x555067(0x152)], KDCore[_0x555067(0xe3)][_0x555067(0x136)][_0x555067(0x146)](0xf)), _0x2f172b['\x6f\x6e'](), _0x1afc92 = window['\x41\x4e\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72\x4d\x61\x6e\x61\x67\x65\x72'], _0x1afc92[_0x555067(0x140)] = function () {
-        var _0x331cac = _0x555067;
-        $gameMessage[_0x331cac(0x135)]() ? $gameMessage['\x6e\x53\x65\x74\x45\x6e\x64\x43\x61\x6c\x6c\x62\x61\x63\x6b'](_0x1afc92[_0x331cac(0x140)]) : !$gameMap[_0x331cac(0xf2)]() && (_0x331cac(0x12f) === '\x53\x50\x44\x69\x4b' ? (_0x2ff8ee = _0x178991, _0x383ad8['\x77'](_0x458f20)) : (_0x1afc92[_0x331cac(0x10a)](), _0x1afc92[_0x331cac(0x104)]()));
-    }, _0x1afc92[_0x555067(0x14e)] = function () {
-        var _0x5390ea = _0x555067, _0x13e04d;
-        if (NetPlayerDataWrapper[_0x5390ea(0x103)](ANGameManager[_0x5390ea(0x126)]()))
-            _0x5390ea(0x148) !== _0x5390ea(0x148) ? _0x478ae1[_0x5390ea(0x11f)]() : !$gameMap['\x69\x73\x45\x76\x65\x6e\x74\x52\x75\x6e\x6e\x69\x6e\x67']() && (!$gameMessage[_0x5390ea(0x135)]() && (_0x5390ea(0x122) === _0x5390ea(0x100) ? _0x10090f[_0x5390ea(0x150)](_0x42c67a, _0x2bff88['\x65\x76\x65\x6e\x74\x49\x64'], _0x546ed1[_0x5390ea(0x138)]) : this[_0x5390ea(0x10a)]()));
-        else {
-            if (_0x5390ea(0xdc) === '\x6d\x6a\x70\x58\x4f') {
-                if ($gameMap[_0x5390ea(0xf2)]()) {
-                    if (_0x5390ea(0x10e) === _0x5390ea(0x10e))
-                        _0x13e04d = $gameMap['\x5f\x69\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'][_0x5390ea(0xfc)](), this[_0x5390ea(0x15c)](_0x13e04d);
-                    else {
-                        if (_0x24ba4d[_0x5390ea(0x138)]() !== _0x2a44dc['\x6d\x61\x70\x49\x64'])
-                            return;
-                    }
-                }
-            } else
-                return;
-        }
-    }, _0x1afc92['\x73\x74\x61\x72\x74\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64'] = function (_0x5ed524, _0x24076d, _0x39fb4d) {
-        var _0x253914 = _0x555067, _0x26fd02, _0x46df75, _0xabb895;
-        try {
-            if (_0x5ed524[0x0][_0x253914(0x151)] === 0x7b && _0x24076d > 0x0) {
-                if (_0x253914(0x102) === '\x63\x44\x75\x70\x6c') {
-                    ({
-                        mapId: _0x36d27c,
-                        eventId: _0x3c3517,
-                        action: _0x110f35,
-                        index: _0x4add8f
-                    } = _0x4b4563);
-                    if (_0x20823[_0x253914(0x138)]() !== _0xa108cb)
-                        return;
-                    if (!_0x54afec[_0x253914(0x10b)]())
-                        return;
-                    if (_0x41f931[_0x253914(0x15a)]['\x65\x76\x65\x6e\x74\x49\x64']() !== _0x1d25b0)
-                        return;
-                    return _0x155307[_0x253914(0x12b)] = {
-                        '\x61\x63\x74\x69\x6f\x6e': _0x2aa860,
-                        '\x69\x6e\x64\x65\x78': _0x70cbe6
-                    }, _0x1ec63d['\x70']('\x53\x68\x61\x72\x65\x64\x20\x43\x68\x6f\x69\x63\x65\x20\x61\x63\x63\x65\x70\x74\x65\x64\x20\x66\x72\x6f\x6d\x20\x73\x65\x72\x76\x65\x72');
-                } else
-                    _0x46df75 = [
-                        _0x39fb4d,
-                        _0x24076d,
-                        _0x5ed524[0x0]['\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73'][0x0]
-                    ], $gameSelfSwitches[_0x253914(0x127)](_0x46df75, _0x5ed524[0x0][_0x253914(0xf5)][0x1] === 0x0);
-            } else
-                _0xabb895 = new Game_Interpreter(), _0xabb895['\x73\x65\x74\x75\x70'](_0x5ed524, _0x24076d), _0xabb895[_0x253914(0x120)]();
-        } catch (_0x1b169e) {
-            _0x26fd02 = _0x1b169e, ANET['\x77'](_0x26fd02);
-        }
-    }, _0x1afc92[_0x555067(0x10c)] = function (_0x36add0) {
-        var _0x208ba7 = _0x555067;
-        return !ANET[_0x208ba7(0x13f)][_0x208ba7(0x110)][_0x208ba7(0x134)](_0x36add0);
-    }, _0x1afc92['\x72\x65\x73\x65\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-        var _0x341da7 = _0x555067;
-        this[_0x341da7(0x15a)] = null, this[_0x341da7(0x14f)] = ![], this[_0x341da7(0xf6)]();
-    }, _0x1afc92[_0x555067(0x12d)] = function (_0x301168, _0x3e0354) {
-        var _0x3de009 = _0x555067;
-        this[_0x3de009(0x15a)] = _0x301168, this[_0x3de009(0x14f)] = _0x3e0354, $gameTemp[_0x3de009(0x119)] = ![];
-        if ($gameTemp[_0x3de009(0x12e)]())
-            return;
-        if (this['\x5f\x73\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'] == null) {
-            if ('\x6f\x43\x57\x73\x75' !== _0x3de009(0x113))
-                return;
-            else
-                _0x42f1f9[0x0][_0x3de009(0x151)] === 0x7b && _0x211995 > 0x0 ? (_0x1bd353 = [
-                    _0x17b396,
-                    _0x519fa2,
-                    _0x2285fd[0x0][_0x3de009(0xf5)][0x0]
-                ], _0x5b775c['\x73\x65\x74\x56\x61\x6c\x75\x65'](_0x387443, _0x5997a7[0x0][_0x3de009(0xf5)][0x1] === 0x0)) : (_0x33836a = new _0x678ff7(), _0x1102fe[_0x3de009(0x158)](_0x359639, _0x3a4a93), _0x19fc68[_0x3de009(0x120)]());
-        }
-        _0x2f172b['\x70'](_0x3de009(0xf9) + this[_0x3de009(0x15a)][_0x3de009(0xfc)]());
-    }, _0x1afc92[_0x555067(0xde)] = function () {
-        var _0x585a04 = _0x555067;
-        return this[_0x585a04(0x10b)]() && this[_0x585a04(0x14f)] === !![];
-    }, _0x1afc92[_0x555067(0x10b)] = function () {
-        var _0x3adb74 = _0x555067;
-        if ('\x77\x63\x59\x41\x44' !== _0x3adb74(0x13a))
-            _0x278a38 = new _0x575d1e(), _0x40886f[_0x3adb74(0x158)](_0x180880, _0xac580), _0x33e675[_0x3adb74(0x120)]();
-        else
-            return this[_0x3adb74(0x15a)] != null && $gameMap[_0x3adb74(0xf2)]();
-    }, _0x1afc92['\x66\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-        var _0x47c40b = _0x555067;
-        if (!this[_0x47c40b(0xde)]())
-            return;
-        _0x2f172b['\x70'](_0x47c40b(0x10f)), _0x47c40b(0x11d)['\x70'](), this[_0x47c40b(0x109)](), this[_0x47c40b(0xf6)]();
-    }, _0x1afc92['\x73\x68\x6f\x77\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-        var _0xfcd3de = _0x555067, _0x4e637f, _0xa87ebd;
-        this[_0xfcd3de(0xf6)](), _0x4e637f = '\x57\x61\x69\x74\x69\x6e\x67\x20\x70\x6c\x61\x79\x65\x72\x73', _0xa87ebd = '';
-        this[_0xfcd3de(0xde)]() && this[_0xfcd3de(0x15a)]['\x6e\x49\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x43\x61\x6e\x42\x65\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x6c\x65\x64']() && ('\x44\x72\x67\x52\x52' !== _0xfcd3de(0x10d) ? (_0xc6d0a9 = _0x2e89fb, _0x6436d0['\x77'](_0xb2fd56)) : _0xa87ebd = _0xfcd3de(0xed));
-        if (typeof HUIManager !== _0xfcd3de(0xfa) && HUIManager !== null) {
-            if (_0xfcd3de(0x129) === _0xfcd3de(0x153)) {
-                ({
-                    mapId: _0x3850b4,
-                    eventId: _0x2d54ca,
-                    index: _0xeab575,
-                    indent: _0xdffddc
-                } = _0x5f805c);
-                if (_0xcbd601[_0xfcd3de(0x138)]() !== _0x466a2f)
-                    return;
-                if (_0x29c634[_0xfcd3de(0x10b)]())
-                    return;
-                if (_0x6f4099 !== 0x0)
-                    return;
-                _0x243107[_0xfcd3de(0x11b)](_0x523059);
-                return;
-            } else
-                HUIManager['\x73\x68\x6f\x77\x57\x61\x69\x74\x69\x6e\x67\x49\x6e\x66\x6f'](_0x4e637f, _0xa87ebd, 0x3e8);
-        }
-    }, _0x1afc92['\x68\x69\x64\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-        var _0x2b2f1d = _0x555067;
-        return typeof HUIManager !== _0x2b2f1d(0xfa) && HUIManager !== null ? HUIManager[_0x2b2f1d(0x130)]() : void 0x0;
-    }, _0x1afc92['\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x65\x64'] = function (_0x58620c) {
-        var _0x32c47f = _0x555067;
-        if ('\x61\x6a\x72\x4b\x6e' === _0x32c47f(0xe2))
-            return ANNetwork['\x73\x65\x6e\x64'](NMS[_0x32c47f(0x116)](_0x32c47f(0x137), _0x58620c));
-        else
-            !_0x488190['\x69\x73\x45\x76\x65\x6e\x74\x52\x75\x6e\x6e\x69\x6e\x67']() && (!_0x7bb1e3[_0x32c47f(0x135)]() && this[_0x32c47f(0x10a)]());
-    }, _0x1afc92[_0x555067(0x10a)] = function () {
-        var _0x506721 = _0x555067;
-        return ANNetwork[_0x506721(0xff)](NMS['\x45\x76\x65\x6e\x74'](_0x506721(0x156)));
-    }, _0x1afc92[_0x555067(0xe8)] = function (_0x385cae, _0x521d41, _0x117bf9) {
-        var _0x34ac4d = _0x555067, _0x35e82b, _0x267813, _0x22591f;
-        _0x267813 = {
-            '\x63\x6f\x64\x65': 0x0,
-            '\x69\x6e\x64\x65\x6e\x74': 0x0,
-            '\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73': []
-        }, _0x22591f = {
-            '\x6c\x69\x73\x74': [
-                _0x385cae,
-                _0x267813
-            ]
-        }, _0x35e82b = {
-            '\x6d\x61\x70\x49\x64': $gameMap[_0x34ac4d(0x138)](),
-            '\x65\x76\x65\x6e\x74\x49\x64': _0x117bf9,
-            '\x65\x76\x65\x6e\x74': _0x22591f,
-            '\x6f\x70\x74\x69\x6f\x6e\x73': _0x521d41
-        }, ANNetwork[_0x34ac4d(0xff)](NMS[_0x34ac4d(0x116)](_0x34ac4d(0x112), _0x35e82b));
-    }, _0x1afc92['\x73\x65\x6e\x64\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x71\x75\x69\x72\x65\x52\x65\x67\x69\x73\x74\x65\x72'] = function () {
-        var _0x1928cb = _0x555067;
-        if (_0x1928cb(0xf3) !== '\x4e\x48\x7a\x53\x52')
-            return;
-        else {
-            var _0x1d81bc;
-            if (!this['\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72']())
-                return;
-            _0x1d81bc = {
-                '\x6d\x61\x70\x49\x64': $gameMap[_0x1928cb(0x138)](),
-                '\x65\x76\x65\x6e\x74\x49\x64': this[_0x1928cb(0x15a)][_0x1928cb(0xfc)](),
-                '\x69\x6e\x64\x65\x78': this[_0x1928cb(0x15a)][_0x1928cb(0x13e)][_0x1928cb(0xe6)],
-                '\x69\x6e\x64\x65\x6e\x74': this['\x5f\x73\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'][_0x1928cb(0x13e)][_0x1928cb(0x11e)]
-            }, ANNetwork[_0x1928cb(0xff)](NMS[_0x1928cb(0x116)](_0x1928cb(0x13b), _0x1d81bc));
-        }
-    }, _0x1afc92[_0x555067(0xfe)] = function () {
-        var _0x25b820 = _0x555067, _0x2196c1;
-        if (this[_0x25b820(0xde)]())
-            return;
-        _0x2196c1 = {
-            '\x6d\x61\x70\x49\x64': $gameMap[_0x25b820(0x138)](),
-            '\x65\x76\x65\x6e\x74\x49\x64': this['\x5f\x73\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'][_0x25b820(0xfc)](),
-            '\x61\x63\x74\x6f\x72\x49\x64': ANGameManager[_0x25b820(0xf1)](),
-            '\x69\x6e\x64\x65\x78': this[_0x25b820(0x15a)][_0x25b820(0x13e)][_0x25b820(0xe6)],
-            '\x69\x6e\x64\x65\x6e\x74': this['\x5f\x73\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'][_0x25b820(0x13e)][_0x25b820(0x11e)]
-        }, ANNetwork[_0x25b820(0xff)](NMS[_0x25b820(0x116)](_0x25b820(0x12a), _0x2196c1));
-    }, _0x1afc92['\x73\x65\x6e\x64\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x61\x64\x79\x54\x6f\x43\x6f\x6e\x74\x69\x6e\x75\x65'] = function () {
-        var _0x42a9a9 = _0x555067;
-        if (_0x42a9a9(0xe9) !== '\x45\x63\x61\x4e\x73') {
-            var _0x2744da;
-            if (!this[_0x42a9a9(0xde)]()) {
-                if ('\x48\x5a\x63\x64\x6e' === _0x42a9a9(0x143))
-                    return;
-                else
-                    return;
-            }
-            _0x2744da = {
-                '\x6d\x61\x70\x49\x64': $gameMap[_0x42a9a9(0x138)](),
-                '\x65\x76\x65\x6e\x74\x49\x64': this[_0x42a9a9(0x15a)][_0x42a9a9(0xfc)]()
-            }, ANNetwork[_0x42a9a9(0xff)](NMS[_0x42a9a9(0x116)]('\x73\x68\x61\x72\x65\x64\x43\x61\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65', _0x2744da));
-        } else
-            return this[_0x42a9a9(0x10b)]() && this[_0x42a9a9(0x14f)] === !![];
-    }, _0x1afc92['\x73\x65\x6e\x64\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-        var _0x53fdf2 = _0x555067;
-        if (_0x53fdf2(0x154) !== _0x53fdf2(0xe7)) {
-            var _0x18452e;
-            if (!this['\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72']()) {
-                if (_0x53fdf2(0xe0) !== _0x53fdf2(0xe0))
-                    _0x4df65e[_0x53fdf2(0x15b)](_0x5847dd[_0x53fdf2(0x140)]);
-                else
-                    return;
-            }
-            _0x18452e = {
-                '\x6d\x61\x70\x49\x64': $gameMap[_0x53fdf2(0x138)](),
-                '\x65\x76\x65\x6e\x74\x49\x64': this[_0x53fdf2(0x15a)][_0x53fdf2(0xfc)]()
-            }, ANNetwork['\x73\x65\x6e\x64'](NMS['\x45\x76\x65\x6e\x74']('\x73\x68\x61\x72\x65\x64\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c', _0x18452e));
-        } else
-            return;
-    }, _0x1afc92[_0x555067(0x11a)] = function (_0x259f37, _0x2ee1b3) {
-        var _0x454220 = _0x555067, _0x2b5007;
-        if (!this[_0x454220(0xde)]())
-            return;
-        _0x2b5007 = {
-            '\x6d\x61\x70\x49\x64': $gameMap[_0x454220(0x138)](),
-            '\x65\x76\x65\x6e\x74\x49\x64': this[_0x454220(0x15a)][_0x454220(0xfc)](),
-            '\x69\x6e\x64\x65\x78': _0x259f37,
-            '\x61\x63\x74\x69\x6f\x6e': _0x2ee1b3
-        }, ANNetwork[_0x454220(0xff)](NMS[_0x454220(0x116)](_0x454220(0x14a), _0x2b5007));
-    }, _0x1afc92[_0x555067(0x12c)] = function (_0x539136) {
-        var _0x2599e1 = _0x555067, _0x8e7b43, _0x637496, _0x2b3dd2;
-        try {
-            if (_0x2599e1(0xef) !== '\x61\x53\x63\x4a\x49') {
-                if (_0x539136['\x6f\x70\x74\x69\x6f\x6e\x73']['\x73\x63\x6f\x70\x65'] === _0x2599e1(0x132)) {
-                    if (_0x2599e1(0x159) !== _0x2599e1(0xf4)) {
-                        if ($gameMap['\x6d\x61\x70\x49\x64']() !== _0x539136[_0x2599e1(0x138)]) {
-                            if ('\x66\x76\x77\x48\x56' !== _0x2599e1(0xe1))
-                                _0x1bb756 = _0x2599e1(0xed);
-                            else
-                                return;
-                        }
-                    } else
-                        !_0x520269[_0x2599e1(0xf2)]() && (_0x5229d2['\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x45\x6e\x64\x65\x64'](), _0xbd5772['\x72\x65\x73\x65\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74']());
-                }
-                if (!ANET[_0x2599e1(0x115)][_0x2599e1(0x131)](_0x539136[_0x2599e1(0x114)]))
-                    return;
-                _0x637496 = _0x539136[_0x2599e1(0x106)], _0x2b3dd2 = _0x637496[_0x2599e1(0xec)];
-                switch (_0x539136[_0x2599e1(0x114)][_0x2599e1(0xee)]) {
-                case _0x2599e1(0xfb):
-                    _0x1afc92[_0x2599e1(0x150)](_0x2b3dd2, _0x539136[_0x2599e1(0xfc)], _0x539136[_0x2599e1(0x138)]);
-                    break;
-                case _0x2599e1(0xdd):
-                    $gameTemp[_0x2599e1(0xf7)](_0x637496);
-                    break;
-                default:
-                    if (_0x1afc92[_0x2599e1(0x10c)](_0x2b3dd2[0x0][_0x2599e1(0x151)]))
-                        _0x1afc92[_0x2599e1(0x150)](_0x2b3dd2, _0x539136[_0x2599e1(0xfc)], _0x539136[_0x2599e1(0x138)]);
-                    else {
-                        if ('\x67\x76\x58\x59\x4e' === _0x2599e1(0x108))
-                            $gameTemp[_0x2599e1(0xf7)](_0x637496);
-                        else
-                            return typeof _0x1ed273 !== _0x2599e1(0xfa) && _0x706cb !== null ? _0x1ff057[_0x2599e1(0x130)]() : void 0x0;
-                    }
-                }
-            } else
-                _0x9fe18b[_0x2599e1(0x12e)]() && (_0x5db027 === _0x4e4e4f[_0x2599e1(0x14b)] && _0x1c2b7c[_0x2599e1(0x11f)]());
-        } catch (_0x579fc7) {
-            _0x8e7b43 = _0x579fc7, ANET['\x77'](_0x8e7b43);
-        }
-    }, _0x1afc92[_0x555067(0x107)] = function (_0x2c9b7f) {
-        var _0x81f783 = _0x555067;
-        if ('\x4f\x6c\x4c\x4a\x46' === _0x81f783(0x118))
-            return;
-        else {
-            var _0x8c88fe, _0xc3b76, _0x59aa1d, _0x16c2df, _0x1e7b8c;
-            try {
-                ({
-                    mapId: _0x1e7b8c,
-                    eventId: _0xc3b76,
-                    index: _0x16c2df,
-                    indent: _0x59aa1d
-                } = _0x2c9b7f);
-                if ($gameMap[_0x81f783(0x138)]() !== _0x1e7b8c) {
-                    if ('\x66\x61\x56\x57\x53' !== _0x81f783(0xda))
-                        return;
-                    else {
-                        var _0x158fe9, _0x230611;
-                        this['\x68\x69\x64\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'](), _0x158fe9 = '\x57\x61\x69\x74\x69\x6e\x67\x20\x70\x6c\x61\x79\x65\x72\x73', _0x230611 = '', this[_0x81f783(0xde)]() && this[_0x81f783(0x15a)]['\x6e\x49\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x43\x61\x6e\x42\x65\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x6c\x65\x64']() && (_0x230611 = _0x81f783(0xed)), typeof _0x2e9495 !== _0x81f783(0xfa) && _0x5c0a16 !== null && _0x5c9183[_0x81f783(0x111)](_0x158fe9, _0x230611, 0x3e8);
-                    }
-                }
-                if (_0x1afc92[_0x81f783(0x10b)]())
-                    return;
-                if (_0x16c2df !== 0x0)
-                    return;
-                $gameTemp[_0x81f783(0x11b)](_0xc3b76);
-                return;
-            } catch (_0x5e9860) {
-                if ('\x74\x47\x78\x59\x4b' === _0x81f783(0x121))
-                    return;
-                else
-                    _0x8c88fe = _0x5e9860, ANET['\x77'](_0x8c88fe);
-            }
-        }
-    }, _0x1afc92[_0x555067(0x149)] = function (_0x2eeee3) {
-        var _0x3fe93f = _0x555067, _0x33e453, _0x29e519, _0x400068, _0x3a31ed, _0x38ba23, _0x420860;
-        try {
-            if (_0x3fe93f(0x123) !== '\x48\x54\x72\x6c\x74')
-                _0x53cee1[_0x3fe93f(0x135)]() ? _0x472806[_0x3fe93f(0x15b)](_0x3e4701[_0x3fe93f(0x140)]) : !_0x2359ef[_0x3fe93f(0xf2)]() && (_0x34ebed[_0x3fe93f(0x10a)](), _0xbd40e7[_0x3fe93f(0x104)]());
-            else {
-                ({
-                    mapId: _0x420860,
-                    eventId: _0x400068,
-                    actorId: _0x33e453,
-                    index: _0x38ba23,
-                    indent: _0x3a31ed
-                } = _0x2eeee3);
-                if ($gameMap[_0x3fe93f(0x138)]() !== _0x420860)
-                    return;
-                if (!_0x1afc92[_0x3fe93f(0xde)]()) {
-                    if ('\x6f\x41\x64\x4e\x62' !== '\x4b\x4d\x4a\x41\x64')
-                        return;
-                    else
-                        return;
-                }
-                if (_0x1afc92[_0x3fe93f(0x15a)][_0x3fe93f(0xfc)]() !== _0x400068)
-                    return;
-                _0x1afc92[_0x3fe93f(0x15a)][_0x3fe93f(0x157)](_0x38ba23, _0x3a31ed, _0x33e453);
-            }
-        } catch (_0x3cb9cc) {
-            _0x29e519 = _0x3cb9cc, ANET['\x77'](_0x29e519);
-        }
-    }, _0x1afc92[_0x555067(0x141)] = function (_0x4d692b) {
-        var _0x58a260 = _0x555067;
-        if (_0x58a260(0x128) !== _0x58a260(0x128))
-            _0x217bbd[_0x58a260(0xf7)](_0x355d06);
-        else {
-            var _0x10d0a8, _0x177bed, _0x5a7f72;
-            try {
-                ({
-                    mapId: _0x5a7f72,
-                    eventId: _0x177bed
-                } = _0x4d692b);
-                if ($gameMap[_0x58a260(0x138)]() !== _0x5a7f72)
-                    return;
-                if (!_0x1afc92['\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x49\x73\x52\x75\x6e\x6e\x69\x6e\x67']())
-                    return;
-                if (_0x1afc92[_0x58a260(0xde)]()) {
-                    if (_0x58a260(0x11c) !== _0x58a260(0x142))
-                        return;
-                    else {
-                        var _0x8e3b98, _0x137658, _0x551c8f;
-                        _0x137658 = {
-                            '\x63\x6f\x64\x65': 0x0,
-                            '\x69\x6e\x64\x65\x6e\x74': 0x0,
-                            '\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73': []
-                        }, _0x551c8f = {
-                            '\x6c\x69\x73\x74': [
-                                _0x389934,
-                                _0x137658
-                            ]
-                        }, _0x8e3b98 = {
-                            '\x6d\x61\x70\x49\x64': _0x384839[_0x58a260(0x138)](),
-                            '\x65\x76\x65\x6e\x74\x49\x64': _0x42f801,
-                            '\x65\x76\x65\x6e\x74': _0x551c8f,
-                            '\x6f\x70\x74\x69\x6f\x6e\x73': _0x1a2f9f
-                        }, _0x30ebd1[_0x58a260(0xff)](_0x387712[_0x58a260(0x116)](_0x58a260(0x112), _0x8e3b98));
-                    }
-                }
-                if (_0x1afc92[_0x58a260(0x15a)]['\x65\x76\x65\x6e\x74\x49\x64']() !== _0x177bed)
-                    return;
-                return _0x1afc92[_0x58a260(0x15a)]['\x6e\x41\x6c\x6c\x6f\x77\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74']();
-            } catch (_0x39fb92) {
-                if (_0x58a260(0x155) !== _0x58a260(0x155))
-                    _0x192bdc = _0x4cd315[_0x58a260(0x101)]['\x65\x76\x65\x6e\x74\x49\x64'](), this[_0x58a260(0x15c)](_0xfeaadd);
-                else
-                    return _0x10d0a8 = _0x39fb92, ANET['\x77'](_0x10d0a8);
-            }
-        }
-    }, _0x1afc92[_0x555067(0x13d)] = function (_0x25d39f) {
-        var _0x5ee472 = _0x555067, _0x1530f8, _0x271d80, _0x401729;
-        try {
-            ({
-                mapId: _0x401729,
-                eventId: _0x271d80
-            } = _0x25d39f);
-            if ($gameMap[_0x5ee472(0x138)]() !== _0x401729)
-                return;
-            if (_0x1afc92[_0x5ee472(0xde)]()) {
-                if (_0x5ee472(0x117) !== _0x5ee472(0x117)) {
-                    var _0x21f46a;
-                    if (!this[_0x5ee472(0xde)]())
-                        return;
-                    _0x21f46a = {
-                        '\x6d\x61\x70\x49\x64': _0x189a3e[_0x5ee472(0x138)](),
-                        '\x65\x76\x65\x6e\x74\x49\x64': this[_0x5ee472(0x15a)][_0x5ee472(0xfc)](),
-                        '\x69\x6e\x64\x65\x78': this[_0x5ee472(0x15a)]['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61']['\x69\x6e\x64\x65\x78'],
-                        '\x69\x6e\x64\x65\x6e\x74': this[_0x5ee472(0x15a)][_0x5ee472(0x13e)]['\x69\x6e\x64\x65\x6e\x74']
-                    }, _0x3dcf40[_0x5ee472(0xff)](_0x2d0aca[_0x5ee472(0x116)](_0x5ee472(0x13b), _0x21f46a));
-                } else
-                    return;
-            }
-            if (_0x1afc92[_0x5ee472(0x10b)]()) {
-                if (_0x1afc92[_0x5ee472(0x15a)][_0x5ee472(0xfc)]() !== _0x271d80)
-                    return;
-                return $gameTemp['\x5f\x73\x68\x6f\x75\x6c\x64\x46\x6f\x72\x63\x65\x45\x78\x69\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = !![];
-            } else {
-                if ($gameTemp[_0x5ee472(0x12e)]()) {
-                    if (_0x271d80 === $gameTemp['\x5f\x72\x65\x73\x65\x72\x76\x65\x64\x4e\x65\x74\x77\x6f\x72\x6b\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74']) {
-                        if ('\x6d\x50\x56\x46\x76' !== _0x5ee472(0x14d))
-                            $gameTemp[_0x5ee472(0x11f)]();
-                        else
-                            return;
-                    }
-                }
-            }
-        } catch (_0x39f433) {
-            if (_0x5ee472(0x125) === _0x5ee472(0x14c))
-                return;
-            else
-                return _0x1530f8 = _0x39f433, ANET['\x77'](_0x1530f8);
-        }
-    }, _0x1afc92['\x6f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x43\x68\x6f\x69\x63\x65\x41\x63\x74\x69\x6f\x6e\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72'] = function (_0x48bf9f) {
-        var _0x3ec09d = _0x555067;
-        if ('\x5a\x46\x4c\x6c\x78' !== _0x3ec09d(0xe4)) {
-            var _0x3c0ac2;
-            if (this[_0x3ec09d(0xde)]())
-                return;
-            _0x3c0ac2 = {
-                '\x6d\x61\x70\x49\x64': _0x1ca6dd[_0x3ec09d(0x138)](),
-                '\x65\x76\x65\x6e\x74\x49\x64': this[_0x3ec09d(0x15a)][_0x3ec09d(0xfc)](),
-                '\x61\x63\x74\x6f\x72\x49\x64': _0x4210dc['\x6d\x79\x41\x63\x74\x6f\x72\x49\x64'](),
-                '\x69\x6e\x64\x65\x78': this[_0x3ec09d(0x15a)][_0x3ec09d(0x13e)]['\x69\x6e\x64\x65\x78'],
-                '\x69\x6e\x64\x65\x6e\x74': this[_0x3ec09d(0x15a)]['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61']['\x69\x6e\x64\x65\x6e\x74']
-            }, _0x5f3077['\x73\x65\x6e\x64'](_0x407e6a['\x45\x76\x65\x6e\x74'](_0x3ec09d(0x12a), _0x3c0ac2));
-        } else {
-            var _0x1e9b8a, _0x1e63d5, _0x23b5a7, _0x34dea4, _0x5c3451;
-            try {
-                ({
-                    mapId: _0x5c3451,
-                    eventId: _0x23b5a7,
-                    action: _0x1e9b8a,
-                    index: _0x34dea4
-                } = _0x48bf9f);
-                if ($gameMap[_0x3ec09d(0x138)]() !== _0x5c3451)
-                    return;
-                if (!_0x1afc92['\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x49\x73\x52\x75\x6e\x6e\x69\x6e\x67']()) {
-                    if ('\x4b\x65\x58\x6b\x43' === _0x3ec09d(0xdb))
-                        return;
-                    else
-                        return this[_0x3ec09d(0x15a)] != null && _0x3184c7[_0x3ec09d(0xf2)]();
-                }
-                if (_0x1afc92[_0x3ec09d(0x15a)][_0x3ec09d(0xfc)]() !== _0x23b5a7)
-                    return;
-                return $gameTemp[_0x3ec09d(0x12b)] = {
-                    '\x61\x63\x74\x69\x6f\x6e': _0x1e9b8a,
-                    '\x69\x6e\x64\x65\x78': _0x34dea4
-                }, _0x2f172b['\x70'](_0x3ec09d(0x139));
-            } catch (_0x5ed2b6) {
-                return _0x1e63d5 = _0x5ed2b6, ANET['\x77'](_0x1e63d5);
-            }
-        }
+  };
+  _.updateInputChange = function() {
+    if ($gameParty.isOneBattler()) {
+      return;
+    }
+    if (this._lastBattleManagerInputActor !== BattleManager._currentActor) {
+      this._lastBattleManagerInputActor = BattleManager._currentActor;
+      this.sendInputState();
+    } else if (this._lastBattleManagerInputValue !== BattleManager._inputting) {
+      this._lastBattleManagerInputValue = BattleManager._inputting;
+      this.sendInputState();
+    }
+  };
+  _.registerOnLocalBattle = function() {
+    this.battleData = {
+      isLocal: true,
+      battleId: "local",
+      actors: [ANGameManager.myActorId()]
     };
-}()));
+    LOG.p("STARTED LOCAL BATTLE");
+  };
+  _.onBattleStarted = function() {
+    this._battleMethodsPool = [];
+    this._lastBattleManagerInputValue = false;
+    this._lastBattleManagerInputActor = null;
+    this.sendBattleStarted();
+  };
+  _.onBattleEnd = function() {
+    if (!this.isBattleLocal()) {
+      this.sendBattleEnded();
+    }
+    this.battleData = null;
+  };
+  _.callBattleMethod = function(battler, method, args) {
+    // * Если в бою только один игрок, то ничего не отправляем (чтобы не грузить сеть)
+    if ($gameParty.isOneBattler()) {
+      return;
+    }
+    if (ANET.PP.isForceBattleSyncMode()) {
+      if (this._battleMethodsPool == null) {
+        this._battleMethodsPool = [];
+      }
+      this._battleMethodsPool.push([battler, method, args]);
+    } else {
+      this._callBattleMethodOnServer(battler, method, args);
+    }
+  };
+  
+  // * Отправка метод из очереди (используется в режиме Force Battle Sync)
+  _._callBattleMethodOnServer = function(battler, method, args) {
+    "CALL BATTLE METHOD".p();
+    // * Обновим данные перед методом битвы
+    // * Без этого был баг, что приходил collapse эффект, а hp = 0 уже после
+    ANSyncDataManager.sendBattlerObserver(battler);
+    // * На всякий случай, чтобы не сбивать основную логику обновления
+    battler.netDataObserver._isDataChanged = true;
+    this.sendBattleMethod(method, battler.packForNetwork(), args);
+    if (ANET.PP.isForceBattleSyncMode()) {
+      // * Будем ждать игроков
+      this.setWait('battleMethod');
+      this._waitPool += 1; // * Мы уже готовы (мастер боя)
+    }
+  };
+  // * Анимация в бою
+  _.requestAnimation = function(targets, animationId, mirror = false) {
+    var converted, data;
+    if ($gameParty.isOneBattler()) {
+      return;
+    }
+    converted = targets.map(function(t) {
+      return t.packForNetwork();
+    });
+    data = {
+      animationId: animationId,
+      mirror: mirror,
+      targets: converted
+    };
+    this.sendBattleAnimation(data);
+  };
+  // * Персонаж данного игрока сделал выбор в бою (ввод команды)
+  _.battleInputActionDone = function() {
+    var action;
+    action = BattleManager.inputtingAction();
+    // * Логика боя в MV другая, поэтому доп. проверка
+    if (KDCore.isMV()) {
+      if (action == null) {
+        return;
+      }
+    }
+    this.sendBattleInputAction(ANGameManager.myActorId(), action);
+  };
+  // * Регистрация на битву
+  _.registerOnBattle = function(battleData) {
+    LOG.p("Try register battle: " + battleData.battleId);
+    return this.sendRegisterOnBattle(battleData);
+  };
+  // * Регистрация (вступление в битву) которая уже была начата
+  _._registerToExistsSharedBattle = function() {
+    LOG.p("Join Shared battle");
+    $gameTemp._requestInitialSharedBattleRefresh = true;
+  };
+  // * Запуск глобальный битвы через Map Encounter
+  _.executeMapEncounterBattle = function(troopId) {
+    var battleId, e;
+    try {
+      // * Создаём ID
+      battleId = KDCore.makeId(4);
+      // * Регестрируем битву
+      BattleManager.nSetNetworkBattle(battleId);
+      // * Отправляем на сервер (другим игрокам)
+      return this.sendExecuteEncounterBattleRequest({
+        battleId,
+        mapId: $gameMap.mapId(),
+        troopId
+      });
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  //? КОМАНДЫ ЗАПРОСЫ (посылаются на сервер)
+  // * ===============================================================
+
+  // * Отправить выбранное игроком (в битве) действие
+  _.sendBattleInputAction = function(inputActorId, action) {
+    ANNetwork.send(NMS.Battle("inputAction", {action, inputActorId}));
+  };
+  // * Отправить изменение состояния ввода
+  _.sendInputState = function() {
+    var inputActorId, inputState;
+    inputState = BattleManager._inputting;
+    if (BattleManager._currentActor != null) {
+      inputActorId = BattleManager._currentActor.actorId();
+    } else {
+      inputActorId = null;
+    }
+    ANNetwork.send(NMS.Battle("input", {inputState, inputActorId}));
+  };
+  // * Отправить команду WindowLog на сервер
+  _.sendWindowLogMessage = function(cmd, text) {
+    ANNetwork.send(NMS.Battle("logMessage", {cmd, text}));
+  };
+  _.sendBattleStarted = function() {
+    return ANNetwork.send(NMS.Battle("started"));
+  };
+  _.sendBattleEnded = function() {
+    return ANNetwork.send(NMS.Battle("ended"));
+  };
+  _.sendBattleMethod = function(methodName, id, args) {
+    var data;
+    data = {
+      method: methodName,
+      id: id,
+      data: args
+    };
+    ANNetwork.send(NMS.Battle("battleMethod", data), true);
+  };
+  _.sendBattleAnimation = function(data) {
+    ANNetwork.send(NMS.Battle("animation", data));
+  };
+  _.sendBattleMethodReceived = function() {
+    ANNetwork.send(NMS.Battle("battleMethodReceived"));
+  };
+  _.sendRegisterOnBattle = function(battleData) {
+    ANNetwork.get(NMS.Battle("register", battleData), function(result) {
+      return ANBattleManager.onBattleRegisterResult(result);
+    }, function() {
+      // * Снять флаг сетевой битвы (чтобы сцена Start выполнела)
+      BattleManager.nSetNetworkBattle(null);
+      // * Запускаем локальную битву (чтобы battleData существовал)
+      return ANBattleManager.registerOnLocalBattle();
+    });
+  };
+  _.sendExecuteEncounterBattleRequest = function(battleData) {
+    return ANNetwork.send(NMS.Battle("executeEncounter", battleData));
+  };
+  //? CALLBACKS ОТ ЗАПРОСОВ НА СЕРВЕР
+  // * ===============================================================
+  _.onBattleDataFromServer = function(battleData) {
+    // * Если этот клиент не участвует в битве, то ничего
+    if (!this.isBattleRegistred()) {
+      return;
+    }
+    // * Если я в локальной битве (сам), то меня не касается
+    if (this.isBattleLocal()) {
+      return;
+    }
+    // * Данные битвы касаются моей битвы?
+    if (this.battleData.battleId === battleData.battleId) {
+      $gameTemp._previousNetBattleActors = [...this.battleData.actors];
+      this.battleData = battleData;
+    }
+  };
+  _.onBattleRegisterResult = function(result) {
+    var _evCallback;
+    "REGISTER SUCCESS".p();
+    this.battleData = result;
+    // * Эта команда обязательно должны быть ниже этой @battleData = result
+    // * После регистрации на сетевую битву, устанавливается Troop
+    // * из сервера, чтобы у всех одинаковый был
+    // * Чтобы не сбросился callback результата битвы, переносим его
+    // * Так как initMembers получается второй раз вызывается
+    _evCallback = BattleManager._eventCallback;
+    BattleManager.setup(...result.options);
+    if (_evCallback != null) {
+      BattleManager.setEventCallback(_evCallback);
+    }
+    "SETUP".p(result.options);
+    console.info(result);
+    if (!this.isBattleMaster()) {
+      this._registerToExistsSharedBattle();
+    }
+  };
+  // * С сервера пришла команда проиграть анимацию
+  _.onBattleAnimation = function(data) {
+    var e, targets;
+    try {
+      targets = data.targets.map(function(t) {
+        return ANET.Utils.unpackBattlerFromNetwork(t);
+      });
+      $gameTemp.requestAnimation(targets, data.animationId, data.mirror);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * С сервера пришла команда (метод) боя
+  _.onBattleMethod = function(battlerNetData, method, args) {
+    var battler, e;
+    try {
+      //"BATTLE METHOD RECEIVED".p()
+      // * Отправляю мастеру битвы информацию что я получил команду
+      if (ANET.PP.isForceBattleSyncMode()) {
+        this.sendBattleMethodReceived();
+      }
+      battler = ANET.Utils.unpackBattlerFromNetwork(battlerNetData);
+      if (battler[method] != null) {
+        //TODO: convert arguments
+        battler[method](args);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Игрок принял команду боя
+  _.onBattleMethodReceived = function() {
+    var e;
+    try {
+      this._waitPool += 1;
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Пришло изменение состояние ввода
+  _.onBattleInputState = function(inputState, inputActorId) {
+    var e;
+    try {
+      if (!$gameParty.inBattle()) {
+        return;
+      }
+      BattleManager._inputting = inputState;
+      if (inputActorId === ANGameManager.myActorId()) {
+        return BattleManager.nSetCurrentClientInput();
+      } else {
+        // * Если не мой персонаж, то никакого ввода
+        return BattleManager.nClearClientInput();
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _.onBattleInputAction = function(inputActorId, action) {
+    var e;
+    try {
+      if (!ANGameManager.isBattleMaster()) {
+        return;
+      }
+      //TODO: Тут есть проблема в MV версии
+      //? TypeError: Cannot read property 'setFromNetwork' of null
+      // inputtingAction() - нету в MV
+      //TODO: Проверка что inputActorId = BattleManager._currentActor.actorId()
+      BattleManager.inputtingAction().setFromNetwork(action);
+      // * Далее (продолжить бой)
+      return BattleManager.selectNextCommand();
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _.onLogWindowMessage = function(cmd, text) {
+    var e, ref, ref1;
+    try {
+      if (!$gameParty.inBattle()) {
+        return;
+      }
+      switch (cmd) {
+        case "add":
+          if ((ref = BattleManager._logWindow) != null) {
+            ref.addText(text);
+          }
+          break;
+        default:
+          if ((ref1 = BattleManager._logWindow) != null) {
+            ref1.clear();
+          }
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _.onExecuteEncounterBattle = function(battleData) {
+    var battleId, e, mapId, timeRand, troopId;
+    try {
+      // * Данный метод приходит ДРУГИМ игрокам, помимо того, кто вызвал битву
+      //?Пока просто выходим, если запущено событие
+      if ($gameMap.isEventRunning()) {
+        return;
+      }
+      if (KDCore.Utils.isSceneBattle()) {
+        return;
+      }
+      if (battleData == null) {
+        return;
+      }
+      ({battleId, mapId, troopId} = battleData);
+      // * Нельзя на разных картах!
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Сбрасываем шаги до след. битвы у всех, чтобы не частить
+      $gamePlayer.makeEncounterCount();
+      // * Чтобы все игрока в одно времяя не начали
+      // (чтобы кто-то первый (точно первый) зарегестрировал Shared битву)
+      timeRand = Math.random() * 200;
+      return setTimeout((function() {
+        var e;
+        try {
+          // * Регестрируемся на Shared битву (как обычно)
+          BattleManager.nSetNetworkBattle(battleId);
+          // * Настраиваем битву
+          BattleManager.setup(troopId, true, false);
+          // * Начинаем битву
+          return SceneManager.push(Scene_Battle);
+        } catch (error) {
+          e = error;
+          return KDCore.warning(e);
+        }
+      }), timeRand);
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+})();
+
+
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за синхронизацию и обработку интерпретера и команд события
+
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANInterpreterManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("NetIntr");
+  LOG.setColors(KDCore.Color.YELLOW, KDCore.Color.BLACK.getLightestColor(15));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANInterpreterManager;
+  // * Когда закончелось событие
+  _.eventProcessExit = function() {
+    if ($gameMessage.isBusy()) {
+      $gameMessage.nSetEndCallback(_.eventProcessExit);
+    } else {
+      if (!$gameMap.isEventRunning()) {
+        _.sendEventEnded();
+        _.resetSharedEvent();
+      }
+    }
+  };
+  // * Дополнительная проверка что статус игрока соответсвует событию (запущено или нет)
+  _.checkEventRunning = function() {
+    var evId;
+    if (NetPlayerDataWrapper.isOnAnyEvent(ANGameManager.myPlayerData())) {
+      if (!$gameMap.isEventRunning()) {
+        if (!$gameMessage.isBusy()) {
+          this.sendEventEnded();
+        }
+      }
+    } else {
+      if ($gameMap.isEventRunning()) {
+        evId = $gameMap._interpreter.eventId();
+        this.sendEventStarted(evId);
+      }
+    }
+  };
+  // * Выполнить виртуальную команду (list) вне очереди (не ожидая сцены или другого события)
+  // * mapId - ID карты не текущей, а того, от кого пришла команда (нужно для Self.Switch)
+  _.startVirtualCommand = function(list, eventId, mapId) {
+    var e, key, virtualInter;
+    try {
+      // * Self.Switch имеет отдельную обработку (так как mapId отличается)
+      if (list[0].code === 123 && eventId > 0) {
+        key = [mapId, eventId, list[0].parameters[0]];
+        $gameSelfSwitches.setValue(key, list[0].parameters[1] === 0); // * Команда может быть только одна (всегда), поэтому else (больше команд нету)
+      } else {
+        virtualInter = new Game_Interpreter();
+        virtualInter.setup(list, eventId);
+        virtualInter.executeCommand(); // * force execute
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Выполнить комадну виртуально?
+  _.isVirtualCommand = function(commandCode) {
+    return !ANET.System.NonVirtualCommandsList.contains(commandCode);
+  };
+  // * Сброс общего события
+  _.resetSharedEvent = function() {
+    this._sharedInterpreter = null;
+    this._sharedEventMaster = false;
+    // * На всякий случай
+    this.hideWaitPlayersOnSharedEvent();
+  };
+  // * Когда игрок запускает общее событие, оно регестрируется этим методом
+  // * ссылка на сам interpreter и флаг - является ли игрок мастером - кто первый запустил
+  _.setupSharedInterpreter = function(_sharedInterpreter, _sharedEventMaster) {
+    this._sharedInterpreter = _sharedInterpreter;
+    this._sharedEventMaster = _sharedEventMaster;
+    // * Сброс флага необходимости закрытия (для клиентов)
+    $gameTemp._shouldForceExitSharedEvent = false;
+    // * Нельзя, если уже зарезервированно общее событие от сервера
+    if ($gameTemp.isNetworkSharedEventReserved()) {
+      return;
+    }
+    if (this._sharedInterpreter == null) {
+      return;
+    }
+    LOG.p("Shared event registred " + this._sharedInterpreter.eventId());
+  };
+  // * Является ли данный клиент мастером общего события
+  _.isSharedEventMaster = function() {
+    return this.isSharedEventIsRunning() && this._sharedEventMaster === true;
+  };
+  _.isSharedEventIsRunning = function() {
+    return (this._sharedInterpreter != null) && $gameMap.isEventRunning();
+  };
+  // * Отмена ожидания игроков (когда Shared mode == optional)
+  _.forceCancelSharedEvent = function() {
+    if (!this.isSharedEventMaster()) {
+      return;
+    }
+    LOG.p("Shared event force cancelled");
+    "SEND ALL CANCEL EVENT".p();
+    this.sendForceCancelSharedEvent();
+    this.hideWaitPlayersOnSharedEvent();
+  };
+  _.showWaitPlayersOnSharedEvent = function() {
+    var text, text2;
+    this.hideWaitPlayersOnSharedEvent();
+    //TODO: Вынести все строки в параметры
+    text = "Waiting players";
+    text2 = "";
+    if (this.isSharedEventMaster() && this._sharedInterpreter.nIsSharedEventCanBeForceCancelled()) {
+      text2 = "Press ESC to cancel";
+    }
+    if (typeof HUIManager !== "undefined" && HUIManager !== null) {
+      HUIManager.showWaitingInfo(text, text2, 1000);
+    }
+  };
+  _.hideWaitPlayersOnSharedEvent = function() {
+    return typeof HUIManager !== "undefined" && HUIManager !== null ? HUIManager.hideWaitingInfo() : void 0;
+  };
+  //? КОМАНДЫ ЗАПРОСЫ (посылаются на сервер)
+  // * ===============================================================
+
+  // * Когда игрок запускает какое-либо событие
+  _.sendEventStarted = function(eventId) {
+    return ANNetwork.send(NMS.Event("eventStarted", eventId));
+  };
+  
+  // * Когда игрок "выходит" из запущенного события
+  _.sendEventEnded = function() {
+    return ANNetwork.send(NMS.Event("eventEnded"));
+  };
+  
+  // * Отправка виртуальной команды на сервер
+  _.sendEventVirtualCommand = function(command, options, eventId) {
+    var data, endCommand, vEvent;
+    // * Эта команда всегда в конце
+    endCommand = {
+      code: 0,
+      indent: 0,
+      parameters: []
+    };
+    // * Модель общего события
+    vEvent = {
+      list: [command, endCommand]
+    };
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: eventId,
+      event: vEvent,
+      options: options
+    };
+    ANNetwork.send(NMS.Event("virtualEventCommand", data));
+  };
+  // * Отправка запроса чтобы все начали общее событие
+  // * Игрок запустил общее событие и будет теперь ждать всех игроков (на карте)
+  _.sendSharedEventRequireRegister = function() {
+    var data;
+    // * Только мастер может это отправить
+    // * Плюс эта проверка гарантирует, что мы запустили событие
+    if (!this.isSharedEventMaster()) {
+      return;
+    }
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: this._sharedInterpreter.eventId(),
+      index: this._sharedInterpreter.nSyncWaitCommandData.index,
+      indent: this._sharedInterpreter.nSyncWaitCommandData.indent
+    };
+    ANNetwork.send(NMS.Event("registerOnShared", data));
+  };
+  // * Отправка ответа, что клиент зарегестрировался на общем событии
+  _.sendSharedEventRegisteredDone = function() {
+    var data;
+    if (this.isSharedEventMaster()) {
+      return;
+    }
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: this._sharedInterpreter.eventId(),
+      actorId: ANGameManager.myActorId(),
+      index: this._sharedInterpreter.nSyncWaitCommandData.index,
+      indent: this._sharedInterpreter.nSyncWaitCommandData.indent
+    };
+    ANNetwork.send(NMS.Event("registerDone", data));
+  };
+  // * Мастер отправляет клиентам, что можно продолжать выполнение
+  _.sendSharedEventReadyToContinue = function() {
+    var data;
+    if (!this.isSharedEventMaster()) {
+      return;
+    }
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: this._sharedInterpreter.eventId()
+    };
+    ANNetwork.send(NMS.Event("sharedCanContinue", data));
+  };
+  // * Когда мастер общего события отменяет общее событие (на стадии ожидания игроков)
+  _.sendForceCancelSharedEvent = function() {
+    var data;
+    if (!this.isSharedEventMaster()) {
+      return;
+    }
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: this._sharedInterpreter.eventId()
+    };
+    ANNetwork.send(NMS.Event("sharedForceCancel", data));
+  };
+  _.sendChoiceSelection = function(index, action) {
+    var data;
+    if (!this.isSharedEventMaster()) {
+      return;
+    }
+    data = {
+      mapId: $gameMap.mapId(),
+      eventId: this._sharedInterpreter.eventId(),
+      index: index,
+      action: action
+    };
+    ANNetwork.send(NMS.Event("sharedChoice", data));
+  };
+  //? CALLBACKS ОТ ЗАПРОСОВ НА СЕРВЕР
+  // * ===============================================================
+
+  // * Просто общее событие ждёт, а некоторые вещи можно сразу выполнять, не зависимо от того игрок находится в событии или нет
+  _.onVirtualCommand = function(data) {
+    var e, event, list;
+    try {
+      // * Если только на одой карте, то проверяем номер карты
+      if (data.options.scope === "Same map") {
+        if ($gameMap.mapId() !== data.mapId) {
+          return;
+        }
+      }
+      // * Затем проверяем фильтр (для нас ли эта команда?)
+      if (!ANET.Utils.isPassEventFilterOptions(data.options)) {
+        return;
+      }
+      event = data.event;
+      list = event.list;
+      // * В зависимости от опции, запускаем в разных режимах
+      switch (data.options.executeMode) {
+        case "Virtual":
+          _.startVirtualCommand(list, data.eventId, data.mapId);
+          break;
+        case "Common Event":
+          $gameTemp.reserveVirtualCommonEvent(event); //? AUTO
+          break;
+        default:
+          // * Некоторые команды можно выполнять сразу, не ожидая сцены (или другого события)
+          if (_.isVirtualCommand(list[0].code)) {
+            _.startVirtualCommand(list, data.eventId, data.mapId);
+          } else {
+            // * Остальные идут как общее событие (приоритетное)
+            $gameTemp.reserveVirtualCommonEvent(event);
+          }
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Когда пришёл запрос с сервера, что надо начать общее событие
+  _.onRegisterOnSharedEventRequest = function(data) {
+    var e, eventId, indent, index, mapId;
+    try {
+      ({mapId, eventId, index, indent} = data);
+      // * Если карта другая, то пропускаем это сообщение
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Если общее событие уже запущено (не важно какое), игнорируем
+      if (_.isSharedEventIsRunning()) {
+        return;
+      }
+      // * Это событие уже начато, т.е. этот клиент опоздал (пришёл с другой карты)
+      if (index !== 0) {
+        return;
+      }
+      $gameTemp.reserveNetworkSharedEvent(eventId);
+      return;
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Когда клиент на необходимой команде общего события
+  _.onRegisterOnSharedEventResponse = function(data) {
+    var actorId, e, eventId, indent, index, mapId;
+    try {
+      ({mapId, eventId, actorId, index, indent} = data);
+      // * Если карта другая, то пропускаем это сообщение
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Мы не мастер, игнорируем
+      if (!_.isSharedEventMaster()) {
+        return;
+      }
+      // * ID событий не совпадают, игнорируем
+      if (_._sharedInterpreter.eventId() !== eventId) {
+        return;
+      }
+      // * Регестрируем ответ
+      _._sharedInterpreter.nOnSyncedEventCommandResponse(index, indent, actorId);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Когда все игроки "готовы" и можно продолжать выполнение общего события
+  _.onContinueSharedEvent = function(data) {
+    var e, eventId, mapId;
+    try {
+      ({mapId, eventId} = data);
+      // * Если карта другая, то пропускаем это сообщение
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Если общее событие не запущено, игнорируем
+      if (!_.isSharedEventIsRunning()) {
+        return;
+      }
+      // * Мы мастер, игнорируем (выполнение у мастера от пула внутри события)
+      if (_.isSharedEventMaster()) {
+        return;
+      }
+      // * ID событий не совпадают, игнорируем
+      if (_._sharedInterpreter.eventId() !== eventId) {
+        return;
+      }
+      return _._sharedInterpreter.nAllowContinueSharedEvent();
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  // * Когда мастер общего события отменил его
+  _.onSharedEventForceCancelFromServer = function(data) {
+    var e, eventId, mapId;
+    try {
+      ({mapId, eventId} = data);
+      // * Если карта другая, то пропускаем это сообщение
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Мы мастер, игнорируем
+      if (_.isSharedEventMaster()) {
+        return;
+      }
+      if (_.isSharedEventIsRunning()) {
+        // * ID событий не совпадают, игнорируем
+        if (_._sharedInterpreter.eventId() !== eventId) {
+          return;
+        }
+        // * Ставим глобальны флаг (обаботка идёт внутри Game_Event)
+        return $gameTemp._shouldForceExitSharedEvent = true;
+      } else {
+        // * Если событие ещё не было запущено (например этот клиент был в меню)
+        // * Надо проверить не стоит ли событие в очереди на запуск
+        if ($gameTemp.isNetworkSharedEventReserved()) {
+          // * Если ID событий совпадает
+          if (eventId === $gameTemp._reservedNetworkSharedEvent) {
+            $gameTemp.retrieveNetworkSharedEvent(); // * Забираем без выполнения
+          }
+        }
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  // * Когда мастер общего события сменил выбор (или действие выбора) в окне выбора вариантов в сообщении
+  _.onSharedEventChoiceActionFromServer = function(data) {
+    var action, e, eventId, index, mapId;
+    try {
+      ({mapId, eventId, action, index} = data);
+      // * Если карта другая, то пропускаем это сообщение
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      // * Если клиент не в общем событии, пропускаем
+      if (!_.isSharedEventIsRunning()) {
+        return;
+      }
+      // * ID событий не совпадают, игнорируем
+      if (_._sharedInterpreter.eventId() !== eventId) {
+        return;
+      }
+      // * Задаём глобальные данные
+      $gameTemp.nSelectionActionFromNetwork = {action, index};
+      return LOG.p("Shared Choice accepted from server");
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+})();
+
 
 // Generated by CoffeeScript 2.6.1
 // * Данный класс отвечает за синхронизацию и обработку игровых карт
@@ -13513,6 +19666,7 @@ ANPlayersManager = function() {};
     if (result === true) {
       "BINDING GOOD, send ActorReady".p();
       //TODO: Сейчас без кастомизации
+      ANGameManager.onPlayerCharacterIsBinded();
       this.sendActorReady();
     }
   };
@@ -13548,7 +19702,7 @@ ANPlayersManager = function() {};
     try {
       $gameSystem.nActorsNameplatesStyles = styles;
       // * Обновляем таблички
-      return KDCore.GEventsManager.call("netzRefreshNameplate");
+      return nAPI.requestNameplatesRefresh();
     } catch (error) {
       e = error;
       return KDCore.warning(e);
@@ -13557,397 +19711,293 @@ ANPlayersManager = function() {};
 })();
 
 
-var _0x3d67cd = _0x4d10;
-function _0x1456() {
-    var _0x46fed9 = [
-        '\x4c\x68\x61\x52\x6b',
-        '\x71\x65\x4f\x6f\x44',
-        '\x6d\x61\x70\x49\x64',
-        '\x67\x65\x74\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x32\x35\x37\x38\x33\x34\x38\x42\x4f\x73\x55\x56\x58',
-        '\x37\x78\x61\x4c\x6a\x73\x6e',
-        '\x70\x61\x56\x53\x6c',
-        '\x5f\x6f\x6e\x42\x61\x74\x74\x6c\x65\x72\x52\x65\x73\x75\x6c\x74\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x4b\x6d\x50\x50\x6b',
-        '\x45\x54\x79\x67\x76',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x72\x52\x65\x73\x75\x6c\x74\x4f\x62\x73\x65\x72\x76\x65\x72',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x6f\x6e\x53\x77\x69\x74\x63\x68\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x5f\x64\x61\x74\x61\x43\x6c\x61\x73\x73',
-        '\x6f\x6e\x53\x77\x69\x74\x63\x68\x56\x61\x6c\x75\x65',
-        '\x31\x36\x32\x39\x35\x39\x30\x6f\x43\x42\x75\x44\x76',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x35\x38\x34\x33\x31\x34\x58\x67\x76\x41\x41\x41',
-        '\x76\x6e\x6b\x46\x7a',
-        '\x6f\x6e\x56\x61\x72\x69\x61\x62\x6c\x65\x56\x61\x6c\x75\x65',
-        '\x66\x78\x76\x51\x78',
-        '\x75\x6e\x70\x61\x63\x6b\x42\x61\x74\x74\x6c\x65\x72\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x62\x61\x74\x74\x6c\x65\x72\x52\x65\x73\x75\x6c\x74',
-        '\x6d\x79\x49\x64',
-        '\x53\x45\x4e\x44\x20\x42\x41\x54\x54\x4c\x45\x52\x20\x52\x45\x53\x55\x4c\x54',
-        '\x70\x61\x63\x6b\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x65\x4d\x47\x4b\x7a',
-        '\x58\x51\x6c\x70\x4e',
-        '\x73\x65\x6e\x64\x50\x6c\x61\x79\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72',
-        '\x65\x76\x65\x6e\x74\x43\x68\x61\x72',
-        '\x5f\x6e\x4c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72\x4d\x6f\x64\x65',
-        '\x73\x65\x6e\x64\x41\x63\x74\x6f\x72\x4f\x62\x73\x65\x72\x76\x65\x72',
-        '\x73\x65\x6e\x64\x53\x79\x6e\x63\x47\x6c\x6f\x62\x61\x6c\x56\x61\x72\x69\x61\x62\x6c\x65\x73',
-        '\x73\x65\x6e\x64\x47\x6c\x6f\x62\x61\x6c\x56\x61\x72\x69\x61\x62\x6c\x65\x43\x68\x61\x6e\x67\x65',
-        '\x6c\x65\x6e\x67\x74\x68',
-        '\x59\x6b\x66\x52\x67',
-        '\x5f\x6f\x6e\x50\x6c\x61\x79\x65\x72\x41\x63\x74\x6f\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x34\x35\x31\x31\x32\x37\x34\x52\x69\x61\x65\x45\x52',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x65\x52\x61\x43\x75',
-        '\x4a\x6a\x76\x74\x56',
-        '\x5f\x6f\x6e\x42\x61\x74\x74\x6c\x65\x55\x6e\x69\x74\x73\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x73\x65\x6e\x64\x47\x6c\x6f\x62\x61\x6c\x53\x77\x69\x74\x63\x68\x43\x68\x61\x6e\x67\x65',
-        '\x67\x65\x74\x41\x63\x74\x6f\x72\x46\x6f\x72\x50\x6c\x61\x79\x65\x72',
-        '\x4b\x6c\x44\x4d\x67',
-        '\x41\x4e\x53\x79\x6e\x63\x44\x61\x74\x61\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x31\x35\x38\x36\x32\x32\x75\x4c\x66\x7a\x50\x6c',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64',
-        '\x6d\x61\x70',
-        '\x46\x72\x6f\x6d\x20\x73\x65\x72\x76\x65\x72\x3a\x20\x75\x6e\x6b\x6e\x6f\x77\x6e\x20\x6f\x62\x73\x65\x72\x76\x65\x72\x20\x64\x61\x74\x61\x20\x74\x79\x70\x65\x3a\x20',
-        '\x5f\x72\x65\x71\x75\x65\x73\x74\x49\x6e\x69\x74\x69\x61\x6c\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65\x52\x65\x66\x72\x65\x73\x68',
-        '\x70\x6c\x61\x79\x65\x72\x41\x63\x74\x6f\x72',
-        '\x73\x65\x6e\x64',
-        '\x31\x34\x30\x39\x36\x33\x31\x42\x4e\x77\x77\x6e\x69',
-        '\x4c\x46\x69\x69\x4c',
-        '\x78\x49\x65\x6b\x51',
-        '\x53\x45\x4e\x44\x20\x42\x41\x54\x54\x4c\x45\x52\x20\x4f\x42\x53\x45\x52\x56\x45\x52',
-        '\x78\x52\x74\x68\x56',
-        '\x47\x61\x6d\x65',
-        '\x61\x70\x70\x6c\x79\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x5f\x65\x71\x75\x69\x70\x73',
-        '\x72\x65\x73\x75\x6c\x74',
-        '\x73\x77\x69\x74\x63\x68',
-        '\x41\x51\x55\x41',
-        '\x5f\x63\x6f\x6e\x76\x65\x72\x74\x41\x63\x74\x6f\x72\x45\x71\x75\x69\x70\x6d\x65\x6e\x73',
-        '\x70\x6c\x61\x79\x65\x72\x43\x68\x61\x72',
-        '\x62\x61\x74\x74\x6c\x65\x55\x6e\x69\x74\x73',
-        '\x62\x61\x74\x74\x6c\x65\x72',
-        '\x35\x33\x34\x32\x30\x34\x30\x4f\x5a\x46\x57\x43\x7a',
-        '\x5a\x62\x67\x61\x55',
-        '\x61\x50\x56\x59\x6d',
-        '\x51\x4f\x5a\x65\x4a',
-        '\x55\x74\x69\x6c\x73',
-        '\x6e\x72\x4b\x43\x70',
-        '\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72',
-        '\x6f\x6e\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x71\x67\x66\x61\x79',
-        '\x53\x4e\x6c\x6c\x48',
-        '\x76\x72\x50\x77\x4d',
-        '\x62\x57\x6d\x50\x75',
-        '\x69\x6e\x42\x61\x74\x74\x6c\x65',
-        '\x5f\x6f\x6e\x50\x6c\x61\x79\x65\x72\x43\x68\x61\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x5f\x6e\x4e\x65\x74\x77\x6f\x72\x6b\x41\x63\x74\x6f\x72\x50\x69\x63\x6b\x52\x65\x71\x75\x65\x73\x74',
-        '\x6e\x52\x65\x66\x72\x65\x73\x68\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65\x53\x74\x61\x74\x65',
-        '\x6f\x6e\x56\x61\x72\x69\x61\x62\x6c\x65\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x6b\x57\x4f\x55\x59',
-        '\x65\x76\x65\x6e\x74',
-        '\x5f\x69\x74\x65\x6d\x49\x64',
-        '\x5f\x73\x65\x6e\x64\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x5f\x6f\x6e\x45\x76\x65\x6e\x74\x43\x68\x61\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x6e\x65\x74\x77\x6f\x72\x6b\x43\x68\x61\x72\x61\x63\x74\x65\x72\x42\x79\x49\x64',
-        '\x5f\x6f\x6e\x42\x61\x74\x74\x6c\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61',
-        '\x69\x73\x4f\x6e\x65\x42\x61\x74\x74\x6c\x65\x72',
-        '\x57\x68\x43\x53\x41',
-        '\x6f\x52\x71\x63\x55'
-    ];
-    _0x1456 = function () {
-        return _0x46fed9;
-    };
-    return _0x1456();
-}
-function _0x4d10(_0x42e954, _0x258034) {
-    var _0x1456e4 = _0x1456();
-    return _0x4d10 = function (_0x4d1022, _0x2fa4c3) {
-        _0x4d1022 = _0x4d1022 - 0x107;
-        var _0x374df4 = _0x1456e4[_0x4d1022];
-        return _0x374df4;
-    }, _0x4d10(_0x42e954, _0x258034);
-}
-(function (_0xcdec40, _0x16a0d5) {
-    var _0x580370 = _0x4d10, _0x135697 = _0xcdec40();
-    while (!![]) {
-        try {
-            var _0x2a078c = parseInt(_0x580370(0x14e)) / 0x1 + -parseInt(_0x580370(0x10c)) / 0x2 + -parseInt(_0x580370(0x113)) / 0x3 + -parseInt(_0x580370(0x141)) / 0x4 + -parseInt(_0x580370(0x14c)) / 0x5 + -parseInt(_0x580370(0x162)) / 0x6 * (-parseInt(_0x580370(0x142)) / 0x7) + parseInt(_0x580370(0x122)) / 0x8;
-            if (_0x2a078c === _0x16a0d5)
-                break;
-            else
-                _0x135697['push'](_0x135697['shift']());
-        } catch (_0x285c93) {
-            _0x135697['push'](_0x135697['shift']());
-        }
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за методы передачи, обработки и
+// * синхронизации игровых данных (и Observers)
+
+//$[ENCODE]
+
+//@[GLOBAL]
+window.ANSyncDataManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("DataSync");
+  LOG.setColors(KDCore.Color.AQUA, KDCore.Color.BLACK.getLightestColor(35));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANSyncDataManager;
+  //? КОМАНДЫ ЗАПРОСЫ (посылаются на сервер)
+  // * ===============================================================
+  _.sendPlayerObserver = function() {
+    return this._sendObserverData('playerChar', ANNetwork.myId(), $gamePlayer.getObserverDataForNetwork());
+  };
+  _.sendEventObserver = function(eventId) {
+    this._sendObserverData('eventChar', {
+      mapId: $gameMap.mapId(),
+      eventId: eventId
+    }, $gameMap.event(eventId).getObserverDataForNetwork());
+  };
+  _.sendActorObserver = function() {
+    return this._sendObserverData('playerActor', ANNetwork.myId(), $gameParty.leader().getObserverDataForNetwork());
+  };
+  //TODO: через GET ? или callback
+  _.sendBattleUnitsObserver = function(members) {
+    var observers;
+    //"SEND UNITS OBSERVER".p()
+    if ($gameParty.isOneBattler()) {
+      return;
     }
-}(_0x1456, 0x7639f), window[_0x3d67cd(0x10b)] = function () {
-}, (function () {
-    var _0x47742d = _0x3d67cd, _0x276db8, _0x609d46;
-    _0x276db8 = new KDCore[(_0x47742d(0x14d))]('\x44\x61\x74\x61\x53\x79\x6e\x63'), _0x276db8[_0x47742d(0x148)](KDCore['\x43\x6f\x6c\x6f\x72'][_0x47742d(0x11d)], KDCore[_0x47742d(0x163)]['\x42\x4c\x41\x43\x4b']['\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72'](0x23)), _0x276db8['\x6f\x6e'](), _0x609d46 = window[_0x47742d(0x10b)], _0x609d46[_0x47742d(0x159)] = function () {
-        var _0x21de7f = _0x47742d;
-        if (_0x21de7f(0x12b) === _0x21de7f(0x10a))
-            _0x1d51d0 = _0x343948, _0x538717['\x77'](_0x56e0f0);
-        else
-            return this[_0x21de7f(0x136)](_0x21de7f(0x11f), ANNetwork[_0x21de7f(0x154)](), $gamePlayer[_0x21de7f(0x140)]());
-    }, _0x609d46['\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x4f\x62\x73\x65\x72\x76\x65\x72'] = function (_0x22b613) {
-        var _0x345763 = _0x47742d;
-        this[_0x345763(0x136)](_0x345763(0x15a), {
-            '\x6d\x61\x70\x49\x64': $gameMap['\x6d\x61\x70\x49\x64'](),
-            '\x65\x76\x65\x6e\x74\x49\x64': _0x22b613
-        }, $gameMap[_0x345763(0x134)](_0x22b613)['\x67\x65\x74\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b']());
-    }, _0x609d46[_0x47742d(0x15c)] = function () {
-        var _0x3fef04 = _0x47742d;
-        return this[_0x3fef04(0x136)](_0x3fef04(0x111), ANNetwork[_0x3fef04(0x154)](), $gameParty['\x6c\x65\x61\x64\x65\x72']()[_0x3fef04(0x140)]());
-    }, _0x609d46['\x73\x65\x6e\x64\x42\x61\x74\x74\x6c\x65\x55\x6e\x69\x74\x73\x4f\x62\x73\x65\x72\x76\x65\x72'] = function (_0x45fb1e) {
-        var _0x3b33bf = _0x47742d;
-        if (_0x3b33bf(0x146) === _0x3b33bf(0x13c))
-            return;
-        else {
-            var _0x3ee1c5;
-            if ($gameParty[_0x3b33bf(0x13a)]())
-                return;
-            _0x3ee1c5 = _0x45fb1e[_0x3b33bf(0x10e)](function (_0x24d941) {
-                var _0x348b95 = _0x3b33bf;
-                if ('\x71\x65\x4f\x6f\x44' !== _0x348b95(0x13e)) {
-                    _0x5a915b[_0x348b95(0x15b)] === !![] && (_0x76c9de[_0x348b95(0x130)] = !![]);
-                    _0x44b5fc = _0x37e478[_0x348b95(0x10d)](_0x4244bf), _0x3aca44 = _0x559338[_0x348b95(0x109)](_0x545102), _0x505408[_0x348b95(0x130)] = ![];
-                    if (_0x5f44a0 == null)
-                        return;
-                    this[_0x348b95(0x11e)](_0xaec2c), _0x4e6466['\x61\x70\x70\x6c\x79\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'](_0x3befb6);
-                } else
-                    return [
-                        _0x24d941['\x70\x61\x63\x6b\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b'](),
-                        _0x24d941[_0x348b95(0x140)]()
-                    ];
-            }), this[_0x3b33bf(0x136)](_0x3b33bf(0x120), null, _0x3ee1c5);
-        }
-    }, _0x609d46[_0x47742d(0x128)] = function (_0x15c46e) {
-        var _0x2443d2 = _0x47742d;
-        return _0x2443d2(0x116)['\x70'](), this[_0x2443d2(0x136)](_0x2443d2(0x121), _0x15c46e['\x70\x61\x63\x6b\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b'](), _0x15c46e[_0x2443d2(0x140)]());
-    }, _0x609d46[_0x47742d(0x147)] = function (_0x112c92) {
-        var _0x162afa = _0x47742d;
-        '\x53\x45\x4e\x44\x20\x42\x41\x54\x54\x4c\x45\x52\x20\x52\x45\x53\x55\x4c\x54'['\x70']();
-        if ($gameParty[_0x162afa(0x13a)]())
-            return;
-        return this[_0x162afa(0x136)](_0x162afa(0x153), _0x112c92[_0x162afa(0x156)](), _0x112c92[_0x162afa(0x11b)]()[_0x162afa(0x140)]());
-    }, _0x609d46[_0x47742d(0x136)] = function (_0x120fe3, _0x33a16f, _0x41da8e) {
-        var _0x1fa824 = _0x47742d, _0xeb93b4;
-        _0xeb93b4 = {
-            '\x74\x79\x70\x65': _0x120fe3,
-            '\x69\x64': _0x33a16f,
-            '\x64\x61\x74\x61': _0x41da8e
-        }, ANNetwork[_0x1fa824(0x112)](NMS[_0x1fa824(0x118)]('\x6f\x62\x73\x65\x72\x76\x65\x72', _0xeb93b4), !![]);
-    }, _0x609d46[_0x47742d(0x15e)] = function (_0x509eec, _0x2b10cc) {
-        var _0x535e49;
-        _0x535e49 = {
-            '\x69\x64': _0x509eec,
-            '\x64\x61\x74\x61': _0x2b10cc
-        }, ANNetwork['\x73\x65\x6e\x64'](NMS['\x47\x61\x6d\x65']('\x76\x61\x72\x69\x61\x62\x6c\x65', _0x535e49));
-    }, _0x609d46[_0x47742d(0x108)] = function (_0x13f2a3, _0x3fa922) {
-        var _0x372e94 = _0x47742d;
-        if (_0x372e94(0x14f) !== _0x372e94(0x143)) {
-            var _0x3a30a3;
-            _0x3a30a3 = {
-                '\x69\x64': _0x13f2a3,
-                '\x64\x61\x74\x61': _0x3fa922
-            }, ANNetwork[_0x372e94(0x112)](NMS[_0x372e94(0x118)](_0x372e94(0x11c), _0x3a30a3));
-        } else
-            _0x5d26b3[_0x372e94(0x119)](_0x3c1ac2);
-    }, _0x609d46[_0x47742d(0x15d)] = function () {
-    }, _0x609d46[_0x47742d(0x129)] = function (_0x4fa41a, _0x27c10c, _0x449032) {
-        var _0xd7f753 = _0x47742d;
-        switch (_0x27c10c) {
-        case '\x70\x6c\x61\x79\x65\x72\x43\x68\x61\x72':
-            return this[_0xd7f753(0x12f)](_0x4fa41a, _0x449032);
-        case _0xd7f753(0x15a):
-            return this[_0xd7f753(0x137)](_0x4fa41a, _0x449032);
-        case _0xd7f753(0x111):
-            return this['\x5f\x6f\x6e\x50\x6c\x61\x79\x65\x72\x41\x63\x74\x6f\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'](_0x4fa41a, _0x449032);
-        case _0xd7f753(0x121):
-            return this[_0xd7f753(0x139)](_0x4fa41a, _0x449032);
-        case _0xd7f753(0x153):
-            return this[_0xd7f753(0x144)](_0x4fa41a, _0x449032);
-        case '\x62\x61\x74\x74\x6c\x65\x55\x6e\x69\x74\x73':
-            return this[_0xd7f753(0x107)](_0x449032);
-        default:
-            _0x276db8['\x70'](_0xd7f753(0x10f) + _0x27c10c);
-        }
-    }, _0x609d46[_0x47742d(0x12f)] = function (_0xab1198, _0x16bc37) {
-        var _0x42084a = _0x47742d, _0x5305e0, _0x2ee24c;
-        try {
-            _0x5305e0 = $gameMap[_0x42084a(0x138)](_0xab1198), _0x5305e0 != null && ('\x4b\x58\x4e\x6f\x41' !== '\x4b\x58\x4e\x6f\x41' ? (_0x57f9cf = _0x1640eb, _0x1f41d2['\x77'](_0x491cd8)) : _0x5305e0[_0x42084a(0x119)](_0x16bc37));
-        } catch (_0x35f8f4) {
-            if (_0x42084a(0x164) === _0x42084a(0x164))
-                _0x2ee24c = _0x35f8f4, ANET['\x77'](_0x2ee24c);
-            else {
-                var _0x437a4e;
-                _0x437a4e = {
-                    '\x69\x64': _0x51ad34,
-                    '\x64\x61\x74\x61': _0x22b10a
-                }, _0x108f44[_0x42084a(0x112)](_0x3f9601[_0x42084a(0x118)]('\x76\x61\x72\x69\x61\x62\x6c\x65', _0x437a4e));
-            }
-        }
-    }, _0x609d46['\x5f\x6f\x6e\x45\x76\x65\x6e\x74\x43\x68\x61\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'] = function (_0x56cb67, _0x342cca) {
-        var _0x196a17 = _0x47742d;
-        if (_0x196a17(0x145) !== '\x63\x4a\x7a\x4e\x49') {
-            var _0x484a0e, _0x34df32, _0x318189, _0x4def39;
-            try {
-                if ('\x4c\x68\x61\x52\x6b' !== _0x196a17(0x13d))
-                    _0x5e21d2[_0x196a17(0x130)] = !![];
-                else {
-                    ({
-                        mapId: _0x4def39,
-                        eventId: _0x318189
-                    } = _0x56cb67);
-                    if ($gameMap[_0x196a17(0x13f)]() !== _0x4def39)
-                        return;
-                    _0x34df32 = $gameMap[_0x196a17(0x134)](_0x318189);
-                    if (_0x34df32 != null) {
-                        if (_0x196a17(0x115) === '\x6c\x7a\x4c\x69\x68') {
-                            var _0x1ea9ac, _0x17f427, _0x4f71cb, _0x2822f9;
-                            if (_0x50a595[_0x196a17(0x11a)] == null)
-                                return;
-                            for (_0x1ea9ac = _0x4f71cb = 0x0, _0x2822f9 = _0x407a63['\x5f\x65\x71\x75\x69\x70\x73']['\x6c\x65\x6e\x67\x74\x68']; 0x0 <= _0x2822f9 ? _0x4f71cb < _0x2822f9 : _0x4f71cb > _0x2822f9; _0x1ea9ac = 0x0 <= _0x2822f9 ? ++_0x4f71cb : --_0x4f71cb) {
-                                _0x17f427 = _0x53ea96[_0x196a17(0x11a)][_0x1ea9ac], _0x2011a7[_0x196a17(0x11a)][_0x1ea9ac] = new _0x11d1ea(), _0x265770['\x5f\x65\x71\x75\x69\x70\x73'][_0x1ea9ac][_0x196a17(0x14a)] = _0x17f427['\x5f\x64\x61\x74\x61\x43\x6c\x61\x73\x73'], _0x350715[_0x196a17(0x11a)][_0x1ea9ac][_0x196a17(0x135)] = _0x17f427['\x5f\x69\x74\x65\x6d\x49\x64'];
-                            }
-                        } else
-                            _0x34df32['\x61\x70\x70\x6c\x79\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'](_0x342cca);
-                    }
-                }
-            } catch (_0x4f60f0) {
-                _0x484a0e = _0x4f60f0, ANET['\x77'](_0x484a0e);
-            }
-        } else
-            return;
-    }, _0x609d46[_0x47742d(0x161)] = function (_0x4d11d3, _0x203504) {
-        var _0x2bfbf7 = _0x47742d, _0x1bd44d, _0x7df1cc, _0x6c6e3e;
-        try {
-            if ($gameTemp[_0x2bfbf7(0x15b)] === !![]) {
-                if (_0x2bfbf7(0x12a) !== _0x2bfbf7(0x12a))
-                    return '\x53\x45\x4e\x44\x20\x42\x41\x54\x54\x4c\x45\x52\x20\x4f\x42\x53\x45\x52\x56\x45\x52'['\x70'](), this[_0x2bfbf7(0x136)]('\x62\x61\x74\x74\x6c\x65\x72', _0x4f87ab[_0x2bfbf7(0x156)](), _0x567506[_0x2bfbf7(0x140)]());
-                else
-                    $gameTemp[_0x2bfbf7(0x130)] = !![];
-            }
-            _0x6c6e3e = ANGameManager[_0x2bfbf7(0x10d)](_0x4d11d3), _0x1bd44d = NetPlayerDataWrapper['\x67\x65\x74\x41\x63\x74\x6f\x72\x46\x6f\x72\x50\x6c\x61\x79\x65\x72'](_0x6c6e3e), $gameTemp[_0x2bfbf7(0x130)] = ![];
-            if (_0x1bd44d == null)
-                return;
-            this['\x5f\x63\x6f\x6e\x76\x65\x72\x74\x41\x63\x74\x6f\x72\x45\x71\x75\x69\x70\x6d\x65\x6e\x73'](_0x203504), _0x1bd44d[_0x2bfbf7(0x119)](_0x203504);
-        } catch (_0x4783c1) {
-            _0x7df1cc = _0x4783c1, ANET['\x77'](_0x7df1cc);
-        }
-    }, _0x609d46['\x5f\x6f\x6e\x42\x61\x74\x74\x6c\x65\x72\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'] = function (_0x6a14ef, _0x2bcf94) {
-        var _0x3866b6 = _0x47742d;
-        if (_0x3866b6(0x127) === _0x3866b6(0x151)) {
-            var _0xa22a92;
-            try {
-                _0x2cd29e[_0x3866b6(0x132)](_0x3ce24c, _0x49b308);
-            } catch (_0x3f1aee) {
-                _0xa22a92 = _0x3f1aee, _0x361c12['\x77'](_0xa22a92);
-            }
-        } else {
-            var _0x1ff86c, _0x90b25b;
-            try {
-                if (!$gameParty[_0x3866b6(0x12e)]()) {
-                    if ('\x6e\x77\x6d\x7a\x50' !== _0x3866b6(0x123))
-                        return;
-                    else
-                        _0x4b367b = _0x9d8715, _0x71b69c['\x77'](_0x1e2016);
-                }
-                _0x1ff86c = ANET[_0x3866b6(0x126)][_0x3866b6(0x152)](_0x6a14ef);
-                if (_0x1ff86c == null)
-                    return;
-                this[_0x3866b6(0x11e)](_0x2bcf94), _0x1ff86c[_0x3866b6(0x119)](_0x2bcf94);
-            } catch (_0x459509) {
-                if ('\x76\x46\x71\x73\x63' === _0x3866b6(0x157))
-                    return;
-                else
-                    _0x90b25b = _0x459509, ANET['\x77'](_0x90b25b);
-            }
-        }
-    }, _0x609d46[_0x47742d(0x11e)] = function (_0x15cffd) {
-        var _0x2a0b56 = _0x47742d;
-        if (_0x2a0b56(0x124) === _0x2a0b56(0x165))
-            return;
-        else {
-            var _0x2281dd, _0x495e2f, _0x12ca66, _0x6bcab3;
-            if (_0x15cffd[_0x2a0b56(0x11a)] == null)
-                return;
-            for (_0x2281dd = _0x12ca66 = 0x0, _0x6bcab3 = _0x15cffd[_0x2a0b56(0x11a)][_0x2a0b56(0x15f)]; 0x0 <= _0x6bcab3 ? _0x12ca66 < _0x6bcab3 : _0x12ca66 > _0x6bcab3; _0x2281dd = 0x0 <= _0x6bcab3 ? ++_0x12ca66 : --_0x12ca66) {
-                if ('\x6f\x77\x55\x6d\x68' === '\x6f\x77\x55\x6d\x68')
-                    _0x495e2f = _0x15cffd['\x5f\x65\x71\x75\x69\x70\x73'][_0x2281dd], _0x15cffd['\x5f\x65\x71\x75\x69\x70\x73'][_0x2281dd] = new Game_Item(), _0x15cffd[_0x2a0b56(0x11a)][_0x2281dd][_0x2a0b56(0x14a)] = _0x495e2f[_0x2a0b56(0x14a)], _0x15cffd['\x5f\x65\x71\x75\x69\x70\x73'][_0x2281dd][_0x2a0b56(0x135)] = _0x495e2f[_0x2a0b56(0x135)];
-                else
-                    return;
-            }
-        }
-    }, _0x609d46[_0x47742d(0x144)] = function (_0x1c4632, _0x5ad7f7) {
-        var _0x39982f = _0x47742d, _0x34fc59, _0x514bf8, _0x3a9b63;
-        try {
-            if (!$gameParty[_0x39982f(0x12e)]()) {
-                if (_0x39982f(0x160) === _0x39982f(0x12c)) {
-                    _0x39982f(0x155)['\x70']();
-                    if (_0x149974['\x69\x73\x4f\x6e\x65\x42\x61\x74\x74\x6c\x65\x72']())
-                        return;
-                    return this[_0x39982f(0x136)]('\x62\x61\x74\x74\x6c\x65\x72\x52\x65\x73\x75\x6c\x74', _0x117f62[_0x39982f(0x156)](), _0x2e63bd[_0x39982f(0x11b)]()[_0x39982f(0x140)]());
-                } else
-                    return;
-            }
-            _0x34fc59 = ANET[_0x39982f(0x126)]['\x75\x6e\x70\x61\x63\x6b\x42\x61\x74\x74\x6c\x65\x72\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b'](_0x1c4632);
-            if (_0x34fc59 == null)
-                return;
-            (_0x3a9b63 = _0x34fc59[_0x39982f(0x11b)]()) != null && _0x3a9b63[_0x39982f(0x119)](_0x5ad7f7);
-        } catch (_0x28e362) {
-            _0x514bf8 = _0x28e362, ANET['\x77'](_0x514bf8);
-        }
-    }, _0x609d46[_0x47742d(0x107)] = function (_0xb52128) {
-        var _0x4e95bf = _0x47742d, _0x16b5f0, _0x8555d2, _0x589b9a, _0x46b960, _0x39cc3f;
-        try {
-            if (_0x4e95bf(0x125) === _0x4e95bf(0x125)) {
-                if (!$gameParty['\x69\x6e\x42\x61\x74\x74\x6c\x65']()) {
-                    if ('\x62\x57\x6d\x50\x75' !== _0x4e95bf(0x12d))
-                        _0x456959 = _0x4afc36[_0x42dfa5], _0x569532 = _0x1fe629[_0x4e95bf(0x126)][_0x4e95bf(0x152)](_0x3ca473[0x0]), _0x18deb4 != null && (this[_0x4e95bf(0x11e)](_0x5edeac[0x1]), _0x2e3b25[_0x4e95bf(0x119)](_0x27d474[0x1]));
-                    else
-                        return;
-                }
-                for (_0x589b9a = 0x0, _0x46b960 = _0xb52128[_0x4e95bf(0x15f)]; _0x589b9a < _0x46b960; _0x589b9a++) {
-                    _0x39cc3f = _0xb52128[_0x589b9a], _0x16b5f0 = ANET[_0x4e95bf(0x126)]['\x75\x6e\x70\x61\x63\x6b\x42\x61\x74\x74\x6c\x65\x72\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b'](_0x39cc3f[0x0]), _0x16b5f0 != null && (_0x4e95bf(0x13b) === '\x57\x68\x43\x53\x41' ? (this['\x5f\x63\x6f\x6e\x76\x65\x72\x74\x41\x63\x74\x6f\x72\x45\x71\x75\x69\x70\x6d\x65\x6e\x73'](_0x39cc3f[0x1]), _0x16b5f0['\x61\x70\x70\x6c\x79\x4f\x62\x73\x65\x72\x76\x65\x72\x44\x61\x74\x61'](_0x39cc3f[0x1])) : (_0x58650b = _0x3c1797, _0x239b7e['\x77'](_0x2579d9)));
-                }
-                $gameTemp[_0x4e95bf(0x110)] === !![] && (BattleManager[_0x4e95bf(0x131)](), $gameTemp['\x5f\x72\x65\x71\x75\x65\x73\x74\x49\x6e\x69\x74\x69\x61\x6c\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65\x52\x65\x66\x72\x65\x73\x68'] = ![]);
-            } else
-                _0x158176[_0x4e95bf(0x149)](_0x2759d7, _0x390602);
-        } catch (_0x430693) {
-            if (_0x4e95bf(0x133) !== _0x4e95bf(0x117))
-                _0x8555d2 = _0x430693, ANET['\x77'](_0x8555d2);
-            else
-                return this[_0x4e95bf(0x136)](_0x4e95bf(0x11f), _0x5ada75[_0x4e95bf(0x154)](), _0x2aec28[_0x4e95bf(0x140)]());
-        }
-    }, _0x609d46[_0x47742d(0x150)] = function (_0x581839, _0x5d942c) {
-        var _0x5867f9 = _0x47742d, _0x3e31bf;
-        try {
-            $gameVariables[_0x5867f9(0x132)](_0x581839, _0x5d942c);
-        } catch (_0x41bf3f) {
-            _0x3e31bf = _0x41bf3f, ANET['\x77'](_0x3e31bf);
-        }
-    }, _0x609d46[_0x47742d(0x14b)] = function (_0x1b6f4a, _0x2d343a) {
-        var _0x544df6 = _0x47742d;
-        if (_0x544df6(0x114) !== _0x544df6(0x158)) {
-            var _0x26e40b;
-            try {
-                $gameSwitches[_0x544df6(0x149)](_0x1b6f4a, _0x2d343a);
-            } catch (_0x56a9ea) {
-                _0x26e40b = _0x56a9ea, ANET['\x77'](_0x26e40b);
-            }
-        } else
-            return;
+    observers = members.map(function(m) {
+      return [m.packForNetwork(), m.getObserverDataForNetwork()];
+    });
+    //m.result().getObserverDataForNetwork()]
+    this._sendObserverData('battleUnits', null, observers);
+  };
+  //TODO: NOT USED
+  _.sendBattlerObserver = function(battler) {
+    "SEND BATTLER OBSERVER".p();
+    return this._sendObserverData('battler', battler.packForNetwork(), battler.getObserverDataForNetwork());
+  };
+  _.sendBattlerResultObserver = function(battler) {
+    "SEND BATTLER RESULT".p();
+    if ($gameParty.isOneBattler()) {
+      return;
+    }
+    return this._sendObserverData('battlerResult', battler.packForNetwork(), battler.result().getObserverDataForNetwork());
+  };
+  _._sendObserverData = function(type, id, observerData) {
+    var data;
+    data = {
+      type: type,
+      id: id,
+      data: observerData
     };
-}()));
+    ANNetwork.send(NMS.Game("observer", data), true);
+  };
+  //TODO: Может отправлять изменение на мастера, он уже все глобальные переменные всем отправляет
+  _.sendGlobalVariableChange = function(varId, newValue) {
+    var data;
+    data = {
+      id: varId,
+      data: newValue
+    };
+    ANNetwork.send(NMS.Game("variable", data));
+  };
+  _.sendGlobalSwitchChange = function(switchId, newValue) {
+    var data;
+    data = {
+      id: switchId,
+      data: newValue
+    };
+    ANNetwork.send(NMS.Game("switch", data));
+  };
+  _.sendSyncGlobalVariables = function() {};
+  //TODO: Синхронизация всех глобальных переменных
+  //см. $gameVariables.getAllGlobalVariablesData()
+
+  //? CALLBACKS ОТ ЗАПРОСОВ НА СЕРВЕР
+  // * ===============================================================
+  _.onObserverData = function(id, type, content) {
+    switch (type) {
+      case 'playerChar':
+        return this._onPlayerCharObserverData(id, content);
+      case 'eventChar':
+        return this._onEventCharObserverData(id, content);
+      case 'playerActor':
+        return this._onPlayerActorObserverData(id, content);
+      case 'battler':
+        return this._onBattlerObserverData(id, content);
+      case 'battlerResult':
+        return this._onBattlerResultObserverData(id, content);
+      case 'battleUnits':
+        return this._onBattleUnitsObserverData(content);
+      default:
+        LOG.p("From server: unknown observer data type: " + type);
+    }
+  };
+  _._onPlayerCharObserverData = function(id, content) {
+    var char, e;
+    try {
+      char = $gameMap.networkCharacterById(id);
+      if (char != null) {
+        char.applyObserverData(content);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _._onEventCharObserverData = function(id, content) {
+    var e, event, eventId, mapId;
+    try {
+      ({mapId, eventId} = id);
+      if ($gameMap.mapId() !== mapId) {
+        return;
+      }
+      event = $gameMap.event(eventId);
+      if (event != null) {
+        event.applyObserverData(content);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _._onPlayerActorObserverData = function(id, content) {
+    var actor, e, player;
+    try {
+      // * Если событие перевело выбор персонажа в локальный режим
+      // * то ставим специальный флаг что сейчас идёт обращение только
+      // * к сетевому персонажу
+      if ($gameTemp._nLocalActorMode === true) {
+        $gameTemp._nNetworkActorPickRequest = true;
+      }
+      player = ANGameManager.getPlayerDataById(id);
+      actor = NetPlayerDataWrapper.getActorForPlayer(player);
+      // * На всякий случай сниму флаг
+      $gameTemp._nNetworkActorPickRequest = false;
+      if (actor == null) {
+        return;
+      }
+      this._convertActorEquipmens(content);
+      actor.applyObserverData(content);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _._onBattlerObserverData = function(battlerNetData, content) {
+    var battler, e;
+    try {
+      if (!$gameParty.inBattle()) {
+        return;
+      }
+      //"ON BATTLER OBSERVER DATA".p()
+      battler = ANET.Utils.unpackBattlerFromNetwork(battlerNetData);
+      if (battler == null) {
+        return;
+      }
+      this._convertActorEquipmens(content);
+      battler.applyObserverData(content);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _._convertActorEquipmens = function(content) {
+    var i, itemData, j, ref;
+    if (content._equips == null) {
+      return;
+    }
+    for (i = j = 0, ref = content._equips.length; (0 <= ref ? j < ref : j > ref); i = 0 <= ref ? ++j : --j) {
+      itemData = content._equips[i];
+      content._equips[i] = new Game_Item();
+      content._equips[i]._dataClass = itemData._dataClass;
+      content._equips[i]._itemId = itemData._itemId;
+    }
+  };
+  _._onBattlerResultObserverData = function(battlerNetData, content) {
+    var battler, e, ref;
+    try {
+      if (!$gameParty.inBattle()) {
+        return;
+      }
+      //"ON BATTLER RESULT DATA".p()
+      battler = ANET.Utils.unpackBattlerFromNetwork(battlerNetData);
+      if (battler == null) {
+        return;
+      }
+      if ((ref = battler.result()) != null) {
+        ref.applyObserverData(content);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _._onBattleUnitsObserverData = function(content) {
+    var battler, e, j, len, netData;
+    try {
+      if (!$gameParty.inBattle()) {
+        return;
+      }
+//"ON BATTLERS UNITS DATA".p()
+      for (j = 0, len = content.length; j < len; j++) {
+        netData = content[j];
+        battler = ANET.Utils.unpackBattlerFromNetwork(netData[0]);
+        if (battler != null) {
+          this._convertActorEquipmens(netData[1]);
+          battler.applyObserverData(netData[1]);
+        }
+      }
+      // * Игрок только присоединился, нужен дополнительный refresh графики
+      if ($gameTemp._requestInitialSharedBattleRefresh === true) {
+        BattleManager.nRefreshSharedBattleState();
+        $gameTemp._requestInitialSharedBattleRefresh = false;
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _.onVariableValue = function(varId, value) {
+    var e;
+    try {
+      $gameVariables.onVariableFromServer(varId, value);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  _.onSwitchValue = function(varId, value) {
+    var e;
+    try {
+      $gameSwitches.onSwitchFromServer(varId, value);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+})();
+
+
+// Generated by CoffeeScript 2.6.1
+//@[EXTENSION]
+ANET.extend(ANET.mz3d_patch);
+
 
 // Generated by CoffeeScript 2.6.1
 //? Методы для улучшения совместимости с плагинами Yanfly и VisuMZ
 
 //@[EXTENSION]
 ANET.extend(function() {
+  if (Imported.YEP_ItemCore === true) {
+    (function() {      //╒═════════════════════════════════════════════════════════════════════════╛
+      // ■ Window_ItemInfo.coffee
+      //╒═════════════════════════════════════════════════════════════════════════╛
+      //---------------------------------------------------------------------------
+      var ALIAS__drawInfoTextTop, _;
+      
+      //@[DEFINES]
+      _ = Window_ItemInfo.prototype;
+      
+      //@[ALIAS]
+      ALIAS__drawInfoTextTop = _.drawInfoTextTop;
+      _.drawInfoTextTop = function(dy) {
+        var e;
+        try {
+          return ALIAS__drawInfoTextTop.call(this, ...arguments);
+        } catch (error) {
+          e = error;
+          return dy;
+        }
+      };
+    })();
+  }
+  // ■ END Window_ItemInfo.coffee
+  //---------------------------------------------------------------------------
   if (Imported.YEP_BattleEngineCore === true || Imported.VisuMZ_1_BattleCore === true) {
     // * Force передача Sprite_Battler:startMove
     console.log("Load extension: YEP_BattleEngineCore | VisuMZ_1_BattleCore");
@@ -14162,700 +20212,441 @@ ANET.extend(function() {
 //---------------------------------------------------------------------------
 
 
-function _0x1032() {
-    var _0x48c95a = [
-        '\x57\x4a\x66\x51\x70',
-        '\x5a\x6a\x6c\x50\x56',
-        '\x4a\x4f\x78\x62\x43',
-        '\x74\x72\x61\x64\x65\x5f\x63\x6f\x6d\x70\x6c\x65\x74\x65',
-        '\x6b\x4d\x73\x62\x54',
-        '\x54\x52\x41\x44\x45\x20\x41\x43\x43\x45\x50\x54\x20\x49\x4e',
-        '\x6f\x42\x65\x63\x71',
-        '\x73\x65\x6e\x64',
-        '\x6d\x61\x70',
-        '\x74\x4e\x79\x45\x55',
-        '\x54\x72\x61\x64\x65\x20\x72\x65\x66\x75\x73\x65\x64',
-        '\x73\x68\x6f\x77\x54\x72\x61\x64\x65\x49\x6e\x44\x69\x61\x6c\x6f\x67',
-        '\x5f\x74\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65\x6f\x75\x74',
-        '\x77\x65\x48\x4c\x4b',
-        '\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x72\x65\x71\x75\x65\x73\x74',
-        '\x63\x55\x69\x4a\x57',
-        '\x54\x72\x61\x64\x65',
-        '\x74\x72\x61\x64\x65\x5f\x73\x74\x61\x74\x75\x73',
-        '\x54\x52\x41\x44\x45\x20\x49\x54\x45\x4d\x53\x20\x49\x4e',
-        '\x5f\x73\x74\x61\x72\x74\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65\x6f\x75\x74',
-        '\x7a\x70\x73\x58\x71',
-        '\x44\x65\x76\x4c\x6f\x67',
-        '\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x73\x74\x61\x74\x75\x73',
-        '\x36\x35\x4c\x53\x6b\x65\x43\x73',
-        '\x66\x75\x63\x70\x51',
-        '\x74\x72\x61\x64\x65\x5f\x72\x65\x71\x75\x65\x73\x74',
-        '\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x63\x6f\x6d\x70\x6c\x65\x74\x65',
-        '\x57\x61\x69\x74\x69\x6e\x67\x20',
-        '\x6e\x66\x58\x43\x71',
-        '\x76\x65\x6a\x7a\x74',
-        '\x43\x6f\x6c\x6f\x72',
-        '\x46\x54\x6e\x79\x47',
-        '\x65\x46\x4e\x6a\x4b',
-        '\x55\x74\x69\x6c\x73',
-        '\x51\x65\x4d\x73\x4b',
-        '\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x72\x65\x66\x75\x73\x65',
-        '\x69\x73\x4f\x6e\x4d\x61\x70\x53\x63\x65\x6e\x65',
-        '\x69\x73\x50\x6c\x61\x79\x65\x72\x41\x76\x61\x69\x6c\x61\x62\x6c\x65\x46\x6f\x72\x54\x72\x61\x64\x65',
-        '\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x63\x6f\x6d\x6d\x6f\x6e\x20\x73\x75\x62\x43\x6f\x6d\x6d\x61\x6e\x64\x20',
-        '\x52\x68\x46\x6a\x4f',
-        '\x42\x4c\x41\x43\x4b',
-        '\x61\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x49\x6e\x52\x65\x71\x75\x65\x73\x74',
-        '\x54\x52\x41\x44\x45\x20\x53\x48\x4f\x55\x4c\x44\x20\x42\x45\x20\x43\x4f\x4d\x50\x4c\x45\x54\x45\x44',
-        '\x54\x72\x61\x64\x65\x20\x69\x74\x65\x6d\x73\x20\x5b\x6d\x79\x5d\x20\x63\x68\x61\x6e\x67\x65\x64',
-        '\x63\x75\x75\x6f\x63',
-        '\x76\x75\x74\x55\x46',
-        '\x32\x33\x38\x32\x34\x64\x64\x73\x64\x62\x57',
-        '\x53\x75\x4a\x4f\x45',
-        '\x54\x52\x41\x44\x45\x20\x52\x45\x46\x55\x53\x45\x20\x49\x4e',
-        '\x63\x61\x6c\x6c\x62\x61\x63\x6b',
-        '\x61\x6e\x79',
-        '\x47\x5a\x4d\x6c\x4b',
-        '\x73\x68\x6f\x77\x4d\x6f\x64\x61\x6c\x57\x69\x6e\x64\x6f\x77\x46\x6f\x72\x54\x72\x61\x64\x65',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64',
-        '\x73\x65\x6e\x64\x43\x6f\x6d\x70\x6c\x65\x74\x65\x54\x72\x61\x64\x65',
-        '\x70\x6c\x61\x79\x53\x45',
-        '\x67\x73\x46\x5a\x6a',
-        '\x5f\x69\x73\x49\x6e\x54\x72\x61\x64\x65',
-        '\x73\x65\x6e\x64\x52\x65\x66\x75\x73\x65\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x69\x73\x50\x72\x6f',
-        '\x73\x6d\x49\x56\x73',
-        '\x72\x65\x73\x65\x74\x57\x61\x69\x74',
-        '\x70\x61\x63\x6b\x49\x74\x65\x6d\x46\x6f\x72\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x69\x6e\x66\x6f',
-        '\x69\x73\x49\x6e\x54\x72\x61\x64\x65',
-        '\x54\x72\x61\x64\x65\x47\x6f\x6c\x64\x49\x74\x65\x6d\x49\x64',
-        '\x73\x65\x6e\x64\x4d\x79\x54\x72\x61\x64\x65\x52\x65\x61\x64\x79\x53\x74\x61\x74\x75\x73',
-        '\x72\x45\x68\x68\x77',
-        '\x79\x4f\x6a\x76\x6d',
-        '\x68\x69\x64\x65\x49\x6e\x66\x6f\x4d\x65\x73\x73\x61\x67\x65',
-        '\x47\x4a\x4d\x6b\x62',
-        '\x6d\x4c\x61\x6c\x46',
-        '\x5f\x73\x74\x61\x72\x74\x54\x72\x61\x64\x65\x53\x65\x73\x73\x69\x6f\x6e',
-        '\x31\x33\x39\x39\x32\x36\x47\x4c\x61\x77\x4d\x4b',
-        '\x61\x56\x4c\x58\x45',
-        '\x59\x45\x65\x76\x43',
-        '\x5f\x6e\x65\x74\x48\x69\x73\x54\x72\x61\x64\x65\x52\x65\x61\x64\x79\x53\x74\x61\x74\x75\x73',
-        '\x31\x34\x33\x35\x36\x33\x47\x6a\x61\x77\x66\x55',
-        '\x56\x55\x43\x4b\x6d',
-        '\x6f\x6e\x41\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x4e\x6f\x74\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x4f\x72\x54\x69\x6d\x65\x6f\x75\x74',
-        '\x5f\x68\x69\x73\x49\x64',
-        '\x73\x65\x6e\x64\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x73\x65\x6e\x64\x4d\x79\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x73',
-        '\x73\x63\x65\x6e\x65',
-        '\x6f\x6e\x54\x72\x61\x64\x65\x43\x6f\x6d\x70\x6c\x65\x74\x65\x64',
-        '\x6d\x79\x49\x64',
-        '\x70\x7a\x6b\x6f\x66',
-        '\x56\x72\x70\x56\x45',
-        '\x70\x75\x73\x68',
-        '\x5a\x50\x57\x75\x4f',
-        '\x6f\x6e\x54\x72\x61\x64\x65\x43\x68\x61\x6e\x67\x65',
-        '\x69\x73\x48\x61\x76\x65\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74',
-        '\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x49\x6e\x66\x6f',
-        '\x7a\x50\x70\x59\x62',
-        '\x73\x65\x6e\x64\x53\x74\x61\x72\x74\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x74\x72\x61\x64\x65\x53\x63\x65\x6e\x65\x43\x6f\x6d\x70\x6c\x65\x74\x65\x53\x45',
-        '\x73\x68\x49\x48\x76',
-        '\x6f\x6e\x41\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65',
-        '\x54\x52\x41\x44\x45\x20\x52\x45\x51\x55\x45\x53\x54\x20\x49\x4e',
-        '\x54\x52\x41\x44\x45\x20\x57\x49\x54\x48\x20',
-        '\x4a\x4d\x51\x59\x69',
-        '\x31\x32\x36\x54\x73\x5a\x65\x57\x52',
-        '\x6f\x6e\x54\x72\x61\x64\x65\x53\x63\x65\x6e\x65\x45\x6e\x64',
-        '\x67\x61\x69\x6e\x47\x6f\x6c\x64',
-        '\x59\x62\x75\x6b\x69',
-        '\x48\x4e\x4a\x42\x4f',
-        '\x73\x68\x6f\x77\x52\x65\x64\x41\x6c\x65\x72\x74',
-        '\x5f\x6e\x65\x74\x4d\x79\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x73',
-        '\x69\x73\x43\x6c\x69\x65\x6e\x74\x41\x76\x61\x69\x6c\x61\x62\x6c\x65\x46\x6f\x72\x54\x72\x61\x64\x65',
-        '\x69\x73\x53\x68\x6f\x77\x4d\x6f\x64\x61\x6c\x46\x6f\x72\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x31\x39\x33\x35\x32\x37\x36\x49\x6b\x63\x50\x66\x43',
-        '\x54\x6b\x78\x59\x76',
-        '\x5f\x6f\x6e\x52\x65\x71\x75\x65\x73\x74\x41\x6e\x73\x77\x65\x72',
-        '\x43\x6f\x6d\x6d\x6f\x6e',
-        '\x73\x68\x69\x66\x74',
-        '\x41\x4e\x54\x72\x61\x64\x65\x4d\x61\x6e\x61\x67\x65\x72',
-        '\x4a\x63\x68\x61\x62',
-        '\x73\x65\x74\x43\x6f\x6c\x6f\x72\x73',
-        '\x57\x41\x49\x75\x78',
-        '\x69\x73\x53\x63\x65\x6e\x65\x4d\x61\x70',
-        '\x50\x44\x6b\x4b\x6b',
-        '\x59\x45\x4c\x4c\x4f\x57',
-        '\x5f\x6f\x6e\x5f',
-        '\x67\x65\x74\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74\x44\x61\x74\x61',
-        '\x73\x65\x74\x57\x61\x69\x74',
-        '\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65',
-        '\x74\x72\x61\x64\x65\x5f\x69\x74\x65\x6d\x73',
-        '\x75\x6e\x70\x61\x63\x6b\x49\x74\x65\x6d\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b',
-        '\x5f\x6e\x65\x74\x48\x69\x73\x4e\x65\x74\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x73',
-        '\x46\x57\x79\x45\x43',
-        '\x71\x4c\x54\x49\x62',
-        '\x50\x6c\x61\x79\x65\x72\x20\x6e\x6f\x74\x20\x61\x76\x61\x69\x6c\x61\x62\x6c\x65\x21',
-        '\x35\x35\x30\x36\x33\x38\x6b\x41\x53\x4b\x44\x51',
-        '\x6e\x65\x74\x49\x64',
-        '\x69\x73\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74\x49\x73\x56\x61\x6c\x69\x64',
-        '\x72\x65\x66\x75\x73\x65\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74',
-        '\x6e\x61\x6d\x65',
-        '\x6c\x65\x6e\x67\x74\x68',
-        '\x42\x4a\x61\x46\x4b',
-        '\x54\x4d\x42\x41\x6a',
-        '\x6c\x6f\x73\x65\x47\x6f\x6c\x64',
-        '\x67\x65\x74\x4c\x69\x67\x68\x74\x65\x73\x74\x43\x6f\x6c\x6f\x72',
-        '\x20\x72\x65\x66\x75\x73\x65\x64',
-        '\x77\x56\x68\x48\x68',
-        '\x6e\x73\x50\x72\x62',
-        '\x59\x65\x71\x42\x78',
-        '\x6f\x6e\x54\x72\x61\x64\x65\x53\x68\x6f\x75\x6c\x64\x43\x6f\x6d\x70\x6c\x65\x74\x65',
-        '\x31\x30\x31\x35\x35\x37\x36\x55\x70\x6a\x64\x72\x56',
-        '\x6b\x52\x78\x77\x75',
-        '\x56\x4c\x66\x4f\x6c',
-        '\x72\x65\x71\x75\x65\x73\x74\x54\x72\x61\x64\x65\x57\x69\x74\x68',
-        '\x6f\x6e\x43\x6f\x6d\x6d\x6f\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x61\x78\x59\x55\x6f',
-        '\x34\x30\x34\x33\x32\x32\x33\x56\x42\x62\x66\x4b\x42',
-        '\x55\x50\x44\x55\x64',
-        '\x61\x77\x6d\x64\x6a',
-        '\x74\x72\x61\x64\x65\x5f\x72\x65\x66\x75\x73\x65',
-        '\x4a\x7a\x4f\x45\x42',
-        '\x45\x6d\x77\x55\x45',
-        '\x4a\x47\x79\x58\x63',
-        '\x7a\x70\x53\x46\x42',
-        '\x49\x57\x71\x79\x53'
-    ];
-    _0x1032 = function () {
-        return _0x48c95a;
-    };
-    return _0x1032();
-}
-var _0x5bf0dc = _0x20a4;
-function _0x20a4(_0x3baf52, _0x111101) {
-    var _0x10329f = _0x1032();
-    return _0x20a4 = function (_0x20a43b, _0x1e6d71) {
-        _0x20a43b = _0x20a43b - 0x132;
-        var _0x23274f = _0x10329f[_0x20a43b];
-        return _0x23274f;
-    }, _0x20a4(_0x3baf52, _0x111101);
-}
-(function (_0x541b8b, _0x4d965a) {
-    var _0x12125d = _0x20a4, _0xaa42fe = _0x541b8b();
-    while (!![]) {
-        try {
-            var _0x3369f3 = parseInt(_0x12125d(0x1b8)) / 0x1 + parseInt(_0x12125d(0x14d)) / 0x2 + parseInt(_0x12125d(0x1d0)) / 0x3 * (-parseInt(_0x12125d(0x199)) / 0x4) + parseInt(_0x12125d(0x182)) / 0x5 * (parseInt(_0x12125d(0x1b4)) / 0x6) + parseInt(_0x12125d(0x137)) / 0x7 + -parseInt(_0x12125d(0x15c)) / 0x8 + -parseInt(_0x12125d(0x162)) / 0x9;
-            if (_0x3369f3 === _0x4d965a)
-                break;
-            else
-                _0xaa42fe['push'](_0xaa42fe['shift']());
-        } catch (_0x32c1a5) {
-            _0xaa42fe['push'](_0xaa42fe['shift']());
-        }
+// Generated by CoffeeScript 2.6.1
+// * Данный класс отвечает за сетевые алгоритмы
+// * внутриигровой торговли (обмене) между игроками
+
+//$[ENCODE]
+
+//%[Работает на NMS.Common]
+
+//@[GLOBAL]
+window.ANTradeManager = function() {};
+
+(function() {
+  var LOG, _;
+  //@[LOG]
+  LOG = new KDCore.DevLog("Trade");
+  LOG.setColors(KDCore.Color.YELLOW, KDCore.Color.BLACK.getLightestColor(35));
+  LOG.on();
+  //@[DEFINES]
+  _ = window.ANTradeManager;
+  // * Время на раздумия при запросе на торговлю (используется и как timeout)
+  _.TradeRequestTime = 6000;
+  // * ID для идентификации предмета - золото
+  _.TradeGoldItemId = -100;
+  // * Находится ли игрок в режиме торговли
+  // * Данный метод используется стандартными окнами и сценами для смены
+  // * некоторых методов (например отрисовка пустого предмета в списке предметов)
+  _.isInTrade = function() {
+    return ANNetwork.isConnected() && this._isInTrade === true;
+  };
+  // * Есть с кем торговать? (Уже задан и установлен другой участник торговли)
+  _.isHaveTradeParticipant = function() {
+    return String.any(this._hisId);
+  };
+  // * Данные игрока с которым я торгую
+  _.getTradeParticipantData = function() {
+    return nAPI.getPlayerInfo("info", "netId", this._hisId);
+  };
+  //%[Главный метод начала торговли]
+  // * Начать торговлю с другим игроком
+  //?anotherPlayer - NetPlayerData structure
+  _.requestTradeWith = function(anotherPlayer) {
+    if (this.isInTrade()) {
+      return;
     }
-}(_0x1032, 0x2a091), window[_0x5bf0dc(0x13c)] = function () {
-}, (function () {
-    var _0xa56598 = _0x5bf0dc, _0x389408, _0x1c6c95;
-    _0x389408 = new KDCore[(_0xa56598(0x180))](_0xa56598(0x17b)), _0x389408[_0xa56598(0x13e)](KDCore[_0xa56598(0x189)][_0xa56598(0x142)], KDCore['\x43\x6f\x6c\x6f\x72'][_0xa56598(0x193)][_0xa56598(0x156)](0x23)), _0x389408['\x6f\x6e'](), _0x1c6c95 = window['\x41\x4e\x54\x72\x61\x64\x65\x4d\x61\x6e\x61\x67\x65\x72'], _0x1c6c95[_0xa56598(0x146)] = 0x1770, _0x1c6c95[_0xa56598(0x1ac)] = -0x64, _0x1c6c95[_0xa56598(0x1ab)] = function () {
-        var _0x14183a = _0xa56598;
-        return ANNetwork['\x69\x73\x43\x6f\x6e\x6e\x65\x63\x74\x65\x64']() && this[_0x14183a(0x1a4)] === !![];
-    }, _0x1c6c95[_0xa56598(0x1c6)] = function () {
-        var _0x31a61b = _0xa56598;
-        return '\x42\x54\x6b\x6b\x4b' !== _0x31a61b(0x1c1) ? String[_0x31a61b(0x19d)](this[_0x31a61b(0x1bb)]) : _0x4ab55e['\x70']('\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x63\x6f\x6d\x6d\x6f\x6e\x20\x73\x75\x62\x43\x6f\x6d\x6d\x61\x6e\x64\x20' + _0x4cc7fc);
-    }, _0x1c6c95[_0xa56598(0x144)] = function () {
-        var _0x35d8a7 = _0xa56598;
-        if ('\x61\x56\x4c\x58\x45' !== _0x35d8a7(0x1b5))
-            _0x11a4d4 = _0x5122b5[_0x35d8a7(0x151)], _0x1d3bf0['\x73\x68\x6f\x77\x52\x65\x64\x41\x6c\x65\x72\x74'](_0x484003 + _0x35d8a7(0x157));
-        else
-            return nAPI[_0x35d8a7(0x1c7)]('\x69\x6e\x66\x6f', _0x35d8a7(0x14e), this[_0x35d8a7(0x1bb)]);
-    }, _0x1c6c95[_0xa56598(0x15f)] = function (_0x30e3ec) {
-        var _0x4e5c3d = _0xa56598;
-        if (this['\x69\x73\x49\x6e\x54\x72\x61\x64\x65']()) {
-            if (_0x4e5c3d(0x159) === '\x6e\x73\x50\x72\x62')
-                return;
-            else
-                _0x409bfe[0x1] != null && _0x37714[0x1] > 0x0 && _0x513ff8[_0x4e5c3d(0x155)](_0x227872[0x1]);
-        }
-        if (this[_0x4e5c3d(0x190)](_0x30e3ec)) {
-            if (_0x4e5c3d(0x1a3) === _0x4e5c3d(0x14b))
-                return _0x5b804d = _0x36e448, _0x31f5cc['\x77'](_0x2d3ab6);
-            else
-                this[_0x4e5c3d(0x1c9)](_0x30e3ec);
-        } else
-            nAPI[_0x4e5c3d(0x133)](_0x4e5c3d(0x14c));
-    }, _0x1c6c95[_0xa56598(0x190)] = function (_0x1ec0bf) {
-        var _0x4ccd7d = _0xa56598;
-        if (_0x4ccd7d(0x188) !== _0x4ccd7d(0x188))
-            _0x3fab0f['\x55\x49'][_0x4ccd7d(0x19f)](this[_0x4ccd7d(0x1bb)]);
-        else
-            return _0x1ec0bf != null && NetPlayerDataWrapper[_0x4ccd7d(0x18f)](_0x1ec0bf);
-    }, _0x1c6c95[_0xa56598(0x14f)] = function () {
-        var _0x47f957 = _0xa56598;
-        if (_0x47f957(0x1a7) !== _0x47f957(0x158)) {
-            var _0xe64183;
-            if (!this[_0x47f957(0x1ab)]())
-                return '\x7a\x50\x70\x59\x62' !== _0x47f957(0x1c8) ? (_0x17a5a8['\x70'](_0x47f957(0x195)), this[_0x47f957(0x1a1)]()) : ![];
-            if (!this['\x69\x73\x48\x61\x76\x65\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74']())
-                return ![];
-            _0xe64183 = this[_0x47f957(0x144)]();
-            if (_0xe64183 != null)
-                return _0xe64183[_0x47f957(0x1be)] !== _0x47f957(0x173);
-            return ![];
-        } else
-            return _0x29176a[_0x47f957(0x176)]();
-    }, _0x1c6c95[_0xa56598(0x135)] = function () {
-        var _0x409b7f = _0xa56598;
-        return ANET[_0x409b7f(0x1a6)]() && !this[_0x409b7f(0x1ab)]() && KDCore[_0x409b7f(0x18c)][_0x409b7f(0x140)]();
-    }, _0x1c6c95[_0xa56598(0x1b3)] = function () {
-        var _0x27e0a0 = _0xa56598;
-        if (!this[_0x27e0a0(0x1c6)]()) {
-            if (_0x27e0a0(0x16f) === '\x6b\x4d\x73\x62\x54')
-                return;
-            else {
-                if (this[_0x27e0a0(0x1c6)]())
-                    return this[_0x27e0a0(0x1a5)](this[_0x27e0a0(0x1bb)]);
-            }
-        }
-        _0x389408['\x70'](_0x27e0a0(0x1ce) + this[_0x27e0a0(0x1bb)]), this[_0x27e0a0(0x1a4)] = !![], $gameTemp[_0x27e0a0(0x134)] = [], $gameTemp[_0x27e0a0(0x149)] = [], $gameTemp[_0x27e0a0(0x1b7)] = ![], SceneManager[_0x27e0a0(0x1c3)](Scene_NetworkInGameTrade);
-    }, _0x1c6c95[_0xa56598(0x176)] = function () {
-        var _0x16281b = _0xa56598;
-        if (!this[_0x16281b(0x1c6)]())
-            return;
-        if (ANET['\x50\x50'][_0x16281b(0x136)]()) {
-            if (_0x16281b(0x132) === _0x16281b(0x132))
-                ANET['\x55\x49'][_0x16281b(0x19f)](this[_0x16281b(0x1bb)]);
-            else
-                return _0x3c48e5['\x6f\x6e\x41\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x4e\x6f\x74\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x4f\x72\x54\x69\x6d\x65\x6f\x75\x74']();
-        } else
-            ANTradeManager[_0x16281b(0x194)]();
-    }, _0x1c6c95[_0xa56598(0x150)] = function () {
-        var _0x58435f = _0xa56598;
-        if (this['\x69\x73\x48\x61\x76\x65\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74']())
-            return this[_0x58435f(0x1a5)](this[_0x58435f(0x1bb)]);
-    }, _0x1c6c95[_0xa56598(0x194)] = function () {
-        var _0x8e05ed = _0xa56598;
-        if (_0x8e05ed(0x183) === _0x8e05ed(0x1c4))
-            return _0x560366 = _0x34c2b2, _0x4f7a2e['\x77'](_0x105559);
-        else {
-            if (!this[_0x8e05ed(0x1c6)]()) {
-                if (_0x8e05ed(0x138) !== _0x8e05ed(0x138))
-                    return _0x5696b9 = _0x14dcf6['\x5f\x6f\x6e\x5f' + _0x29b927], _0x522af9 != null ? _0x20919b(_0xb62e6d) : _0x5d37c5['\x70'](_0x8e05ed(0x191) + _0x492673);
-                else
-                    return;
-            }
-            this[_0x8e05ed(0x1bc)](this[_0x8e05ed(0x1bb)]), this[_0x8e05ed(0x1b3)]();
-        }
-    }, _0x1c6c95['\x6f\x6e\x54\x72\x61\x64\x65\x52\x65\x61\x64\x79'] = function (_0x3cbab4) {
-        var _0x27b2e3 = _0xa56598;
-        return this[_0x27b2e3(0x1ad)](_0x3cbab4);
-    }, _0x1c6c95[_0xa56598(0x1c5)] = function (_0x205b5c, _0x30b9b6) {
-        var _0x18f0bd = _0xa56598, _0x95af;
-        _0x95af = $gameTemp['\x5f\x5f\x6e\x65\x74\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x49\x6e\x64\x65\x78'];
-        if (_0x95af == null)
-            return;
-        if (_0x95af < 0x0) {
-            if (_0x18f0bd(0x1b6) === _0x18f0bd(0x1b6))
-                return;
-            else
-                return _0x29011f(_0x92208e);
-        }
-        if (_0x205b5c != null && _0x30b9b6 >= 0x1) {
-            if (_0x18f0bd(0x16b) === '\x44\x62\x49\x4e\x73') {
-                if (this[_0x18f0bd(0x1ab)]())
-                    return;
-                this[_0x18f0bd(0x190)](_0x1a83af) ? this['\x73\x65\x6e\x64\x53\x74\x61\x72\x74\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74'](_0x5f4719) : _0x965c50['\x73\x68\x6f\x77\x52\x65\x64\x41\x6c\x65\x72\x74'](_0x18f0bd(0x14c));
-            } else
-                $gameTemp[_0x18f0bd(0x134)][_0x95af] = [
-                    _0x205b5c,
-                    _0x30b9b6
-                ];
-        } else
-            $gameTemp['\x5f\x6e\x65\x74\x4d\x79\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x73'][_0x95af] = null;
-        _0x389408['\x70'](_0x18f0bd(0x196)), console[_0x18f0bd(0x1aa)]($gameTemp[_0x18f0bd(0x134)]), this[_0x18f0bd(0x1bd)]();
-    }, _0x1c6c95[_0xa56598(0x15b)] = function () {
-        var _0x2ce92a = _0xa56598;
-        return _0x389408['\x70'](_0x2ce92a(0x195)), this[_0x2ce92a(0x1a1)]();
-    }, _0x1c6c95[_0xa56598(0x1d1)] = function () {
-        var _0x14b050 = _0xa56598;
-        if (_0x14b050(0x16a) === _0x14b050(0x15d))
-            return;
-        else
-            this[_0x14b050(0x1bb)] = null, this[_0x14b050(0x1a4)] = ![], this[_0x14b050(0x1b7)] = ![];
-    }, _0x1c6c95[_0xa56598(0x1c9)] = function (_0x47cc3b) {
-        var _0x1d3405 = _0xa56598;
-        if (_0x1d3405(0x18b) === _0x1d3405(0x14a)) {
-            var _0x4c2b5;
-            try {
-                '\x54\x52\x41\x44\x45\x20\x41\x43\x43\x45\x50\x54\x20\x49\x4e'['\x70']();
-                if (_0x391b0a !== _0x2950a5['\x6d\x79\x49\x64']())
-                    return;
-                return _0x5e52c1['\x6f\x6e\x41\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65']();
-            } catch (_0x5d071a) {
-                return _0x4c2b5 = _0x5d071a, _0x5cafb6['\x77'](_0x4c2b5);
-            }
-        } else {
-            var _0x224af8;
-            this[_0x1d3405(0x1bb)] = _0x47cc3b['\x69\x64'], _0x224af8 = {
-                '\x69\x6e\x69\x74\x69\x61\x74\x6f\x72': ANNetwork[_0x1d3405(0x1c0)](),
-                '\x70\x61\x72\x63\x69\x70\x69\x61\x6e\x74': _0x47cc3b['\x69\x64']
-            }, ANNetwork[_0x1d3405(0x172)](NMS[_0x1d3405(0x13a)](_0x1d3405(0x184), _0x224af8)), ANNetwork[_0x1d3405(0x145)](), nAPI['\x73\x68\x6f\x77\x49\x6e\x66\x6f\x4d\x65\x73\x73\x61\x67\x65'](_0x1d3405(0x186) + _0x47cc3b[_0x1d3405(0x151)]), this[_0x1d3405(0x17e)]();
-        }
-    }, _0x1c6c95[_0xa56598(0x17e)] = function () {
-        var _0x28625c = _0xa56598;
-        if (_0x28625c(0x1cf) === _0x28625c(0x1cf))
-            ANTradeManager['\x5f\x74\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65\x6f\x75\x74'] = setTimeout(function () {
-                var _0x17d8d6 = _0x28625c;
-                return ANTradeManager[_0x17d8d6(0x1ba)]();
-            }, ANTradeManager['\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65']);
-        else
-            return;
-    }, _0x1c6c95[_0xa56598(0x1a5)] = function (_0x3e616b) {
-        var _0x30db7e = _0xa56598;
-        ANNetwork[_0x30db7e(0x172)](NMS[_0x30db7e(0x13a)](_0x30db7e(0x165), _0x3e616b));
-    }, _0x1c6c95[_0xa56598(0x1bc)] = function (_0x331f74) {
-        var _0x260fe6 = _0xa56598;
-        _0x260fe6(0x178) !== _0x260fe6(0x141) ? ANNetwork['\x73\x65\x6e\x64'](NMS[_0x260fe6(0x13a)]('\x74\x72\x61\x64\x65\x5f\x61\x63\x63\x65\x70\x74', _0x331f74)) : _0x12236f[_0x260fe6(0x133)](_0x260fe6(0x175));
-    }, _0x1c6c95[_0xa56598(0x1bd)] = function () {
-        var _0x3bb568 = _0xa56598, _0x59e42f, _0x25dac1;
-        _0x25dac1 = $gameTemp[_0x3bb568(0x134)][_0x3bb568(0x173)](function (_0x59a6c4) {
-            var _0x1ac91b = _0x3bb568;
-            return '\x6e\x4d\x46\x53\x77' === '\x6e\x4d\x46\x53\x77' ? _0x59a6c4 != null ? [
-                ANET[_0x1ac91b(0x18c)][_0x1ac91b(0x1a9)](_0x59a6c4[0x0]),
-                _0x59a6c4[0x1]
-            ] : null : ![];
-        }), _0x59e42f = {
-            '\x66\x72\x6f\x6d\x57\x68\x6f': ANNetwork[_0x3bb568(0x1c0)](),
-            '\x69\x74\x65\x6d\x73': _0x25dac1
-        }, ANNetwork[_0x3bb568(0x172)](NMS[_0x3bb568(0x13a)]('\x74\x72\x61\x64\x65\x5f\x69\x74\x65\x6d\x73', _0x59e42f));
-    }, _0x1c6c95[_0xa56598(0x1ad)] = function (_0x10daf0) {
-        var _0x24b260 = _0xa56598, _0x1ddd23;
-        _0x1ddd23 = {
-            '\x66\x72\x6f\x6d\x57\x68\x6f': ANNetwork[_0x24b260(0x1c0)](),
-            '\x73\x74\x61\x74\x75\x73': _0x10daf0
-        }, ANNetwork['\x73\x65\x6e\x64'](NMS['\x43\x6f\x6d\x6d\x6f\x6e'](_0x24b260(0x17c), _0x1ddd23));
-    }, _0x1c6c95[_0xa56598(0x1a1)] = function () {
-        var _0xf4e9d4 = _0xa56598;
-        ANNetwork[_0xf4e9d4(0x19c)](NMS['\x43\x6f\x6d\x6d\x6f\x6e'](_0xf4e9d4(0x16e), ANNetwork[_0xf4e9d4(0x1c0)]()), function () {
-            return ANTradeManager['\x6f\x6e\x54\x72\x61\x64\x65\x43\x6f\x6d\x70\x6c\x65\x74\x65\x64']();
-        });
-    }, _0x1c6c95[_0xa56598(0x1cc)] = function () {
-        var _0xf713d9 = _0xa56598;
-        this[_0xf713d9(0x139)](), this[_0xf713d9(0x1b3)]();
-    }, _0x1c6c95['\x5f\x6f\x6e\x52\x65\x71\x75\x65\x73\x74\x41\x6e\x73\x77\x65\x72'] = function () {
-        var _0x436d61 = _0xa56598;
-        ANNetwork[_0x436d61(0x1a8)](), nAPI[_0x436d61(0x1b0)](), clearTimeout(ANTradeManager['\x5f\x74\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74\x54\x69\x6d\x65\x6f\x75\x74']);
-    }, _0x1c6c95[_0xa56598(0x1ba)] = function () {
-        var _0x2b51c7 = _0xa56598, _0x398861, _0x39a64e, _0x5cac47;
-        this[_0x2b51c7(0x139)]();
-        try {
-            _0x398861 = ANGameManager['\x67\x65\x74\x50\x6c\x61\x79\x65\x72\x44\x61\x74\x61\x42\x79\x49\x64'](this['\x5f\x68\x69\x73\x49\x64']);
-            if (_0x398861 != null)
-                _0x5cac47 = _0x398861[_0x2b51c7(0x151)], nAPI[_0x2b51c7(0x133)](_0x5cac47 + _0x2b51c7(0x157));
-            else {
-                if ('\x46\x54\x6e\x79\x47' === _0x2b51c7(0x18a))
-                    nAPI[_0x2b51c7(0x133)](_0x2b51c7(0x175));
-                else {
-                    var _0x41975f, _0x560337;
-                    _0x560337 = _0x48a5a6[_0x2b51c7(0x134)]['\x6d\x61\x70'](function (_0x245797) {
-                        var _0x2c9ee5 = _0x2b51c7;
-                        return _0x245797 != null ? [
-                            _0xa9e1e5[_0x2c9ee5(0x18c)][_0x2c9ee5(0x1a9)](_0x245797[0x0]),
-                            _0x245797[0x1]
-                        ] : null;
-                    }), _0x41975f = {
-                        '\x66\x72\x6f\x6d\x57\x68\x6f': _0x2ea9bb[_0x2b51c7(0x1c0)](),
-                        '\x69\x74\x65\x6d\x73': _0x560337
-                    }, _0x3880f8[_0x2b51c7(0x172)](_0x27af41[_0x2b51c7(0x13a)](_0x2b51c7(0x147), _0x41975f));
-                }
-            }
-        } catch (_0x1b046e) {
-            if (_0x2b51c7(0x192) === _0x2b51c7(0x192))
-                _0x39a64e = _0x1b046e, ANET['\x77'](_0x39a64e);
-            else
-                return _0xc66212 = _0x39dac8, _0x5642dc['\x77'](_0x1f1bd8);
-        }
-        this['\x5f\x68\x69\x73\x49\x64'] = null;
-    }, _0x1c6c95[_0xa56598(0x1bf)] = function () {
-        var _0x3679d9 = _0xa56598;
-        if (_0x3679d9(0x171) === _0x3679d9(0x1af))
-            return _0x4f39cf != null ? [
-                _0x2d48c5['\x55\x74\x69\x6c\x73'][_0x3679d9(0x148)](_0x2628d4[0x0]),
-                _0x422f20[0x1]
-            ] : null;
-        else {
-            var _0x22036a, _0x4ce047, _0x4c6a98, _0x21dcb4, _0x1139e9, _0x394a1d, _0x3ff1bf, _0x4c8a92, _0x231205;
-            _0x389408['\x70']('\x54\x52\x41\x44\x45\x20\x43\x4f\x4d\x50\x4c\x45\x54\x45\x44');
-            try {
-                if ('\x4a\x63\x68\x61\x62' !== _0x3679d9(0x13d)) {
-                    if (!this['\x69\x73\x48\x61\x76\x65\x54\x72\x61\x64\x65\x50\x61\x72\x74\x69\x63\x69\x70\x61\x6e\x74']())
-                        return;
-                    this['\x73\x65\x6e\x64\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74'](this[_0x3679d9(0x1bb)]), this['\x5f\x73\x74\x61\x72\x74\x54\x72\x61\x64\x65\x53\x65\x73\x73\x69\x6f\x6e']();
-                } else {
-                    KDCore['\x55\x74\x69\x6c\x73'][_0x3679d9(0x1a2)](ANET['\x50\x50'][_0x3679d9(0x1ca)]()), _0x4ce047 = $gameTemp[_0x3679d9(0x134)][_0x3679d9(0x13b)]();
-                    if (_0x4ce047 != null) {
-                        if (_0x4ce047[0x1] != null && _0x4ce047[0x1] > 0x0) {
-                            if (_0x3679d9(0x19a) === _0x3679d9(0x19a))
-                                $gameParty[_0x3679d9(0x155)](_0x4ce047[0x1]);
-                            else {
-                                var _0x5c0d6c;
-                                try {
-                                    '\x54\x52\x41\x44\x45\x20\x52\x45\x46\x55\x53\x45\x20\x49\x4e'['\x70']();
-                                    if (_0x2b9787 !== _0x57082d[_0x3679d9(0x1c0)]())
-                                        return;
-                                    return _0x2cf685['\x6f\x6e\x41\x6e\x6f\x74\x68\x65\x72\x50\x6c\x61\x79\x65\x72\x4e\x6f\x74\x41\x63\x63\x65\x70\x74\x54\x72\x61\x64\x65\x4f\x72\x54\x69\x6d\x65\x6f\x75\x74']();
-                                } catch (_0xaaeaf3) {
-                                    return _0x5c0d6c = _0xaaeaf3, _0x27142b['\x77'](_0x5c0d6c);
-                                }
-                            }
-                        }
-                    }
-                    _0x4c8a92 = $gameTemp[_0x3679d9(0x134)];
-                    for (_0x4c6a98 = 0x0, _0x394a1d = _0x4c8a92['\x6c\x65\x6e\x67\x74\x68']; _0x4c6a98 < _0x394a1d; _0x4c6a98++) {
-                        _0x21dcb4 = _0x4c8a92[_0x4c6a98];
-                        if (_0x21dcb4 == null) {
-                            if ('\x56\x4c\x66\x4f\x6c' === _0x3679d9(0x15e))
-                                continue;
-                            else
-                                return _0x183872 != null && _0x368aaf[_0x3679d9(0x18f)](_0x5dea8b);
-                        }
-                        if (_0x21dcb4[0x0] == null)
-                            continue;
-                        if (_0x21dcb4[0x1] <= 0x0) {
-                            if (_0x3679d9(0x167) === _0x3679d9(0x167))
-                                continue;
-                            else
-                                return;
-                        }
-                        $gameParty['\x67\x61\x69\x6e\x49\x74\x65\x6d'](_0x21dcb4[0x0], _0x21dcb4[0x1] * -0x1);
-                    }
-                    _0x4ce047 = $gameTemp[_0x3679d9(0x149)][_0x3679d9(0x13b)]();
-                    _0x4ce047 != null && (_0x4ce047[0x1] != null && _0x4ce047[0x1] > 0x0 && $gameParty['\x67\x61\x69\x6e\x47\x6f\x6c\x64'](_0x4ce047[0x1]));
-                    _0x231205 = $gameTemp[_0x3679d9(0x149)];
-                    for (_0x1139e9 = 0x0, _0x3ff1bf = _0x231205[_0x3679d9(0x152)]; _0x1139e9 < _0x3ff1bf; _0x1139e9++) {
-                        if (_0x3679d9(0x19e) === _0x3679d9(0x19e)) {
-                            _0x21dcb4 = _0x231205[_0x1139e9];
-                            if (_0x21dcb4 == null) {
-                                if ('\x73\x59\x56\x66\x58' !== _0x3679d9(0x1ae))
-                                    continue;
-                                else
-                                    _0x5d0560[_0x3679d9(0x177)] = _0x44c53b(function () {
-                                        var _0x4687ed = _0x3679d9;
-                                        return _0x129649[_0x4687ed(0x1ba)]();
-                                    }, _0x222254[_0x3679d9(0x146)]);
-                            }
-                            if (_0x21dcb4[0x0] == null) {
-                                if ('\x4a\x47\x79\x58\x63' !== _0x3679d9(0x168))
-                                    return;
-                                else
-                                    continue;
-                            }
-                            if (_0x21dcb4[0x1] <= 0x0) {
-                                if (_0x3679d9(0x174) !== '\x76\x70\x77\x55\x47')
-                                    continue;
-                                else
-                                    return;
-                            }
-                            $gameParty['\x67\x61\x69\x6e\x49\x74\x65\x6d'](_0x21dcb4[0x0], _0x21dcb4[0x1]);
-                        } else
-                            return ![];
-                    }
-                }
-            } catch (_0x6ee8fa) {
-                _0x3679d9(0x164) !== _0x3679d9(0x164) ? _0x552f64[_0x3679d9(0x194)]() : (_0x22036a = _0x6ee8fa, ANET['\x77'](_0x22036a));
-            }
-        }
-    }, _0x1c6c95[_0xa56598(0x160)] = function (_0x415852, _0x5bc2f1) {
-        var _0x3afce0 = _0xa56598, _0xb2081a, _0x627d28;
-        try {
-            if (_0x3afce0(0x15a) !== '\x59\x65\x71\x42\x78')
-                return _0x284326['\x61\x6e\x79'](this['\x5f\x68\x69\x73\x49\x64']);
-            else {
-                _0x627d28 = ANTradeManager[_0x3afce0(0x143) + _0x415852];
-                if (_0x627d28 != null)
-                    return _0x627d28(_0x5bc2f1);
-                else {
-                    if (_0x3afce0(0x166) !== _0x3afce0(0x163))
-                        return _0x389408['\x70'](_0x3afce0(0x191) + _0x415852);
-                    else
-                        _0x3b22ba = _0x331316, _0x26ecbc['\x77'](_0x1e1792);
-                }
-            }
-        } catch (_0x576f86) {
-            return _0x3afce0(0x13f) !== _0x3afce0(0x13f) ? (_0x1b7134 = _0xfda823, _0x27c0b1['\x77'](_0x395f3f)) : (_0xb2081a = _0x576f86, ANET['\x77'](_0xb2081a));
-        }
-    }, _0x1c6c95[_0xa56598(0x179)] = function (_0x263cb9) {
-        var _0x27f41e = _0xa56598;
-        if (_0x27f41e(0x198) === '\x76\x75\x74\x55\x46') {
-            var _0x221e64, _0x4474ff, _0x396870, _0x1b24c7;
-            try {
-                _0x27f41e(0x1cd)['\x70'](), {
-                    initiator: _0x4474ff,
-                    parcipiant: _0x396870
-                } = _0x263cb9;
-                if (_0x396870 !== ANNetwork[_0x27f41e(0x1c0)]())
-                    return;
-                ANTradeManager[_0x27f41e(0x1bb)] = _0x4474ff, _0x1b24c7 = ANTradeManager[_0x27f41e(0x135)]();
-                if (_0x1b24c7 === !![]) {
-                    if ('\x7a\x70\x73\x58\x71' !== _0x27f41e(0x17f))
-                        _0x50b2f2 = _0x210ef9[_0x27f41e(0x1a0)](this['\x5f\x68\x69\x73\x49\x64']), _0x489c99 != null ? (_0x1e8284 = _0x1d91fe[_0x27f41e(0x151)], _0x4baf13[_0x27f41e(0x133)](_0x3335bf + _0x27f41e(0x157))) : _0x2d7316[_0x27f41e(0x133)](_0x27f41e(0x175));
-                    else
-                        return ANTradeManager['\x73\x68\x6f\x77\x54\x72\x61\x64\x65\x49\x6e\x44\x69\x61\x6c\x6f\x67']();
-                } else
-                    return '\x62\x51\x44\x75\x72' === _0x27f41e(0x16c) ? _0x5de29e[_0x27f41e(0x150)]() : ANTradeManager[_0x27f41e(0x150)]();
-            } catch (_0x3ed7c9) {
-                if (_0x27f41e(0x161) === '\x69\x6b\x54\x42\x64') {
-                    '\x54\x52\x41\x44\x45\x20\x53\x54\x41\x54\x55\x53\x20\x49\x4e'['\x70']();
-                    if (!_0x29e54a['\x69\x73\x49\x6e\x54\x72\x61\x64\x65']())
-                        return;
-                    ({
-                        fromWho: _0x28aa69,
-                        status: _0xbfea08
-                    } = _0x45c13f);
-                    if (_0x526d7b !== _0x33e11d['\x5f\x68\x69\x73\x49\x64'])
-                        return;
-                    return _0x21ec6f[_0x27f41e(0x1b7)] = _0x13692b;
-                } else
-                    return _0x221e64 = _0x3ed7c9, ANET['\x77'](_0x221e64);
-            }
-        } else {
-            if (!this[_0x27f41e(0x1c6)]())
-                return;
-            _0x1a1f07['\x50\x50'][_0x27f41e(0x136)]() ? _0x3b9cac['\x55\x49']['\x73\x68\x6f\x77\x4d\x6f\x64\x61\x6c\x57\x69\x6e\x64\x6f\x77\x46\x6f\x72\x54\x72\x61\x64\x65'](this[_0x27f41e(0x1bb)]) : _0x4778b1[_0x27f41e(0x194)]();
-        }
-    }, _0x1c6c95[_0xa56598(0x18e)] = function (_0xf2bd6) {
-        var _0x1a518a = _0xa56598;
-        if (_0x1a518a(0x1c2) === _0x1a518a(0x1d3))
-            return [
-                _0x2d086a['\x55\x74\x69\x6c\x73'][_0x1a518a(0x148)](_0x8fd9d3[0x0]),
-                _0x3f12bf[0x1]
-            ];
-        else {
-            var _0x49f4d7;
-            try {
-                if ('\x56\x55\x43\x4b\x6d' === _0x1a518a(0x1b9)) {
-                    _0x1a518a(0x19b)['\x70']();
-                    if (_0xf2bd6 !== ANNetwork[_0x1a518a(0x1c0)]())
-                        return;
-                    return ANTradeManager[_0x1a518a(0x1ba)]();
-                } else {
-                    if (!this[_0x1a518a(0x1c6)]())
-                        return;
-                    _0x4f5939['\x70'](_0x1a518a(0x1ce) + this[_0x1a518a(0x1bb)]), this[_0x1a518a(0x1a4)] = !![], _0x884d38[_0x1a518a(0x134)] = [], _0x50f8f0[_0x1a518a(0x149)] = [], _0x11bde1['\x5f\x6e\x65\x74\x48\x69\x73\x54\x72\x61\x64\x65\x52\x65\x61\x64\x79\x53\x74\x61\x74\x75\x73'] = ![], _0x571396[_0x1a518a(0x1c3)](_0x2167de);
-                }
-            } catch (_0x41ca61) {
-                if (_0x1a518a(0x16d) === _0x1a518a(0x16d))
-                    return _0x49f4d7 = _0x41ca61, ANET['\x77'](_0x49f4d7);
-                else
-                    return;
-            }
-        }
-    }, _0x1c6c95['\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x61\x63\x63\x65\x70\x74'] = function (_0x506cf7) {
-        var _0x53c274 = _0xa56598;
-        if ('\x7a\x70\x53\x46\x42' !== _0x53c274(0x169))
-            return _0x29ab4c[_0x53c274(0x1be)] !== '\x6d\x61\x70';
-        else {
-            var _0x434255;
-            try {
-                _0x53c274(0x170)['\x70']();
-                if (_0x506cf7 !== ANNetwork[_0x53c274(0x1c0)]())
-                    return;
-                return ANTradeManager[_0x53c274(0x1cc)]();
-            } catch (_0x6e36ae) {
-                return _0x434255 = _0x6e36ae, ANET['\x77'](_0x434255);
-            }
-        }
-    }, _0x1c6c95['\x5f\x6f\x6e\x5f\x74\x72\x61\x64\x65\x5f\x69\x74\x65\x6d\x73'] = function (_0x1ee475) {
-        var _0x2e4491 = _0xa56598, _0x2fe8ae, _0x5d193c, _0x38460e;
-        try {
-            _0x2e4491(0x17d)['\x70']();
-            if (!ANTradeManager[_0x2e4491(0x1ab)]()) {
-                if (_0x2e4491(0x18d) !== _0x2e4491(0x197))
-                    return;
-                else
-                    return;
-            }
-            ({
-                fromWho: _0x5d193c,
-                items: _0x38460e
-            } = _0x1ee475);
-            if (_0x5d193c !== ANTradeManager[_0x2e4491(0x1bb)])
-                return;
-            return $gameTemp['\x5f\x6e\x65\x74\x48\x69\x73\x4e\x65\x74\x54\x72\x61\x64\x65\x49\x74\x65\x6d\x73'] = _0x38460e[_0x2e4491(0x173)](function (_0x303577) {
-                var _0x2f5a15 = _0x2e4491;
-                if (_0x2f5a15(0x187) === _0x2f5a15(0x187))
-                    return _0x303577 != null ? [
-                        ANET['\x55\x74\x69\x6c\x73']['\x75\x6e\x70\x61\x63\x6b\x49\x74\x65\x6d\x46\x72\x6f\x6d\x4e\x65\x74\x77\x6f\x72\x6b'](_0x303577[0x0]),
-                        _0x303577[0x1]
-                    ] : _0x2f5a15(0x1cb) !== '\x73\x68\x49\x48\x76' ? this['\x73\x65\x6e\x64\x52\x65\x66\x75\x73\x65\x54\x72\x61\x64\x65\x52\x65\x71\x75\x65\x73\x74'](this['\x5f\x68\x69\x73\x49\x64']) : null;
-                else {
-                    '\x54\x52\x41\x44\x45\x20\x52\x45\x46\x55\x53\x45\x20\x49\x4e'['\x70']();
-                    if (_0x4ca9a8 !== _0x313265[_0x2f5a15(0x1c0)]())
-                        return;
-                    return _0x3b4c0a[_0x2f5a15(0x1ba)]();
-                }
-            });
-        } catch (_0x308b8e) {
-            return _0x2fe8ae = _0x308b8e, ANET['\x77'](_0x2fe8ae);
-        }
-    }, _0x1c6c95[_0xa56598(0x181)] = function (_0x44c2bc) {
-        var _0x3f4c09 = _0xa56598, _0x157188, _0x238423, _0x4a4335;
-        try {
-            '\x54\x52\x41\x44\x45\x20\x53\x54\x41\x54\x55\x53\x20\x49\x4e'['\x70']();
-            if (!ANTradeManager[_0x3f4c09(0x1ab)]()) {
-                if (_0x3f4c09(0x17a) === '\x63\x55\x69\x4a\x57')
-                    return;
-                else
-                    return [
-                        _0x4ca04f[_0x3f4c09(0x18c)][_0x3f4c09(0x1a9)](_0x2709eb[0x0]),
-                        _0x3e5f4c[0x1]
-                    ];
-            }
-            ({
-                fromWho: _0x238423,
-                status: _0x4a4335
-            } = _0x44c2bc);
-            if (_0x238423 !== ANTradeManager[_0x3f4c09(0x1bb)])
-                return;
-            return $gameTemp[_0x3f4c09(0x1b7)] = _0x4a4335;
-        } catch (_0x4985b3) {
-            return _0x157188 = _0x4985b3, ANET['\x77'](_0x157188);
-        }
-    }, _0x1c6c95[_0xa56598(0x185)] = function (_0x23450c) {
-        var _0x491f93 = _0xa56598;
-        if (_0x491f93(0x1b1) !== '\x47\x4a\x4d\x6b\x62')
-            return null;
-        else {
-            var _0x939564;
-            try {
-                if (_0x491f93(0x154) !== _0x491f93(0x154))
-                    return;
-                else {
-                    '\x54\x52\x41\x44\x45\x20\x43\x4f\x4d\x50\x4c\x45\x54\x45\x20\x49\x4e'['\x70']();
-                    if (!ANTradeManager[_0x491f93(0x1ab)]()) {
-                        if (_0x491f93(0x1b2) !== _0x491f93(0x1b2))
-                            _0x3d3ea8[_0x491f93(0x134)][_0x47583d] = [
-                                _0x2c7234,
-                                _0x96a442
-                            ];
-                        else
-                            return;
-                    }
-                    if (_0x23450c !== ANTradeManager[_0x491f93(0x1bb)])
-                        return;
-                    if ($gameTemp[_0x491f93(0x1b7)] !== !![])
-                        return;
-                    return ANTradeManager[_0x491f93(0x1bf)]();
-                }
-            } catch (_0x4d7fbb) {
-                if (_0x491f93(0x153) === _0x491f93(0x153))
-                    return _0x939564 = _0x4d7fbb, ANET['\x77'](_0x939564);
-                else
-                    _0x315341[_0x491f93(0x1d2)](_0x4c21d2[0x1]);
-            }
-        }
+    // * Если игрок в бою, то нельзя (если в событии, то тоже нельзя) и т.д.
+    if (this.isPlayerAvailableForTrade(anotherPlayer)) {
+      this.sendStartTradeRequest(anotherPlayer);
+    } else {
+      nAPI.showRedAlert("Player not available!");
+    }
+  };
+  
+  // * Может ли другой игрок сейчас принять запрос на торговлю
+  // * Да, если находится на сцене карты (пусть даже в событии)
+  _.isPlayerAvailableForTrade = function(anotherPlayer) {
+    return (anotherPlayer != null) && NetPlayerDataWrapper.isOnMapScene(anotherPlayer);
+  };
+  // * Когда уже торговля идёт, проверка что другой игрок на сцене и существует (не отключился)
+  _.isTradeParticipantIsValid = function() {
+    var anotherPlayer;
+    if (!this.isInTrade()) {
+      return false;
+    }
+    if (!this.isHaveTradeParticipant()) {
+      return false;
+    }
+    anotherPlayer = this.getTradeParticipantData();
+    if (anotherPlayer != null) {
+      // * Тут должна быть проверка == "trade", но тогда
+      // * возвращает false, если сцена выбора предмета внутри торговли
+      return anotherPlayer.scene !== "map";
+    }
+    return false;
+  };
+  // * Может ли текущий игрок начать торговлю
+  // * Да, если он не торгует уже и находится на сцене карты
+  _.isClientAvailableForTrade = function() {
+    return ANET.isPro() && !this.isInTrade() && KDCore.Utils.isSceneMap();
+  };
+  // * Подготовить данные для торговли и запустить сцену
+  _._startTradeSession = function() {
+    // * Должен быть игрок, с кем мы торгуем
+    if (!this.isHaveTradeParticipant()) {
+      return;
+    }
+    LOG.p("TRADE WITH " + this._hisId);
+    // * Находимся в режиме торговли
+    this._isInTrade = true;
+    // * Нет никаких предметов
+    $gameTemp._netMyTradeItems = [];
+    $gameTemp._netHisNetTradeItems = [];
+    // * Изначально другой игрок "не готов"
+    $gameTemp._netHisTradeReadyStatus = false;
+    SceneManager.push(Scene_NetworkInGameTrade);
+  };
+  // * Показать диалоговое окно (принять торговлю или нет)
+  _.showTradeInDialog = function() {
+    // * Должен быть игрок, кто нам предлагает торговлю
+    if (!this.isHaveTradeParticipant()) {
+      return;
+    }
+    if (ANET.PP.isShowModalForTradeRequest()) {
+      ANET.UI.showModalWindowForTrade(this._hisId);
+    } else {
+      ANTradeManager.acceptTradeInRequest();
+    }
+  };
+  // * Отказать в торговле игроку anotherPlayer (он прислал запрос)
+  _.refuseTradeRequest = function() {
+    if (this.isHaveTradeParticipant()) {
+      return this.sendRefuseTradeRequest(this._hisId);
+    }
+  };
+  // * Принять запрос в торговле от другого игрока
+  _.acceptTradeInRequest = function() {
+    if (!this.isHaveTradeParticipant()) {
+      return;
+    }
+    this.sendAcceptTradeRequest(this._hisId);
+    this._startTradeSession();
+  };
+  //? СОБЫТИЯ ВНУТРИ СЦЕНЫ ТОРГОВЛИ
+  // * ===============================================================
+
+  // * Я "готов" к торговле (нажатие кнопки)
+  _.onTradeReady = function(status) {
+    return this.sendMyTradeReadyStatus(status);
+  };
+  // * Изменение вещей (золота) с моей стороны
+  _.onTradeChange = function(item, count) {
+    var index;
+    index = $gameTemp.__netTradeItemIndex;
+    if (index == null) {
+      return;
+    }
+    if (index < 0) {
+      return;
+    }
+    if ((item != null) && count >= 1) {
+      $gameTemp._netMyTradeItems[index] = [
+        item,
+        count // item, count
+      ];
+    } else {
+      $gameTemp._netMyTradeItems[index] = null;
+    }
+    LOG.p("Trade items [my] changed");
+    console.info($gameTemp._netMyTradeItems);
+    this.sendMyTradeItems();
+  };
+  // * Отправляем изменения, у другого игрока должен быть сброс "Ready"
+
+  // * Оба игрока готовы, завершаем торговлю
+  _.onTradeShouldComplete = function() {
+    LOG.p("TRADE SHOULD BE COMPLETED");
+    return this.sendCompleteTrade();
+  };
+  // * Торговля законченна (любой исход)
+  _.onTradeSceneEnd = function() {
+    this._hisId = null;
+    this._isInTrade = false;
+    this._netHisTradeReadyStatus = false;
+  };
+  //? КОМАНДЫ ЗАПРОСЫ (посылаются на сервер)
+  // * ===============================================================
+  _.sendStartTradeRequest = function(anotherPlayer) {
+    var data;
+    this._hisId = anotherPlayer.id;
+    data = {
+      initiator: ANNetwork.myId(),
+      parcipiant: anotherPlayer.id
     };
-}()));
+    ANNetwork.send(NMS.Common("trade_request", data));
+    ANNetwork.setWait();
+    nAPI.showInfoMessage("Waiting " + anotherPlayer.name);
+    // * Нужет timeout (вдруг игрок disconnect)
+    this._startRequestTimeout();
+  };
+  _._startRequestTimeout = function() {
+    ANTradeManager._tradeRequestTimeout = setTimeout((function() {
+      return ANTradeManager.onAnotherPlayerNotAcceptTradeOrTimeout();
+    }), ANTradeManager.TradeRequestTime);
+  };
+  _.sendRefuseTradeRequest = function(anotherPlayerId) {
+    ANNetwork.send(NMS.Common("trade_refuse", anotherPlayerId));
+  };
+  _.sendAcceptTradeRequest = function(anotherPlayerId) {
+    ANNetwork.send(NMS.Common("trade_accept", anotherPlayerId));
+  };
+  _.sendMyTradeItems = function() {
+    var data, items;
+    items = $gameTemp._netMyTradeItems.map(function(item) {
+      if (item != null) {
+        return [ANET.Utils.packItemForNetwork(item[0]), item[1]];
+      } else {
+        return null;
+      }
+    });
+    data = {
+      fromWho: ANNetwork.myId(),
+      items
+    };
+    ANNetwork.send(NMS.Common("trade_items", data));
+  };
+  _.sendMyTradeReadyStatus = function(status) {
+    var data;
+    data = {
+      fromWho: ANNetwork.myId(),
+      status
+    };
+    ANNetwork.send(NMS.Common("trade_status", data));
+  };
+  _.sendCompleteTrade = function() {
+    ANNetwork.callback(NMS.Common("trade_complete", ANNetwork.myId()), function() {
+      return ANTradeManager.onTradeCompleted();
+    });
+  };
+  //? CALLBACKS ОТ ЗАПРОСОВ НА СЕРВЕР
+  // * ===============================================================
+
+  // * Другой игрок принял приглашение
+  _.onAnotherPlayerAcceptTrade = function() {
+    this._onRequestAnswer();
+    this._startTradeSession();
+  };
+  _._onRequestAnswer = function() {
+    ANNetwork.resetWait();
+    nAPI.hideInfoMessage();
+    clearTimeout(ANTradeManager._tradeRequestTimeout);
+  };
+  // * Другой игрок отказался (или timeout)
+  _.onAnotherPlayerNotAcceptTradeOrTimeout = function() {
+    var anotherPlayer, e, name;
+    this._onRequestAnswer();
+    try {
+      anotherPlayer = ANGameManager.getPlayerDataById(this._hisId);
+      if (anotherPlayer != null) {
+        name = anotherPlayer.name;
+        nAPI.showRedAlert(name + " refused");
+      } else {
+        nAPI.showRedAlert("Trade refused");
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+    this._hisId = null;
+  };
+  _.onTradeCompleted = function() {
+    var e, gold, i, item, j, len, len1, ref, ref1;
+    LOG.p("TRADE COMPLETED");
+    try {
+      KDCore.Utils.playSE(ANET.PP.tradeSceneCompleteSE());
+      // * Забираем вещи у игрока (которые он предлагал)
+      gold = $gameTemp._netMyTradeItems.shift();
+      if (gold != null) {
+        if ((gold[1] != null) && gold[1] > 0) {
+          $gameParty.loseGold(gold[1]);
+        }
+      }
+      ref = $gameTemp._netMyTradeItems;
+      for (i = 0, len = ref.length; i < len; i++) {
+        item = ref[i];
+        if (item == null) {
+          continue;
+        }
+        if (item[0] == null) {
+          continue;
+        }
+        if (item[1] <= 0) {
+          continue;
+        }
+        $gameParty.gainItem(item[0], item[1] * -1); // * -1 - т.к убираем
+      }
+      
+      // * Добавляем вещи другого игрока (что он нам предложил)
+      gold = $gameTemp._netHisNetTradeItems.shift();
+      if (gold != null) {
+        if ((gold[1] != null) && gold[1] > 0) {
+          $gameParty.gainGold(gold[1]);
+        }
+      }
+      ref1 = $gameTemp._netHisNetTradeItems;
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        item = ref1[j];
+        if (item == null) {
+          continue;
+        }
+        if (item[0] == null) {
+          continue;
+        }
+        if (item[1] <= 0) {
+          continue;
+        }
+        $gameParty.gainItem(item[0], item[1]);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  //? СОБЫТИЯ (обработка событий от сервера, вызываются из NETClientMethodsManager)
+  // * ===============================================================
+
+  // * Обработка общей команды NMS.Common
+  _.onCommonCommandFromServer = function(cmd, content) {
+    var e, method;
+    try {
+      method = ANTradeManager["_on_" + cmd];
+      if (method != null) {
+        return method(content);
+      } else {
+        return LOG.p("Unknown common subCommand " + cmd);
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_request = function(content) {
+    var e, initiator, parcipiant, result;
+    try {
+      "TRADE REQUEST IN".p();
+      ({initiator, parcipiant} = content);
+      // * Эта команда не мне
+      if (parcipiant !== ANNetwork.myId()) {
+        return;
+      }
+      // * Запоминаем кто с нами хочет торговать
+      ANTradeManager._hisId = initiator;
+      result = ANTradeManager.isClientAvailableForTrade();
+      if (result === true) {
+        return ANTradeManager.showTradeInDialog();
+      } else {
+        return ANTradeManager.refuseTradeRequest();
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_refuse = function(content) {
+    var e;
+    try {
+      "TRADE REFUSE IN".p();
+      // * Эта команда не на мой запрос торговли
+      if (content !== ANNetwork.myId()) {
+        return;
+      }
+      return ANTradeManager.onAnotherPlayerNotAcceptTradeOrTimeout();
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_accept = function(content) {
+    var e;
+    try {
+      "TRADE ACCEPT IN".p();
+      // * Этот ответ не на мой запрос торговли
+      if (content !== ANNetwork.myId()) {
+        return;
+      }
+      return ANTradeManager.onAnotherPlayerAcceptTrade();
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_items = function(content) {
+    var e, fromWho, items;
+    try {
+      "TRADE ITEMS IN".p();
+      if (!ANTradeManager.isInTrade()) {
+        return;
+      }
+      // * Это предметы не от моего соучастника торговли
+      ({fromWho, items} = content);
+      if (fromWho !== ANTradeManager._hisId) {
+        return;
+      }
+      return $gameTemp._netHisNetTradeItems = items.map(function(item) {
+        if (item != null) {
+          return [ANET.Utils.unpackItemFromNetwork(item[0]), item[1]];
+        } else {
+          return null;
+        }
+      });
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_status = function(content) {
+    var e, fromWho, status;
+    try {
+      "TRADE STATUS IN".p();
+      if (!ANTradeManager.isInTrade()) {
+        return;
+      }
+      ({fromWho, status} = content);
+      // * Этот статус не от моего соучастника торговли
+      if (fromWho !== ANTradeManager._hisId) {
+        return;
+      }
+      return $gameTemp._netHisTradeReadyStatus = status;
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+  _._on_trade_complete = function(content) {
+    var e;
+    try {
+      "TRADE COMPLETE IN".p();
+      if (!ANTradeManager.isInTrade()) {
+        return;
+      }
+      // * Проверка на соответсвие участника торговли
+      if (content !== ANTradeManager._hisId) {
+        return;
+      }
+      // * Доп. проверка статуса
+      if ($gameTemp._netHisTradeReadyStatus !== true) {
+        return;
+      }
+      // * Конец торговли (успешный)
+      return ANTradeManager.onTradeCompleted();
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+})();
+
 
 // Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -14873,6 +20664,9 @@ ANET.Utils = KDCore.Utils.ANET;
   var _;
   //@[DEFINES]
   _ = KDCore.Utils.ANET;
+  _.isGameInActiveState = function() {
+    return window.top.document.hasFocus();
+  };
   // * Проверка, что комментарий является NET командой
   _.isNetCommentCommand = function(commentLine) {
     if (!String.any(commentLine)) {
@@ -14930,6 +20724,32 @@ ANET.Utils = KDCore.Utils.ANET;
         typeId = KDCore.Utils.getItemTypeId(item);
       }
       return {id, typeId};
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+      return null;
+    }
+  };
+  // Shortcuts: p1 - player 1, a1 - actor 1
+  _.getNetworkCharByShortcut = function(shortcut) {
+    var byWhat, e, itemIndex, typeSymbol;
+    try {
+      if (!String.any(shortcut)) {
+        return null;
+      }
+      typeSymbol = shortcut[0];
+      if (typeSymbol === 'a') {
+        byWhat = 'actorId';
+      } else if (typeSymbol === 'p') {
+        byWhat = 'playerIndex';
+      } else {
+        return null;
+      }
+      itemIndex = parseInt(shortcut.substr(1));
+      if (isNaN(itemIndex)) {
+        return null;
+      }
+      return nAPI.getPlayerCharacter(byWhat, itemIndex);
     } catch (error) {
       e = error;
       ANET.w(e);
@@ -15115,7 +20935,7 @@ ANET.Utils = KDCore.Utils.ANET;
   _.generateSaveUniqueId = function() {
     var savefileId, versionId;
     versionId = ANET.VD.getGameVersion();
-    savefileId = versionId + "" + Math.randomInt(versionId);
+    savefileId = versionId + "@" + KDCore.makeid(12);
     // * Вероятность крайне крайне мала, но нельзя чтобы были повторы
     if (DataManager.nIsHaveNetworkSaveWithId(savefileId)) {
       return this.generateSaveUniqueId();
@@ -15187,6 +21007,20 @@ ANET.Utils = KDCore.Utils.ANET;
       return 10;
     }
     return 0;
+  };
+  _.getActorFaceForNetwork = function(actor) {
+    var e;
+    try {
+      if ((actor != null) && (actor.meta != null) && (String.any(actor.meta.faceForNetwork) != null)) {
+        return actor.meta.faceForNetwork;
+      } else {
+        return "faceNoActor";
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "faceNoActor";
   };
 })();
 
@@ -15482,6 +21316,31 @@ ANET.Utils = KDCore.Utils.ANET;
   var ALIAS__makeSavefileInfo, _;
   //@[DEFINES]
   _ = DataManager;
+  DataManager._databaseFiles.push({
+    name: "$ANETZ_NUI_JsonNetworkScene",
+    src: "ANETZ/NUI_NetworkScene.json"
+  }, {
+    name: "$ANETZ_NUI_JsonRoomsListScene",
+    src: "ANETZ/NUI_RoomsListScene.json"
+  }, {
+    name: "$ANETZ_NUI_JsonRoomsListItem",
+    src: "ANETZ/NUI_RoomsListItem.json"
+  }, {
+    name: "$ANETZ_NUI_JsonRoomLobbyScene",
+    src: "ANETZ/NUI_RoomLobbyScene.json"
+  }, {
+    name: "$ANETZ_NUI_JsonRoomLobbyPlayerItem",
+    src: "ANETZ/NUI_RoomLobbyPlayerItem.json"
+  }, {
+    name: "$ANETZ_NUI_JsonRoomLobbyCharacterItem",
+    src: "ANETZ/NUI_RoomLobbyCharacterItem.json"
+  }, {
+    name: "$ANETZ_NUI_JsonNetworkScene_NewRoomModal",
+    src: "ANETZ/NUI_NetworkScene_NewRoomModal.json"
+  }, {
+    name: "$ANETZ_NUI_JsonNetworkScene_SettingsModal",
+    src: "ANETZ/NUI_NetworkScene_SettingsModal.json"
+  });
   //@[ALIAS]
   ALIAS__makeSavefileInfo = _.makeSavefileInfo;
   _.makeSavefileInfo = function() {
@@ -15584,6 +21443,252 @@ ANET.Utils = KDCore.Utils.ANET;
 })();
 
 // ■ END DataManager.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+var FWindow_InGameChat;
+
+FWindow_InGameChat = class FWindow_InGameChat extends KDCore.FloatingWindow {
+  constructor() {
+    super(...arguments);
+    this.params = this.getSettings();
+    this.setDragEndHandler(this._savePlayerDragPosition.bind(this));
+    return;
+  }
+
+  //%[I] Показывать чат в сцене ввода сообщения
+  // * должен быть всега не прозрачный и без обработки кнопок (без крестика)
+  getSettings() {
+    return ANET.PP.uiData("inGameChatWindow");
+  }
+
+  isMouseInContentZone() {
+    return !($gameTemp.kdButtonUnderMouse != null) && !this._isMouseInHeader();
+  }
+
+  //? message: {
+  //   channelId
+  //   actorId
+  //   text
+  //}
+  addMessageToChat(message) {
+    var e;
+    try {
+      return this._addMessageToChat(message, true);
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  }
+
+  parseEmotions(message) {
+    if (!ANET.PP.getChatMessagesSettings().allowEmotions) {
+      return;
+    }
+    this._parseAndShowEmotions(message);
+  }
+
+  open() {
+    super.open();
+    return $gamePlayer._nChatIsClosed = false;
+  }
+
+  close() {
+    super.close();
+    return $gamePlayer._nChatIsClosed = true;
+  }
+
+  update() {
+    var ref;
+    super.update();
+    if ((ref = this._changer) != null) {
+      ref.update();
+    }
+    if (this.isOpen()) {
+      return this._updateClickOnChat();
+    }
+  }
+
+};
+
+(function() {  
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  // ■ FWindow_InGameChat.coffee
+  //╒═════════════════════════════════════════════════════════════════════════╛
+  //---------------------------------------------------------------------------
+  var ALIAS___onMouseIn, ALIAS___onMouseOut, _;
+  //@[DEFINES]
+  _ = FWindow_InGameChat.prototype;
+  //@[ALIAS]
+  ALIAS___onMouseIn = _._onMouseIn;
+  _._onMouseIn = function() {
+    ALIAS___onMouseIn.call(this);
+    if (this.opacity === 255) {
+      return;
+    }
+    this._changer = new KDCore.Changer(this);
+    this._changer.change('opacity').from(this.opacity).to(255).step(10);
+    this._changer.start();
+  };
+  
+  //@[ALIAS]
+  ALIAS___onMouseOut = _._onMouseOut;
+  _._onMouseOut = function() {
+    ALIAS___onMouseOut.call(this);
+    if (this.params.notActiveOpacity === 255) {
+      return;
+    }
+    this._changer = new KDCore.Changer(this);
+    this._changer.change('opacity').from(this.opacity).to(this.params.notActiveOpacity).step(5).delay(10);
+    this._changer.start();
+  };
+  //$[OVER]
+  _._createCustomElements = function() {
+    this._lines = [];
+    this._loadChatHistory();
+  };
+  _._loadChatHistory = function() {
+    var e, j, len, message, ref;
+    if ($gameTemp._nChatHistory == null) {
+      $gameTemp._nChatHistory = [];
+    }
+    ref = $gameTemp._nChatHistory;
+    for (j = 0, len = ref.length; j < len; j++) {
+      message = ref[j];
+      try {
+        this._addMessageToChat(message, false);
+      } catch (error) {
+        e = error;
+        ANET.w(e);
+      }
+    }
+  };
+  _._addMessageToChat = function(message, isNew) {
+    var actorId, channelId, i, j, line, ref, text;
+    if (message == null) {
+      return;
+    }
+    if (this._lines == null) {
+      this._lines = [];
+    }
+    ({channelId, actorId, text} = message);
+    line = new ANET.Sprite_NetChatTextLine();
+    this.addContent(line);
+    line.drawChatMessage(channelId, actorId, text);
+    if (isNew === true && KDCore.Utils.isSceneMap() && this.isOpen()) {
+      // * Анимируем, если сцена карта и сообщение новое (а не из истории)
+      line.animate();
+    }
+    line.move(this.params.firstChatMessageMargin);
+    this._lines.unshift(line);
+    if (this._lines.length % 2 === 0) {
+      //TODO: Тут есть баг, см. сообщение от SMO_Valadorn
+      // * Разный цвет для каждой последующей
+      line.applyBackgroundStyleB();
+    }
+    for (i = j = 1, ref = this._lines.length; (1 <= ref ? j < ref : j > ref); i = 1 <= ref ? ++j : --j) {
+      this._lines[i].moveUp();
+      if (i === this.params.maxMessages) {
+        this._removeLine(this._lines[i]);
+        break;
+      }
+    }
+    if (isNew === true) {
+      // * Добавляем в историю только новые сообщения (а не из истории)
+      $gameTemp._nChatHistory.push(message);
+      // * Очищаем историю, чтобы память не занимала
+      if ($gameTemp._nChatHistory.length > this.params.maxMessages) {
+        $gameTemp._nChatHistory.shift();
+      }
+    }
+  };
+  _._removeLine = function(line) {
+    var ref;
+    line.visible = false;
+    if ((ref = line.parent) != null) {
+      ref.removeChild(line);
+    }
+    this._lines.delete(line);
+  };
+  //$[OVER]
+  _._moveToStartPosition = function() {
+    return this._moveToLastSavedPosition();
+  };
+  //$[OVER]
+  _._afterOpen = function() {
+    this._checkMousePositionAfterOpen();
+    this._moveToStartPosition();
+  };
+  // * Доп. проверка нахождения курсора мышки при открытии окна
+  _._checkMousePositionAfterOpen = function() {
+    this._mouseIn = !this.isMouseIn();
+    this._registerMouseInOut();
+  };
+  _._moveToLastSavedPosition = function() {
+    var e, x, y;
+    if ($gamePlayer._nLastChatWindowPosition == null) {
+      ({x, y} = this.getSettings().position);
+      try {
+        $gamePlayer._nLastChatWindowPosition = {
+          x: eval(x),
+          y: eval(y)
+        };
+      } catch (error) {
+        e = error;
+        AA.warning(e);
+        $gamePlayer._nLastChatWindowPosition = {
+          x: 0,
+          y: 0
+        };
+      }
+    }
+    this.move($gamePlayer._nLastChatWindowPosition);
+  };
+  _._savePlayerDragPosition = function() {
+    $gamePlayer._nLastChatWindowPosition = {
+      x: this.x,
+      y: this.y
+    };
+  };
+  //@[DYNAMIC INNER]
+  _._updateClickOnChat = function() {
+    if (!ANET.PP.isSayIfClickOnChatWindow()) {
+      this._updateClickOnChat = function() {}; // * EMPTY
+    } else {
+      this._updateClickOnChat = function() {
+        if (TouchInput.isTriggered() && this.isMouseIn() && this.isMouseInContentZone()) {
+          ANET.UI.showChatInputSafe();
+          return Input.clear();
+        }
+      };
+    }
+  };
+  _._parseAndShowEmotions = function(message) {
+    var actorId, char, e, emotionCode, text;
+    try {
+      if (message == null) {
+        return;
+      }
+      ({actorId, text} = message);
+      emotionCode = ANET.Utils.getEmotionCodeFromText(text);
+      if (emotionCode === 0) {
+        return;
+      }
+      if (ANGameManager.myActorId() === actorId) {
+        char = $gamePlayer;
+      } else {
+        char = nAPI.getPlayerCharacter("actorId", actorId);
+      }
+      return char != null ? char.requestBalloon(emotionCode) : void 0;
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+})();
+
+// ■ END FWindow_InGameChat.coffee
 //---------------------------------------------------------------------------
 
 
@@ -15772,6 +21877,213 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
 })();
 
 // ■ END FWindow_InGameModalDialog.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ FWindow_InGamePlayerMenu.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+var FWindow_InGamePlayerMenu;
+
+FWindow_InGamePlayerMenu = class FWindow_InGamePlayerMenu extends KDCore.FloatingWindow {
+  constructor() {
+    super(...arguments);
+  }
+
+  _init() {
+    this.parameters = {
+      draggable: false,
+      closeButton: true,
+      moveToCenter: false,
+      alwaysOnTop: true,
+      header: true
+    };
+    KDCore.FloatingWindow.prototype._init.call(this);
+  }
+
+  isHaveCharacter() {
+    return this.bindedChar != null;
+  }
+
+  //%[Основной метод - открыть окно relative другого игрока]
+  // * Нужно передать Game_Character
+  openForCharacter(netChar) {
+    this.prepareForCharacter(netChar);
+    this.open();
+  }
+
+  // * Подготовка меню под персонажа
+  prepareForCharacter(bindedChar) {
+    this.bindedChar = bindedChar;
+    if (this.bindedChar == null) {
+      return;
+    }
+    this.sub().setCommandsFor(this.bindedChar);
+    this.sub().activate();
+    this.sub().select(0);
+    this._storePositions();
+    this._updatePlacement();
+    this._updateTitle();
+  }
+
+  close() {
+    var e;
+    super.close();
+    try {
+      if (this.sub() != null) {
+        return this.sub().deactivate();
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  }
+
+  update() {
+    super.update();
+    if (this.isOpen() && this.isHaveCharacter()) {
+      // * Автоматическое закрытие окна если игрок (или персонаж для меню) совершили движение
+      return this._updateAutoClose();
+    }
+  }
+
+};
+
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = FWindow_InGamePlayerMenu.prototype;
+  _._createCustomElements = function() {
+    this._createCommandsListWindow();
+    this._createCharNameText();
+  };
+  _._createCommandsListWindow = function() {
+    var playerCommandsListWindow, size;
+    size = new Rectangle(0, 0, this.width, this.height - 24);
+    playerCommandsListWindow = new Window_NPlayerCommandsList(size);
+    playerCommandsListWindow.setHandler('ok', this._onPlayerCommandSelected.bind(this));
+    playerCommandsListWindow.refresh();
+    this.setSubWindow(playerCommandsListWindow);
+  };
+  _._onPlayerCommandSelected = function() {
+    var item;
+    if (this.sub().isCurrentItemEnabled()) {
+      ANET.UI.closePlayerMenu();
+      item = this.sub().selectedItem();
+      this._executeMenuItem(item);
+    } else {
+      SoundManager.playBuzzer();
+      this.sub().activate();
+    }
+  };
+  _._createCharNameText = function() {
+    var p;
+    p = {
+      visible: true,
+      size: {
+        w: this.width - 20,
+        h: 28
+      },
+      alignment: "center",
+      font: {
+        face: null,
+        size: 18,
+        italic: false
+      },
+      margins: {
+        x: 0,
+        y: 0
+      },
+      outline: {
+        color: null,
+        width: 2
+      },
+      textColor: "#e0da1b".toCss()
+    };
+    this.charNameText = new KDCore.UI.Sprite_UIText(p);
+    return this.addChild(this.charNameText);
+  };
+  _._updatePlacement = function() {
+    var h2, sector, w2, x, y;
+    if (this.bindedChar == null) {
+      return;
+    }
+    x = this.bindedChar.screenX();
+    y = this.bindedChar.screenY() - 42;
+    // Screen sectors
+    // 1 | 2
+    // 3 | 4
+    // ==============
+    sector = 1;
+    w2 = Graphics.width / 2;
+    h2 = Graphics.height / 2;
+    
+    // * Определяем сектор экрана, на котром находится элемент
+    if (x < w2) {
+      if (y < h2) {
+        sector = 1;
+      } else {
+        sector = 3;
+      }
+    } else {
+      if (y < h2) {
+        sector = 2;
+      } else {
+        sector = 4;
+      }
+    }
+    // * Настраиваем позиции в зависимости от секторов
+    if (sector === 3 || sector === 1) {
+      this.x = x + 18;
+    }
+    if (sector === 2 || sector === 4) {
+      this.x = x - this.width - 18; //TODO: margins from settings
+    }
+    if (sector >= 3) {
+      this.y = y - this.height;
+    } else {
+      this.y = y + 42;
+    }
+  };
+  _._updateTitle = function() {
+    var actor;
+    actor = this.bindedChar.actor();
+    return this.charNameText.draw(actor.name());
+  };
+  _._storePositions = function() {
+    this._myOldX = $gamePlayer.x;
+    this._myOldY = $gamePlayer.y;
+    this._charOldX = this.bindedChar.x;
+    this._charOldY = this.bindedChar.y;
+  };
+  _._updateAutoClose = function() {
+    if ($gamePlayer.x !== this._myOldX || $gamePlayer.y !== this._myOldY || this.bindedChar.x !== this._charOldX || this.bindedChar.y !== this._charOldY) {
+      return ANET.UI.closePlayerMenu();
+    }
+  };
+  _._executeMenuItem = function(item) {
+    var e;
+    if (item == null) {
+      return;
+    }
+    try {
+      if (String.any(item.action)) { // * Только для стандартных комманд
+        nAPI.callPlayerMenuAction(item.action, this.bindedChar.actorId());
+      }
+      if (item.value > 0) {
+        // * Общее событие (есть у всех комманд)
+        return $gameTemp.reserveCommonEvent(item.value);
+      }
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
+})();
+
+// ■ END FWindow_InGamePlayerMenu.coffee
 //---------------------------------------------------------------------------
 
 
@@ -16102,7 +22414,7 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
         if (playerData != null) {
           name = playerData.name;
         } else {
-          name = this.name();
+          return null;
         }
       }
       return {
@@ -16367,6 +22679,24 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
     //TODO: Можно автоматически и удалять лишнее (см. Game_ActionResult)
     _._fillNetworkObserver = function() {
       this.netDataObserver.addFields(this, ["_hp", "_mp", "_tp", "_paramPlus", "_states", "_stateTurns", "_buffs", "_buffTurns"]);
+      if (typeof $gameSystem !== "undefined" && $gameSystem !== null) {
+        $gameSystem._nSetupUserDefinedObservers(this, 'battler');
+      }
+    };
+    _.nRefreshUserDefinedObservers = function() {
+      var e;
+      try {
+        if (typeof $gameSystem === "undefined" || $gameSystem === null) {
+          return;
+        }
+        if (this.netDataObserver == null) {
+          return;
+        }
+        return this._createNetworkObserver();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
     };
     //TODO: updateStateTurns и баффы не должны выполняться на фантоме (???)
 
@@ -16405,7 +22735,7 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
 (function() {
-  var ALIAS__initMembers, ALIAS__update, _;
+  var ALIAS__initMembers, ALIAS__isCollidedWithCharacters, ALIAS__update, _;
   //@[DEFINES]
   _ = Game_CharacterBase.prototype;
   //@[ALIAS]
@@ -16422,6 +22752,16 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
     if (ANNetwork.isConnected()) {
       return this._updateDataObserver();
     }
+  };
+  //@[ALIAS]
+  ALIAS__isCollidedWithCharacters = _.isCollidedWithCharacters;
+  _.isCollidedWithCharacters = function(x, y) {
+    var result;
+    result = ALIAS__isCollidedWithCharacters.call(this, ...arguments);
+    if (ANNetwork.isConnected() && ANET.PP.isAllowCollsBetweenNetChars()) {
+      return result || $gameMap.netCharsIsSomeoneCollided(x, y);
+    }
+    return result;
   };
 })();
 
@@ -16442,6 +22782,20 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
   _.nGetNameplate = function() {
     return null;
   };
+  // * MoveRoute команда для движения события
+  _.moveTowardNetworkChar = function(netCharShortcut) {
+    var e;
+    try {
+      if (!ANNetwork.isConnected()) {
+        return;
+      }
+      return this._netMoveTarget = netCharShortcut;
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+      return this._netMoveTarget = null;
+    }
+  };
   (function() {    // * OBSERVER
     _._createNetworkObserver = function() {
       this.netDataObserver = new DataObserver();
@@ -16452,7 +22806,25 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
     //TODO: Добавить API для разработчиков плагинов вносить свои поля (и так со всем Observers)
     // * Движение передаётся отдельным методом для достижения плавности
     _._fillNetworkObserver = function() {
-      return this.netDataObserver.addFields(this, ["_opacity", "_blendMode", "_walkAnime", "_stepAnime", "_directionFix", "_transparent", "_direction"]);
+      this.netDataObserver.addFields(this, ["_opacity", "_blendMode", "_walkAnime", "_stepAnime", "_directionFix", "_transparent", "_direction", "_characterName", "_characterIndex"]);
+      if (typeof $gameSystem !== "undefined" && $gameSystem !== null) {
+        $gameSystem._nSetupUserDefinedObservers(this, 'character');
+      }
+    };
+    _.nRefreshUserDefinedObservers = function() {
+      var e;
+      try {
+        if (typeof $gameSystem === "undefined" || $gameSystem === null) {
+          return;
+        }
+        if (this.netDataObserver == null) {
+          return;
+        }
+        return this._createNetworkObserver();
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
     };
     _._updateDataObserver = function() {
       if (this.netDataObserver == null) {
@@ -16564,10 +22936,53 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
 (function() {
-  var _;
+  var ALIAS___fillNetworkObserver, ALIAS__initMembers, ALIAS__isNearTheScreen, ALIAS__updateSelfMovementNNX, _;
   //@[DEFINES]
   _ = Game_Event.prototype;
-  (function() {    // * Синхронизация движения
+  // * Следование за Network Character
+  // -----------------------------------------------------------------------
+
+  //@[ALIAS]
+  ALIAS__initMembers = _.initMembers;
+  _.initMembers = function() {
+    ALIAS__initMembers.call(this, ...arguments);
+    this._netMoveTarget = null;
+  };
+  //@[ALIAS]
+  ALIAS___fillNetworkObserver = _._fillNetworkObserver;
+  _._fillNetworkObserver = function() {
+    ALIAS___fillNetworkObserver.call(this, ...arguments);
+    this.netDataObserver.addFields(this, ['_netMoveTarget']);
+  };
+  //@[ALIAS]
+  ALIAS__updateSelfMovementNNX = _.updateSelfMovement;
+  _.updateSelfMovement = function() {
+    var char;
+    ALIAS__updateSelfMovementNNX.call(this, ...arguments);
+    if (this._netMoveTarget == null) {
+      return;
+    }
+    if (!this._locked && this.isNearTheScreen() && this.checkStop(this.stopCountThreshold())) {
+      char = ANET.Utils.getNetworkCharByShortcut(this._netMoveTarget);
+      if (char != null) {
+        this.nMoveTypeTowardNetworkCharacter(char);
+      } else {
+        console.warn("Can't get Network Character for " + this._netMoveTarget);
+        this._netMoveTarget = null;
+      }
+    }
+  };
+  //@[ALIAS]
+  ALIAS__isNearTheScreen = _.isNearTheScreen;
+  _.isNearTheScreen = function() {
+    if (ANNetwork.isConnected()) {
+      return true;
+    } else {
+      return ALIAS__isNearTheScreen.call(this, ...arguments);
+    }
+  };
+  (function() {    
+    // * Синхронизация движения
     // -----------------------------------------------------------------------
     var ALIAS__moveDiagonally, ALIAS__moveStraight, ALIAS__updateSelfMovement;
     //@[ALIAS]
@@ -16655,12 +23070,24 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
       ANSyncDataManager.sendEventObserver(this.eventId());
     }
   };
+  // * Если мы не отправляем данные Observer,
+  // * то check не будет работать, пока не сбросить флаг
+  _.nMoveTypeTowardNetworkCharacter = function(char) {
+    var e;
+    try {
+      if (char == null) {
+        return;
+      }
+      return this.moveTowardCharacter(char);
+    } catch (error) {
+      e = error;
+      return ANET.w(e);
+    }
+  };
 })();
 
 // ■ END Game_Event.coffee
 //---------------------------------------------------------------------------
-// * Если мы не отправляем данные Observer,
-// * то check не будет работать, пока не сбросить флаг
 
 
 // Generated by CoffeeScript 2.6.1
@@ -16744,7 +23171,9 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
           // * пустой лист команд
           this._list = []; // * Не будет выполняться
         } else {
-          ANInterpreterManager.sendEventStarted(eventId);
+          if (!this.nIsParallelEvent()) {
+            ANInterpreterManager.sendEventStarted(eventId);
+          }
           if (this.nIsEventIsShared()) {
             this.nPrepareSharedEvent();
           }
@@ -16756,17 +23185,19 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
     //@[ALIAS]
     ALIAS__clear = _.clear;
     _.clear = function() {
-      ALIAS__clear.call(this);
       if (ANNetwork.isConnected()) {
-        ANInterpreterManager.eventProcessExit();
+        if (!this.nIsParallelEvent()) {
+          ANInterpreterManager.eventProcessExit();
+        }
         this.nClearFlags();
       }
+      ALIAS__clear.call(this);
     };
     //@[ALIAS]
     ALIAS__update = _.update;
     _.update = function() {
       ALIAS__update.call(this);
-      if (ANNetwork.isConnected()) {
+      if (ANNetwork.isConnected() && !this.nIsParallelEvent()) {
         this._nRunningCheckTimer++;
         if (this._nRunningCheckTimer >= 60) {
           ANInterpreterManager.checkEventRunning();
@@ -16819,379 +23250,263 @@ FWindow_InGameModalDialog = class FWindow_InGameModalDialog extends KDCore.Float
 //---------------------------------------------------------------------------
 
 
-function _0x8fd4() {
-    var _0x257527 = [
-        '\x6c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72',
-        '\x55\x71\x57\x59\x4e',
-        '\x5f\x6c\x69\x73\x74',
-        '\x70\x61\x72\x61\x6d\x65\x74\x65\x72\x73',
-        '\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x48\x78\x45\x47\x6b',
-        '\x69\x73\x50\x61\x73\x73\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x64\x41\x46\x59\x67',
-        '\x6e\x53\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x41\x6c\x6c',
-        '\x41\x63\x74\x6f\x72\x20\x4c\x69\x73\x74',
-        '\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x4d\x61\x73\x74\x65\x72',
-        '\x55\x74\x69\x6c\x73',
-        '\x6e\x49\x73\x48\x61\x76\x65\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x5f\x74\x72\x69\x67\x67\x65\x72',
-        '\x4d\x61\x73\x74\x65\x72\x20\x45\x78\x63\x65\x70\x74',
-        '\x5f\x6e\x53\x65\x6e\x64\x43\x6f\x6d\x6d\x61\x6e\x64\x54\x6f\x53\x65\x72\x76\x65\x72',
-        '\x32\x35\x31\x31\x34\x35\x30\x73\x52\x70\x55\x59\x4b',
-        '\x6e\x49\x73\x41\x75\x74\x6f\x72\x75\x6e\x45\x76\x65\x6e\x74',
-        '\x41\x63\x74\x6f\x72\x20\x4c\x69\x73\x74\x20\x45\x78\x63\x65\x70\x74',
-        '\x6e\x43\x68\x65\x63\x6b\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x66\x67\x41\x63\x41',
-        '\x63\x61\x6c\x6c',
-        '\x69\x57\x63\x4f\x57',
-        '\x4d\x61\x73\x74\x65\x72',
-        '\x6d\x61\x73\x74\x65\x72',
-        '\x43\x6f\x74\x42\x6e',
-        '\x61\x6e\x79',
-        '\x36\x38\x51\x64\x52\x52\x79\x4b',
-        '\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x35\x31\x32\x70\x7a\x47\x71\x66\x56',
-        '\x70\x72\x6f\x74\x6f\x74\x79\x70\x65',
-        '\x48\x6a\x51\x4b\x53',
-        '\x55\x6e\x6b\x6e\x6f\x77\x6e\x20\x4e\x45\x54\x20\x43\x6f\x6d\x6d\x65\x6e\x74\x20\x63\x6f\x6d\x6d\x61\x6e\x64\x20',
-        '\x6e\x52\x65\x71\x75\x65\x73\x74\x4d\x61\x73\x74\x65\x72\x4f\x6e\x6c\x79\x43\x68\x6f\x69\x63\x65\x73\x4d\x6f\x64\x65\x46\x6f\x72\x4e\x65\x78\x74\x43\x68\x6f\x69\x63\x65',
-        '\x6e\x44\x69\x73\x61\x62\x6c\x65\x4e\x6f\x74\x4e\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x73',
-        '\x77\x73\x6a\x4b\x45',
-        '\x37\x37\x35\x30\x32\x6b\x6b\x49\x74\x43\x44',
-        '\x65\x4b\x51\x75\x79',
-        '\x6e\x63\x73\x61\x61',
-        '\x6e\x49\x73\x4f\x70\x74\x69\x6f\x6e\x73\x46\x6f\x72\x43\x75\x72\x72\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x69\x73\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x65\x64\x42\x79\x41\x6e\x79',
-        '\x5f\x6e\x4c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72\x4d\x6f\x64\x65',
-        '\x4d\x65\x20\x45\x78\x63\x65\x70\x74',
-        '\x36\x31\x31\x38\x32\x30\x70\x4e\x42\x42\x67\x42',
-        '\x21\x66\x6f\x72\x41\x63\x74\x6f\x72\x73',
-        '\x6c\x6c\x46\x51\x67',
-        '\x46\x6f\x72\x62\x69\x64\x64\x65\x6e\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64\x73\x4c\x69\x73\x74',
-        '\x4e\x20\x63\x68\x6f\x69\x63\x65\x73\x46\x6f\x72\x4d\x61\x73\x74\x65\x72\x20\x63\x61\x6e\x20\x62\x65\x20\x75\x73\x65\x64\x20\x6f\x6e\x6c\x79\x20\x69\x6e\x20\x53\x68\x61\x72\x65\x64\x20\x45\x76\x65\x6e\x74\x73',
-        '\x76\x6d\x78\x49\x62',
-        '\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x4e\x6f\x74\x4d\x65',
-        '\x63\x68\x6f\x69\x63\x65\x73\x46\x6f\x72\x4d\x61\x73\x74\x65\x72',
-        '\x53\x6c\x6f\x4d\x65',
-        '\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x57\x69\x74\x68\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x31\x39\x6e\x7a\x53\x4a\x45\x4f',
-        '\x5f\x6e\x4f\x6e\x4e\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x5f\x41\x63\x74\x6f\x72\x4c\x69\x73\x74\x53\x65\x6c\x65\x63\x74\x6f\x72\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x65\x58\x6f\x57\x6f',
-        '\x5f\x6e\x43\x68\x65\x63\x6b\x4e\x65\x74\x43\x6f\x6d\x6d\x65\x6e\x74',
-        '\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x49\x73\x52\x75\x6e\x6e\x69\x6e\x67',
-        '\x63\x6f\x6d\x6d\x61\x6e\x64',
-        '\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x41\x63\x74\x6f\x72\x73\x4c\x69\x73\x74',
-        '\x69\x73\x48\x61\x76\x65\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x70\x77\x46\x71\x5a',
-        '\x32\x33\x38\x37\x38\x75\x43\x59\x65\x6a\x44',
-        '\x5f\x6e\x52\x75\x6e\x6e\x69\x6e\x67\x43\x68\x65\x63\x6b\x54\x69\x6d\x65\x72',
-        '\x69\x48\x6c\x54\x6a',
-        '\x36\x62\x4d\x5a\x5a\x52\x64',
-        '\x69\x4d\x6d\x48\x4f',
-        '\x31\x30\x30\x67\x73\x75\x64\x78\x6d',
-        '\x34\x30\x35\x33\x35\x65\x6f\x70\x4a\x4b\x65',
-        '\x65\x76\x65\x6e\x74',
-        '\x41\x4c\x49\x41\x53\x5f\x5f\x65\x78\x65\x63\x75\x74\x65\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x5f\x6e\x53\x6b\x69\x70\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x5f\x6e\x4f\x6e\x4e\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x5f\x4c\x6f\x63\x61\x6c\x41\x63\x74\x6f\x72',
-        '\x61\x63\x74\x6f\x72\x4c\x69\x73\x74',
-        '\x79\x74\x4f\x63\x61',
-        '\x71\x68\x6a\x73\x53',
-        '\x53\x79\x73\x74\x65\x6d',
-        '\x54\x61\x6e\x4d\x57',
-        '\x59\x79\x53\x7a\x47',
-        '\x6e\x52\x65\x71\x75\x65\x73\x74\x53\x79\x6e\x63\x65\x64\x4e\x65\x78\x74\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x61\x6c\x6c',
-        '\x65\x76\x65\x6e\x74\x49\x64',
-        '\x33\x36\x31\x34\x38\x35\x36\x70\x50\x55\x42\x58\x6b',
-        '\x77\x68\x6f\x53\x65\x6c\x65\x63\x74\x6f\x72',
-        '\x21\x6d\x65',
-        '\x63\x75\x72\x72\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x62\x6d\x67\x55\x6a',
-        '\x77\x61\x72\x6e',
-        '\x73\x74\x61\x72\x74',
-        '\x31\x31\x37\x32\x37\x38\x56\x63\x65\x4f\x51\x69',
-        '\x6e\x43\x6c\x65\x61\x72\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x5f\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73\x52\x65\x71\x75\x65\x73\x74\x65\x64',
-        '\x69\x73\x50\x61\x73\x73\x45\x76\x65\x6e\x74\x46\x69\x6c\x74\x65\x72\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x63\x6f\x6e\x74\x61\x69\x6e\x73',
-        '\x58\x52\x76\x6e\x4b',
-        '\x63\x6f\x64\x65',
-        '\x5f\x6e\x4f\x6e\x4e\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x5f\x53\x69\x6e\x67\x6c\x65\x53\x65\x6c\x65\x63\x74\x6f\x72\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x5f\x69\x6e\x64\x65\x78',
-        '\x41\x6c\x6c',
-        '\x6e\x53\x65\x74\x4e\x65\x74\x77\x6f\x72\x6b\x42\x61\x74\x74\x6c\x65'
-    ];
-    _0x8fd4 = function () {
-        return _0x257527;
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Game_Interpreter.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+//$[ENCODE]
+(function() {
+  var _;
+  // * Используется Virtual Interpreter. Команда от сервера запускается в отдельном Interpreter, а не
+  // * в аналогичном событии (как это было в Alpha NET).
+  // * Некоторы команды выполняются напрямую, а некоторые через общие события только с одной командой
+
+  //@[DEFINES]
+  _ = Game_Interpreter.prototype;
+  // * Отключение не подходящих для сети комманд
+  _.nDisableNotNetCommands = function() {
+    var code, disableCommand, i, len, ref;
+    disableCommand = function() {
+      return _["command" + code] = function() {
+        return true;
+      };
     };
-    return _0x8fd4();
-}
-function _0x2a04(_0x2dae37, _0x2a797f) {
-    var _0x8fd4c2 = _0x8fd4();
-    return _0x2a04 = function (_0x2a042e, _0x957705) {
-        _0x2a042e = _0x2a042e - 0x182;
-        var _0x488064 = _0x8fd4c2[_0x2a042e];
-        return _0x488064;
-    }, _0x2a04(_0x2dae37, _0x2a797f);
-}
-(function (_0x34d138, _0x443fab) {
-    var _0x5bbb48 = _0x2a04, _0xaf96f9 = _0x34d138();
-    while (!![]) {
-        try {
-            var _0x3c79ab = parseInt(_0x5bbb48(0x1a4)) / 0x1 * (-parseInt(_0x5bbb48(0x1ad)) / 0x2) + parseInt(_0x5bbb48(0x192)) / 0x3 * (parseInt(_0x5bbb48(0x189)) / 0x4) + parseInt(_0x5bbb48(0x1e4)) / 0x5 * (parseInt(_0x5bbb48(0x1b0)) / 0x6) + parseInt(_0x5bbb48(0x1c8)) / 0x7 * (-parseInt(_0x5bbb48(0x18b)) / 0x8) + parseInt(_0x5bbb48(0x199)) / 0x9 * (parseInt(_0x5bbb48(0x1b2)) / 0xa) + -parseInt(_0x5bbb48(0x1b3)) / 0xb + parseInt(_0x5bbb48(0x1c1)) / 0xc;
-            if (_0x3c79ab === _0x443fab)
-                break;
-            else
-                _0xaf96f9['push'](_0xaf96f9['shift']());
-        } catch (_0xdd2439) {
-            _0xaf96f9['push'](_0xaf96f9['shift']());
-        }
+    ref = [129, 202, 206, 216, 217, 137];
+    // * Change Party Member
+    // * Set Vehicle Location
+    // * Get on/off Vehicle
+    // * Change Player Followers
+    // * Gather Followers
+    // * Change Formation Access
+    for (i = 0, len = ref.length; i < len; i++) {
+      code = ref[i];
+      disableCommand(code);
     }
-}(_0x8fd4, 0x974cc), (function () {
-    var _0x43d7c2 = _0x2a04, _0x6feeaa;
-    _0x6feeaa = Game_Interpreter[_0x43d7c2(0x18c)], _0x6feeaa[_0x43d7c2(0x190)] = function () {
-        var _0x35b79f = _0x43d7c2;
-        if ('\x59\x79\x53\x7a\x47' === _0x35b79f(0x1bd)) {
-            var _0x145202, _0x1a543e, _0x380634, _0x3de1c9, _0x40b78b;
-            _0x1a543e = function () {
-                return _0x6feeaa['\x63\x6f\x6d\x6d\x61\x6e\x64' + _0x145202] = function () {
-                    return !![];
-                };
-            }, _0x40b78b = [
-                0x81,
-                0xca,
-                0xce,
-                0xd8,
-                0xd9,
-                0x89
-            ];
-            for (_0x380634 = 0x0, _0x3de1c9 = _0x40b78b['\x6c\x65\x6e\x67\x74\x68']; _0x380634 < _0x3de1c9; _0x380634++) {
-                _0x145202 = _0x40b78b[_0x380634], _0x1a543e(_0x145202);
-            }
-        } else
-            return ![];
-    }, _0x6feeaa[_0x43d7c2(0x1e0)] = function () {
-        var _0x38ef3f = _0x43d7c2;
-        return '\x4a\x74\x55\x6e\x53' === _0x38ef3f(0x1af) ? this[_0x38ef3f(0x1ca)] === !![] && this[_0x38ef3f(0x1d7)] != null : this['\x5f\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73\x52\x65\x71\x75\x65\x73\x74\x65\x64'] === !![] && this['\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73'] != null;
-    }, _0x6feeaa['\x6e\x43\x6c\x65\x61\x72\x43\x6f\x6d\x6d\x61\x6e\x64\x4f\x70\x74\x69\x6f\x6e\x73'] = function () {
-        var _0x45bc66 = _0x43d7c2;
-        if (_0x45bc66(0x1c5) !== '\x58\x4f\x75\x54\x71')
-            return this[_0x45bc66(0x1ca)] = ![], this[_0x45bc66(0x1d7)] = null;
-        else
-            _0x395f70[_0x45bc66(0x197)] = ![], this[_0x45bc66(0x1ae)] = 0x0, this[_0x45bc66(0x1c9)]();
-    }, _0x6feeaa[_0x43d7c2(0x1db)] = function (_0x1b440b) {
-        var _0x5c5291 = _0x43d7c2;
-        if (_0x5c5291(0x1b9) !== '\x58\x68\x66\x65\x4c')
-            return this[_0x5c5291(0x1d7)] = _0x1b440b, this[_0x5c5291(0x1ca)] = !![];
-        else
-            _0x45eb60 = _0x5a5887, _0x2d7214['\x77'](_0x5962bf);
-    }, _0x6feeaa[_0x43d7c2(0x195)] = function () {
-        var _0x42edd1 = _0x43d7c2;
-        if ('\x43\x58\x71\x4c\x6f' !== _0x42edd1(0x193)) {
-            if (!this[_0x42edd1(0x1e0)]())
-                return ![];
-            if (ANET[_0x42edd1(0x1bb)][_0x42edd1(0x19c)][_0x42edd1(0x1cc)](this[_0x42edd1(0x1c4)]()[_0x42edd1(0x1ce)]))
-                return ![];
-            return !![];
-        } else
-            _0x1d8472['\x77\x61\x72\x6e'](_0x42edd1(0x19d));
-    }, _0x6feeaa[_0x43d7c2(0x1a3)] = function () {
-        var _0xdb9d1 = _0x43d7c2, _0x302140;
-        try {
-            this[_0xdb9d1(0x1ca)] = ![];
-            switch (this[_0xdb9d1(0x1d7)][_0xdb9d1(0x1c2)]) {
-            case _0xdb9d1(0x1d1):
-                return this[_0xdb9d1(0x1dc)]();
-            case _0xdb9d1(0x185):
-                return this[_0xdb9d1(0x1de)](!![]);
-            case _0xdb9d1(0x1e2):
-                return this['\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x4d\x61\x73\x74\x65\x72'](![]);
-            case _0xdb9d1(0x1dd):
-                return this[_0xdb9d1(0x1aa)](!![]);
-            case _0xdb9d1(0x1e6):
-                return this[_0xdb9d1(0x1aa)](![]);
-            case _0xdb9d1(0x198):
-                return this[_0xdb9d1(0x19f)]();
-            }
-        } catch (_0x2f5847) {
-            if (_0xdb9d1(0x19e) === _0xdb9d1(0x19e))
-                _0x302140 = _0x2f5847, ANET['\x77'](_0x302140);
-            else
-                return this['\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73'] != null;
+  };
+  _.nIsHaveCommandOptions = function() {
+    return this._nCommandOptionsRequested === true && (this.nCommandStartOptions != null);
+  };
+  _.nClearCommandOptions = function() {
+    this._nCommandOptionsRequested = false;
+    return this.nCommandStartOptions = null;
+  };
+  // * Устанавливаем опции (набор данных) и флаг что надо использовать на следующей команде
+  _.nSetCommandOptions = function(nCommandStartOptions) {
+    this.nCommandStartOptions = nCommandStartOptions;
+    return this._nCommandOptionsRequested = true;
+  };
+  // * Опции подходят для "текущей" (следующей на выполнение) команды
+  _.nIsOptionsForCurrentCommand = function() {
+    if (!this.nIsHaveCommandOptions()) {
+      return false;
+    }
+    if (ANET.System.ForbiddenVirtualCommandsList.contains(this.currentCommand().code)) {
+      return false;
+    }
+    return true;
+  };
+  // * Проверка опций и выполнение команды в соответсвии с ними
+  _.nProcessCommandWithOptions = function() {
+    var e;
+    try {
+      // * Снимаем флаг, что надо использовать опции
+      this._nCommandOptionsRequested = false;
+      switch (this.nCommandStartOptions.whoSelector) {
+        case "All":
+          return this._nProcessCommandForAll();
+        case "Master":
+          return this._nProcessCommandForMaster(true);
+        case "Master Except":
+          return this._nProcessCommandForMaster(false);
+        case "Actor List":
+          return this._nProcessCommandForActorsList(true);
+        case "Actor List Except":
+          return this._nProcessCommandForActorsList(false);
+        case "Me Except":
+          return this._nProcessCommandNotMe();
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+    return _.ALIAS__executeCommand.call(this);
+  };
+  _._nProcessCommandForAll = function() {
+    this._nSendCommandToServer();
+    // * Выполнение команды как обычно у себя (так как там broadcast)
+    return _.ALIAS__executeCommand.call(this);
+  };
+  _._nProcessCommandForMaster = function(isInclude) {
+    if (ANNetwork.isMasterClient() === isInclude) {
+      return _.ALIAS__executeCommand.call(this);
+    } else {
+      this._nSendCommandToServer();
+      return this._nSkipCommand();
+    }
+  };
+  _._nProcessCommandForActorsList = function(isInclude) {
+    this._nSendCommandToServer();
+    if (ANET.Utils.isMyActorInValidListToStart(this.nCommandStartOptions.actorList, isInclude)) {
+      return _.ALIAS__executeCommand.call(this);
+    } else {
+      return this._nSkipCommand();
+    }
+  };
+  _._nProcessCommandNotMe = function() {
+    this._nSendCommandToServer();
+    return this._nSkipCommand();
+  };
+  _._nSkipCommand = function() {
+    this._index++;
+    this.nClearCommandOptions();
+    return true;
+  };
+  _._nSendCommandToServer = function() {
+    ANInterpreterManager.sendEventVirtualCommand(this.currentCommand(), this.nCommandStartOptions, this.eventId());
+  };
+  // * Проверить комментарий на наличие NET команд
+  _._nCheckNetComment = function(commentLine) {
+    var command;
+    command = ANET.Utils.getNetCommentCommand(commentLine);
+    if (!String.any(command)) {
+      return;
+    }
+    switch (command) {
+      case "localActor":
+        this._nOnNetCommand_LocalActor(commentLine);
+        break;
+      case "all":
+        this._nOnNetCommand_SingleSelectorEventCommand("All", commentLine);
+        break;
+      case "!me":
+        this._nOnNetCommand_SingleSelectorEventCommand("Me Except", commentLine);
+        break;
+      case "master":
+        this._nOnNetCommand_SingleSelectorEventCommand("Master", commentLine);
+        break;
+      case "!master":
+        this._nOnNetCommand_SingleSelectorEventCommand("Master Except", commentLine);
+        break;
+      case "forActors":
+        this._nOnNetCommand_ActorListSelectorEventCommand(commentLine, true);
+        break;
+      case "!forActors":
+        this._nOnNetCommand_ActorListSelectorEventCommand(commentLine, false);
+        break;
+      case "wait":
+        if (ANInterpreterManager.isSharedEventIsRunning()) {
+          this.nRequestSyncedNextEventCommand();
+        } else {
+          console.warn("N wait can be used only in Shared Events");
         }
-        return _0x6feeaa[_0xdb9d1(0x1b5)][_0xdb9d1(0x183)](this);
-    }, _0x6feeaa['\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x41\x6c\x6c'] = function () {
-        var _0x3b558e = _0x43d7c2;
-        return this[_0x3b558e(0x1e3)](), _0x6feeaa[_0x3b558e(0x1b5)][_0x3b558e(0x183)](this);
-    }, _0x6feeaa[_0x43d7c2(0x1de)] = function (_0x4cdeca) {
-        var _0x8bcb2b = _0x43d7c2;
-        return _0x8bcb2b(0x1bc) !== _0x8bcb2b(0x1bc) ? (this[_0x8bcb2b(0x1d7)] = _0x30973d, this[_0x8bcb2b(0x1ca)] = !![]) : ANNetwork['\x69\x73\x4d\x61\x73\x74\x65\x72\x43\x6c\x69\x65\x6e\x74']() === _0x4cdeca ? _0x6feeaa[_0x8bcb2b(0x1b5)][_0x8bcb2b(0x183)](this) : (this[_0x8bcb2b(0x1e3)](), this[_0x8bcb2b(0x1b6)]());
-    }, _0x6feeaa[_0x43d7c2(0x1aa)] = function (_0x3054ef) {
-        var _0x190034 = _0x43d7c2;
-        if (_0x190034(0x1ac) !== _0x190034(0x1b1)) {
-            this[_0x190034(0x1e3)]();
-            if (ANET[_0x190034(0x1df)]['\x69\x73\x4d\x79\x41\x63\x74\x6f\x72\x49\x6e\x56\x61\x6c\x69\x64\x4c\x69\x73\x74\x54\x6f\x53\x74\x61\x72\x74'](this[_0x190034(0x1d7)][_0x190034(0x1b8)], _0x3054ef)) {
-                if (_0x190034(0x182) === '\x66\x67\x41\x63\x41')
-                    return _0x6feeaa['\x41\x4c\x49\x41\x53\x5f\x5f\x65\x78\x65\x63\x75\x74\x65\x43\x6f\x6d\x6d\x61\x6e\x64'][_0x190034(0x183)](this);
-                else
-                    _0x1f0c84 = null;
-            } else
-                return '\x73\x46\x74\x66\x68' === _0x190034(0x19b) ? !![] : this[_0x190034(0x1b6)]();
-        } else
-            _0xcb0dee = _0x1d8fad, _0x1c0b63['\x77'](_0x5bb6d9), this['\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73'] = null;
-    }, _0x6feeaa['\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x4e\x6f\x74\x4d\x65'] = function () {
-        var _0x1b05ee = _0x43d7c2;
-        return this[_0x1b05ee(0x1e3)](), this[_0x1b05ee(0x1b6)]();
-    }, _0x6feeaa[_0x43d7c2(0x1b6)] = function () {
-        var _0x5435a8 = _0x43d7c2;
-        return this['\x5f\x69\x6e\x64\x65\x78']++, this[_0x5435a8(0x1c9)](), !![];
-    }, _0x6feeaa[_0x43d7c2(0x1e3)] = function () {
-        var _0x27b01e = _0x43d7c2;
-        if (_0x27b01e(0x1cd) === '\x6f\x73\x47\x4a\x6d')
-            return this[_0x27b01e(0x1e3)](), _0x404437['\x41\x4c\x49\x41\x53\x5f\x5f\x65\x78\x65\x63\x75\x74\x65\x43\x6f\x6d\x6d\x61\x6e\x64']['\x63\x61\x6c\x6c'](this);
-        else
-            ANInterpreterManager['\x73\x65\x6e\x64\x45\x76\x65\x6e\x74\x56\x69\x72\x74\x75\x61\x6c\x43\x6f\x6d\x6d\x61\x6e\x64'](this['\x63\x75\x72\x72\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64'](), this['\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73'], this[_0x27b01e(0x1c0)]());
-    }, _0x6feeaa[_0x43d7c2(0x1a7)] = function (_0x438931) {
-        var _0x1f1603 = _0x43d7c2;
-        if (_0x1f1603(0x18d) !== _0x1f1603(0x1d8)) {
-            var _0x26860f;
-            _0x26860f = ANET[_0x1f1603(0x1df)]['\x67\x65\x74\x4e\x65\x74\x43\x6f\x6d\x6d\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64'](_0x438931);
-            if (!String['\x61\x6e\x79'](_0x26860f)) {
-                if ('\x69\x57\x63\x4f\x57' !== _0x1f1603(0x184))
-                    this['\x6e\x52\x65\x71\x75\x65\x73\x74\x53\x79\x6e\x63\x65\x64\x4e\x65\x78\x74\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64']();
-                else
-                    return;
-            }
-            switch (_0x26860f) {
-            case _0x1f1603(0x1d3):
-                this[_0x1f1603(0x1b7)](_0x438931);
-                break;
-            case _0x1f1603(0x1bf):
-                this[_0x1f1603(0x1cf)](_0x1f1603(0x1d1), _0x438931);
-                break;
-            case _0x1f1603(0x1c3):
-                this['\x5f\x6e\x4f\x6e\x4e\x65\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x5f\x53\x69\x6e\x67\x6c\x65\x53\x65\x6c\x65\x63\x74\x6f\x72\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64']('\x4d\x65\x20\x45\x78\x63\x65\x70\x74', _0x438931);
-                break;
-            case _0x1f1603(0x186):
-                this[_0x1f1603(0x1cf)](_0x1f1603(0x185), _0x438931);
-                break;
-            case '\x21\x6d\x61\x73\x74\x65\x72':
-                this[_0x1f1603(0x1cf)](_0x1f1603(0x1e2), _0x438931);
-                break;
-            case '\x66\x6f\x72\x41\x63\x74\x6f\x72\x73':
-                this[_0x1f1603(0x1a5)](_0x438931, !![]);
-                break;
-            case _0x1f1603(0x19a):
-                this[_0x1f1603(0x1a5)](_0x438931, ![]);
-                break;
-            case '\x77\x61\x69\x74':
-                if (ANInterpreterManager[_0x1f1603(0x1a8)]()) {
-                    if ('\x5a\x6f\x4f\x62\x6c' !== '\x5a\x6f\x4f\x62\x6c') {
-                        var _0x299a59;
-                        return _0x54b6f9[_0x1f1603(0x1ce)] === 0x165 && ((_0x299a59 = _0x2e10ae[_0x1f1603(0x1d6)]) != null ? _0x299a59[0x1] : void 0x0) === '\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73';
-                    } else
-                        this[_0x1f1603(0x1be)]();
-                } else
-                    console[_0x1f1603(0x1c6)]('\x4e\x20\x77\x61\x69\x74\x20\x63\x61\x6e\x20\x62\x65\x20\x75\x73\x65\x64\x20\x6f\x6e\x6c\x79\x20\x69\x6e\x20\x53\x68\x61\x72\x65\x64\x20\x45\x76\x65\x6e\x74\x73');
-                break;
-            case _0x1f1603(0x1a0):
-                ANInterpreterManager[_0x1f1603(0x1a8)]() ? this[_0x1f1603(0x18f)]() : console['\x77\x61\x72\x6e'](_0x1f1603(0x19d));
-                break;
-            case _0x1f1603(0x1c7):
-                break;
-            default:
-                console['\x77\x61\x72\x6e'](_0x1f1603(0x18e) + _0x26860f);
-            }
-        } else
-            return _0x325636[_0x1f1603(0x1a9) + _0x2ba142] = function () {
-                return !![];
-            };
-    }, _0x6feeaa['\x6e\x53\x65\x74\x53\x68\x61\x72\x65\x64\x42\x61\x74\x74\x6c\x65'] = function (_0x1e01a8) {
-        var _0x555d3c = _0x43d7c2;
-        if (!String['\x61\x6e\x79'](_0x1e01a8)) {
-            if (_0x555d3c(0x191) !== _0x555d3c(0x191))
-                return this[_0x555d3c(0x1d0)]++, this[_0x555d3c(0x1c9)](), !![];
-            else
-                _0x1e01a8 = null;
+        break;
+      case "choicesForMaster":
+        if (ANInterpreterManager.isSharedEventIsRunning()) {
+          this.nRequestMasterOnlyChoicesModeForNextChoice();
+        } else {
+          console.warn("N choicesForMaster can be used only in Shared Events");
         }
-        BattleManager[_0x555d3c(0x1d2)](_0x1e01a8);
-    }, _0x6feeaa['\x6e\x43\x6c\x65\x61\x72\x46\x6c\x61\x67\x73'] = function () {
-        var _0x493e22 = _0x43d7c2;
-        $gameTemp[_0x493e22(0x197)] = ![], this['\x5f\x6e\x52\x75\x6e\x6e\x69\x6e\x67\x43\x68\x65\x63\x6b\x54\x69\x6d\x65\x72'] = 0x0, this[_0x493e22(0x1c9)]();
-    }, (function () {
-        var _0x3e4956 = _0x43d7c2;
-        return _0x6feeaa[_0x3e4956(0x1ab)] = function () {
-            var _0x2918f7 = _0x3e4956;
-            return this[_0x2918f7(0x18a)] != null;
-        }, _0x6feeaa[_0x3e4956(0x1d9)] = function () {
-            var _0x24baea = _0x3e4956;
-            if (this['\x6e\x49\x73\x45\x76\x65\x6e\x74\x49\x73\x53\x68\x61\x72\x65\x64']() && $gameTemp['\x5f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4f\x75\x74\x65\x72\x53\x74\x61\x72\x74\x46\x6c\x61\x67'] === !![])
-                return !![];
-            else {
-                if (!this['\x69\x73\x48\x61\x76\x65\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73']())
-                    return !![];
-                if (this['\x6e\x49\x73\x4c\x6f\x63\x6b\x65\x64\x45\x76\x65\x6e\x74']()) {
-                    if (_0x24baea(0x194) === _0x24baea(0x1da))
-                        !_0x49a5dc[_0x24baea(0x188)](_0x33209f) && (_0x1e7935 = null), _0x4116a0[_0x24baea(0x1d2)](_0x47f154);
-                    else {
-                        if (ANET[_0x24baea(0x1df)][_0x24baea(0x196)](this[_0x24baea(0x1c0)]()))
-                            return ![];
-                    }
-                }
-                return ANET[_0x24baea(0x1df)][_0x24baea(0x1cb)](this['\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73']);
-            }
-        }, _0x6feeaa['\x6e\x49\x73\x4c\x6f\x63\x6b\x65\x64\x45\x76\x65\x6e\x74'] = function () {
-            var _0x526212;
-            return this['\x65\x76\x65\x6e\x74\x49\x64']() > 0x0 && ((_0x526212 = this['\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73']) != null ? _0x526212['\x6c\x6f\x63\x6b\x4d\x6f\x64\x65'] : void 0x0) === '\x74\x72\x75\x65';
-        }, _0x6feeaa[_0x3e4956(0x1e7)] = function () {
-            var _0x2e1ce5 = _0x3e4956;
-            if ('\x6d\x79\x6b\x73\x47' !== _0x2e1ce5(0x1a6)) {
-                var _0x10a1a0, _0x4c3dea, _0x17cd9f;
-                this[_0x2e1ce5(0x18a)] = null;
-                try {
-                    if (_0x2e1ce5(0x1a1) !== _0x2e1ce5(0x1ba))
-                        _0x4c3dea = (_0x17cd9f = this[_0x2e1ce5(0x1d5)]) != null ? _0x17cd9f['\x66\x69\x6e\x64'](function (_0x5592c5) {
-                            var _0x2869da = _0x2e1ce5, _0x20b02e;
-                            return _0x5592c5[_0x2869da(0x1ce)] === 0x165 && ((_0x20b02e = _0x5592c5[_0x2869da(0x1d6)]) != null ? _0x20b02e[0x1] : void 0x0) === _0x2869da(0x1a2);
-                        }) : void 0x0, _0x4c3dea != null ? this[_0x2e1ce5(0x18a)] = _0x4c3dea[_0x2e1ce5(0x1d6)][0x3] : this['\x6e\x43\x68\x65\x63\x6b\x45\x76\x65\x6e\x74\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73\x46\x72\x6f\x6d\x43\x6f\x6d\x6d\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64']();
-                    else
-                        return !![];
-                } catch (_0x18e27b) {
-                    _0x10a1a0 = _0x18e27b, ANET['\x77'](_0x10a1a0), this[_0x2e1ce5(0x18a)] = null;
-                }
-            } else
-                return;
-        }, _0x6feeaa[_0x3e4956(0x1e5)] = function () {
-            var _0x390cd1 = _0x3e4956, _0x565197, _0x4cddba;
-            try {
-                if (_0x390cd1(0x187) === _0x390cd1(0x1d4)) {
-                    this[_0x390cd1(0x1ca)] = ![];
-                    switch (this['\x6e\x43\x6f\x6d\x6d\x61\x6e\x64\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73'][_0x390cd1(0x1c2)]) {
-                    case _0x390cd1(0x1d1):
-                        return this[_0x390cd1(0x1dc)]();
-                    case _0x390cd1(0x185):
-                        return this['\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x4d\x61\x73\x74\x65\x72'](!![]);
-                    case _0x390cd1(0x1e2):
-                        return this['\x5f\x6e\x50\x72\x6f\x63\x65\x73\x73\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x6f\x72\x4d\x61\x73\x74\x65\x72'](![]);
-                    case _0x390cd1(0x1dd):
-                        return this[_0x390cd1(0x1aa)](!![]);
-                    case _0x390cd1(0x1e6):
-                        return this[_0x390cd1(0x1aa)](![]);
-                    case _0x390cd1(0x198):
-                        return this[_0x390cd1(0x19f)]();
-                    }
-                } else
-                    return _0x4cddba = $gameMap[_0x390cd1(0x1b4)](this[_0x390cd1(0x1c0)]()), (_0x4cddba != null ? _0x4cddba[_0x390cd1(0x1e1)] : void 0x0) === 0x3;
-            } catch (_0x1d1196) {
-                _0x565197 = _0x1d1196, ANET['\x77'](_0x565197);
-            }
-            return !![];
-        };
-    }());
-}()));
+        break;
+      case "start":
+        break;
+      default:
+        // * Это коммент опций запуска, просто пропускаем, чтобы ошибку не писать в консоль
+        // * Обрабатывается он отдельно, так как если условие ложно, событие не должно
+        // * Вообще запускаться, а эти команды обрабатываеются уже в запущенном событии
+        console.warn("Unknown NET Comment command " + command);
+    }
+  };
+  // * Сделать следующую битву сетевой битвой (общей, расшаринной)
+  _.nSetSharedBattle = function(battleId) {
+    if (!String.any(battleId)) {
+      // * Если пустая строка, то Null
+      battleId = null;
+    }
+    BattleManager.nSetNetworkBattle(battleId);
+  };
+  // * Сбросить все сетевые флаги \ настройки перед запуском очередного события
+  _.nClearFlags = function() {
+    $gameTemp._nLocalActorMode = false;
+    this._nRunningCheckTimer = 0;
+    this.nClearCommandOptions();
+  };
+  (function() {    // * Опции запуска события
+    // -----------------------------------------------------------------------
+    _.isHaveNetworkStartOptions = function() {
+      return this.nStartOptions != null;
+    };
+    // * Может ли данный игрок запустить это событие
+    _.isPassStartOptions = function() {
+      // * Если это общее событие и запускаетс от сервера, то по любому можно запускать
+      if (this.nIsEventIsShared() && $gameTemp._nSharedEventOuterStartFlag === true) {
+        return true;
+      } else {
+        if (!this.isHaveNetworkStartOptions()) {
+          return true;
+        }
+        if (this.nIsLockedEvent()) {
+          if (ANET.Utils.isEventStartedByAny(this.eventId())) {
+            return false;
+          }
+        }
+        return ANET.Utils.isPassEventFilterOptions(this.nStartOptions);
+      }
+    };
+    // * Закрытыми могут быть только события с собственным ID (т.е. события карты)
+    _.nIsLockedEvent = function() {
+      var ref;
+      return this.eventId() > 0 && ((ref = this.nStartOptions) != null ? ref.lockMode : void 0) === "true";
+    };
+    // * Есть ли опции (условия) запуска события для сети
+    _.nCheckEventStartOptions = function() {
+      var e, options, ref;
+      this.nStartOptions = null; // * сбрасываем
+      try {
+        options = (ref = this._list) != null ? ref.find(function(line) {
+          var ref1;
+          return line.code === 357 && ((ref1 = line.parameters) != null ? ref1[1] : void 0) === "EventStartOptions";
+        }) : void 0;
+        if (options != null) {
+          this.nStartOptions = options.parameters[3];
+        } else {
+          // * Меньший приоритет, т.е. параметр плагина главнее
+          this.nCheckEventStartOptionsFromCommentCommand();
+        }
+      } catch (error) {
+        e = error;
+        ANET.w(e);
+        this.nStartOptions = null;
+      }
+    };
+    _.nIsAutorunEvent = function() {
+      var e, event;
+      try {
+        event = $gameMap.event(this.eventId());
+        return (event != null ? event._trigger : void 0) === 3;
+      } catch (error) {
+        e = error;
+        ANET.w(e);
+      }
+      return true;
+    };
+    return _.nIsParallelEvent = function() {
+      var e, event;
+      try {
+        event = $gameMap.event(this.eventId());
+        return (event != null ? event._trigger : void 0) === 4;
+      } catch (error) {
+        e = error;
+        ANET.w(e);
+      }
+      return true;
+    };
+  })();
+})();
+
+// ■ END Game_Interpreter.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -17262,274 +23577,210 @@ function _0x2a04(_0x2dae37, _0x2a797f) {
 //---------------------------------------------------------------------------
 
 
-function _0x35b9() {
-    var _0x3f7316 = [
-        '\x46\x6d\x76\x62\x6f',
-        '\x73\x65\x6e\x64\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x61\x64\x79\x54\x6f\x43\x6f\x6e\x74\x69\x6e\x75\x65',
-        '\x31\x30\x32\x68\x71\x4c\x70\x4c\x4e',
-        '\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72',
-        '\x57\x47\x61\x72\x58',
-        '\x68\x6e\x4c\x73\x74',
-        '\x4f\x55\x55\x54\x45\x52\x20\x53\x54\x41\x52\x54',
-        '\x32\x30\x38\x75\x49\x53\x45\x5a\x6a',
-        '\x6e\x49\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x57\x61\x69\x74\x50\x6f\x6f\x6c\x43\x61\x6e\x63\x65\x6c\x6c\x65\x64',
-        '\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c',
-        '\x5f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4f\x75\x74\x65\x72\x53\x74\x61\x72\x74\x46\x6c\x61\x67',
-        '\x5f\x63\x61\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x41\x61\x5a\x58\x4b',
-        '\x46\x54\x4b\x66\x51',
-        '\x69\x73\x48\x61\x76\x65\x4e\x65\x74\x77\x6f\x72\x6b\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x50\x52\x45\x50\x41\x52\x45\x20\x53\x48\x41\x52\x45\x44\x20\x4d\x4f\x44',
-        '\x31\x35\x38\x38\x33\x71\x74\x66\x4e\x70\x63',
-        '\x6e\x55\x70\x64\x61\x74\x65\x57\x61\x69\x74\x53\x65\x72\x76\x65\x72\x4e\x65\x78\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x50\x65\x72\x6d\x69\x73\x73\x69\x6f\x6e',
-        '\x59\x54\x6e\x52\x44',
-        '\x53\x54\x4f\x50\x20\x57\x41\x49\x54\x49\x4e\x47\x20\x50\x4c\x41\x59\x45\x52\x53\x20\x3a\x20\x49\x53\x20\x43\x41\x4e\x43\x45\x4c\x45\x44\x21',
-        '\x66\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x75\x70\x64\x61\x74\x65',
-        '\x6e\x52\x65\x71\x75\x69\x72\x65\x43\x68\x6f\x69\x63\x65\x4f\x6e\x6c\x79\x46\x6f\x72\x4d\x61\x73\x74\x65\x72',
-        '\x6e\x43\x6c\x65\x61\x72\x53\x68\x61\x72\x65\x64\x53\x79\x6e\x63\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x57\x61\x69\x74',
-        '\x6e\x53\x74\x61\x72\x74\x4f\x70\x74\x69\x6f\x6e\x73',
-        '\x4a\x72\x72\x58\x6b',
-        '\x6e\x52\x65\x71\x75\x65\x73\x74\x53\x79\x6e\x63\x65\x64\x4e\x65\x78\x74\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x6e\x65\x74\x4e\x65\x78\x74\x43\x6f\x6d\x6d\x61\x6e\x64',
-        '\x51\x4c\x68\x65\x46',
-        '\x6e\x49\x73\x45\x76\x65\x6e\x74\x49\x73\x53\x68\x61\x72\x65\x64',
-        '\x5f\x65\x76\x65\x6e\x74\x49\x64',
-        '\x6e\x4b\x61\x53\x50',
-        '\x72\x65\x73\x65\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x31\x33\x36\x31\x38\x30\x68\x4e\x63\x57\x57\x72',
-        '\x6e\x53\x65\x74\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c',
-        '\x6e\x49\x73\x45\x76\x65\x6e\x74\x49\x73\x53\x68\x61\x72\x65\x64\x41\x6e\x64\x53\x74\x72\x69\x63\x74',
-        '\x74\x6e\x59\x63\x70',
-        '\x35\x31\x34\x32\x38\x31\x30\x75\x45\x47\x71\x4a\x65',
-        '\x6d\x4c\x6c\x75\x45',
-        '\x6f\x6e\x41\x6e\x73\x77\x65\x72',
-        '\x34\x33\x32\x77\x5a\x45\x79\x51\x41',
-        '\x6e\x49\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x43\x61\x6e\x42\x65\x46\x6f\x72\x63\x65\x43\x61\x6e\x63\x65\x6c\x6c\x65\x64',
-        '\x31\x31\x59\x67\x5a\x76\x65\x59',
-        '\x43\x41\x4e\x20\x50\x52\x4f\x43\x45\x53\x53\x20\x54\x4f\x20\x4e\x45\x58\x54\x20\x43\x4f\x4d\x4d\x41\x4e\x44',
-        '\x6e\x53\x65\x74\x57\x61\x69\x74\x53\x74\x61\x72\x74\x4e\x65\x78\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x46\x72\x6f\x6d\x53\x65\x72\x76\x65\x72',
-        '\x63\x6c\x65\x61\x72',
-        '\x69\x73\x53\x69\x6e\x67\x6c\x65\x50\x6f\x6f\x6c',
-        '\x6d\x66\x45\x41\x49',
-        '\x37\x35\x34\x39\x39\x32\x49\x51\x57\x6b\x52\x68',
-        '\x74\x65\x72\x6d\x69\x6e\x61\x74\x65',
-        '\x63\x6f\x6e\x74\x61\x69\x6e\x73',
-        '\x55\x54\x4a\x47\x59',
-        '\x7a\x44\x4b\x4e\x52',
-        '\x53\x74\x72\x69\x63\x74',
-        '\x6e\x65\x74\x50\x6c\x61\x79\x65\x72\x73\x50\x6f\x6f\x6c',
-        '\x70\x72\x6f\x74\x6f\x74\x79\x70\x65',
-        '\x75\x62\x6b\x56\x79',
-        '\x73\x68\x6f\x77\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x6e\x41\x6c\x6c\x6f\x77\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x50\x4c\x41\x59\x45\x52\x20\x41\x4e\x53\x57\x45\x52\x20',
-        '\x6e\x4f\x6e\x53\x79\x6e\x63\x65\x64\x45\x76\x65\x6e\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x52\x65\x73\x70\x6f\x6e\x73\x65',
-        '\x42\x55\x6d\x69\x7a',
-        '\x4f\x63\x4c\x54\x4f',
-        '\x73\x65\x74\x75\x70\x53\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72',
-        '\x6e\x52\x65\x71\x75\x65\x73\x74\x4d\x61\x73\x74\x65\x72\x4f\x6e\x6c\x79\x43\x68\x6f\x69\x63\x65\x73\x4d\x6f\x64\x65\x46\x6f\x72\x4e\x65\x78\x74\x43\x68\x6f\x69\x63\x65',
-        '\x5f\x69\x6e\x64\x65\x78',
-        '\x73\x68\x61\x72\x65\x64\x4d\x6f\x64\x65',
-        '\x36\x34\x34\x35\x31\x36\x6c\x4b\x42\x6b\x4e\x43',
-        '\x4b\x56\x69\x47\x46',
-        '\x5f\x6e\x52\x65\x70\x65\x61\x74\x41\x6e\x73\x77\x65\x72\x54\x6f\x53\x65\x72\x76\x65\x72\x54\x69\x6d\x65\x72',
-        '\x6e\x50\x72\x65\x70\x61\x72\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74',
-        '\x38\x39\x35\x35\x34\x70\x6b\x47\x44\x4b\x5a',
-        '\x69\x4e\x67\x79\x78',
-        '\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61',
-        '\x53\x54\x41\x52\x54\x20\x50\x4f\x4f\x4c',
-        '\x69\x6e\x64\x65\x78',
-        '\x58\x4a\x78\x53\x4e',
-        '\x69\x73\x43\x61\x6e\x63\x65\x6c',
-        '\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65',
-        '\x5f\x69\x6e\x64\x65\x6e\x74',
-        '\x31\x33\x30\x31\x31\x39\x51\x76\x64\x43\x64\x72',
-        '\x39\x46\x42\x59\x64\x43\x6f',
-        '\x72\x65\x67\x69\x73\x74\x65\x72',
-        '\x72\x65\x73\x65\x74',
-        '\x6e\x55\x70\x64\x61\x74\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x50\x6f\x6f\x6c'
-    ];
-    _0x35b9 = function () {
-        return _0x3f7316;
-    };
-    return _0x35b9();
-}
-function _0x57bf(_0x3313a5, _0x3a5d2f) {
-    var _0x35b96b = _0x35b9();
-    return _0x57bf = function (_0x57bf14, _0x7af0a8) {
-        _0x57bf14 = _0x57bf14 - 0x12d;
-        var _0x43ab1f = _0x35b96b[_0x57bf14];
-        return _0x43ab1f;
-    }, _0x57bf(_0x3313a5, _0x3a5d2f);
-}
-(function (_0x4f40ae, _0x1aaa91) {
-    var _0xa2b0ad = _0x57bf, _0x490348 = _0x4f40ae();
-    while (!![]) {
-        try {
-            var _0x3ac675 = -parseInt(_0xa2b0ad(0x164)) / 0x1 * (-parseInt(_0xa2b0ad(0x181)) / 0x2) + parseInt(_0xa2b0ad(0x16a)) / 0x3 + -parseInt(_0xa2b0ad(0x17d)) / 0x4 + -parseInt(_0xa2b0ad(0x15b)) / 0x5 * (parseInt(_0xa2b0ad(0x13c)) / 0x6) + -parseInt(_0xa2b0ad(0x14a)) / 0x7 * (-parseInt(_0xa2b0ad(0x141)) / 0x8) + parseInt(_0xa2b0ad(0x136)) / 0x9 * (parseInt(_0xa2b0ad(0x15f)) / 0xa) + parseInt(_0xa2b0ad(0x135)) / 0xb * (-parseInt(_0xa2b0ad(0x162)) / 0xc);
-            if (_0x3ac675 === _0x1aaa91)
-                break;
-            else
-                _0x490348['push'](_0x490348['shift']());
-        } catch (_0xe6dbbc) {
-            _0x490348['push'](_0x490348['shift']());
-        }
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Game_Interpreter.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+//$[ENCODE]
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = Game_Interpreter.prototype;
+  _.nIsEventIsShared = function() {
+    var e;
+    try {
+      return this.isHaveNetworkStartOptions() && this.nStartOptions.sharedMode !== "No";
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+      return false;
     }
-}(_0x35b9, 0x414ed), (function () {
-    var _0x5e27a6 = _0x57bf, _0x457fea;
-    _0x457fea = Game_Interpreter[_0x5e27a6(0x171)], _0x457fea[_0x5e27a6(0x157)] = function () {
-        var _0x1baeab = _0x5e27a6, _0x10c609;
-        try {
-            return '\x56\x79\x58\x78\x67' !== _0x1baeab(0x12d) ? this[_0x1baeab(0x148)]() && this[_0x1baeab(0x152)]['\x73\x68\x61\x72\x65\x64\x4d\x6f\x64\x65'] !== '\x4e\x6f' : (_0x106aff = _0x3a4ad2, _0x1443fa['\x77'](_0xd140a3), ![]);
-        } catch (_0x2103be) {
-            return _0x10c609 = _0x2103be, ANET['\x77'](_0x10c609), ![];
-        }
-    }, _0x457fea[_0x5e27a6(0x15d)] = function () {
-        var _0x5119aa = _0x5e27a6, _0x3f78c4, _0x1caf34;
-        try {
-            if (_0x5119aa(0x156) !== _0x5119aa(0x146))
-                return this[_0x5119aa(0x157)]() && ((_0x1caf34 = this[_0x5119aa(0x152)][_0x5119aa(0x17c)]) != null ? _0x1caf34[_0x5119aa(0x16c)](_0x5119aa(0x16f)) : void 0x0);
-            else
-                _0x5119aa(0x140)['\x70'](), _0x29dabe['\x5f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4f\x75\x74\x65\x72\x53\x74\x61\x72\x74\x46\x6c\x61\x67'] = null, _0x467917[_0x5119aa(0x179)](this, ![]), this[_0x5119aa(0x154)]();
-        } catch (_0x4039ac) {
-            if ('\x72\x56\x4a\x75\x48' === '\x72\x56\x4a\x75\x48')
-                return _0x3f78c4 = _0x4039ac, ANET['\x77'](_0x3f78c4), ![];
-            else {
-                if (this['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61'] == null)
-                    return;
-                if (this[_0x5119aa(0x143)] == null)
-                    return;
-                if (this['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61']['\x69\x6e\x64\x65\x78'] === _0xdea145 && this[_0x5119aa(0x12e)]['\x69\x6e\x64\x65\x6e\x74'] === _0x5de8eb)
-                    return '\x50\x4c\x41\x59\x45\x52\x20\x41\x4e\x53\x57\x45\x52\x20'['\x70'](_0x1c7360), this[_0x5119aa(0x143)][_0x5119aa(0x161)](_0x1a9be7);
-            }
-        }
-    }, _0x457fea[_0x5e27a6(0x163)] = function () {
-        var _0xea5c2e = _0x5e27a6;
-        return !this[_0xea5c2e(0x15d)]() && this[_0xea5c2e(0x12e)][_0xea5c2e(0x130)] === 0x0;
-    }, _0x457fea[_0x5e27a6(0x180)] = function () {
-        var _0x1820ec = _0x5e27a6;
-        ANInterpreterManager[_0x1820ec(0x15a)](), _0x1820ec(0x149)['\x70'](this[_0x1820ec(0x158)]);
-        if ($gameTemp[_0x1820ec(0x144)] == null)
-            this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'] = null, ANInterpreterManager[_0x1820ec(0x179)](this, !![]), this[_0x1820ec(0x154)]();
-        else {
-            if (_0x1820ec(0x13a) === _0x1820ec(0x13a))
-                _0x1820ec(0x140)['\x70'](), $gameTemp[_0x1820ec(0x144)] = null, ANInterpreterManager['\x73\x65\x74\x75\x70\x53\x68\x61\x72\x65\x64\x49\x6e\x74\x65\x72\x70\x72\x65\x74\x65\x72'](this, ![]), this[_0x1820ec(0x154)]();
-            else
-                return;
-        }
-    }, _0x457fea[_0x5e27a6(0x142)] = function () {
-        var _0x4261f0 = _0x5e27a6;
-        if (_0x4261f0(0x14c) !== _0x4261f0(0x14c))
-            this['\x6e\x53\x65\x74\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c']();
-        else {
-            var _0x48bcc8;
-            try {
-                if ('\x4a\x6d\x74\x78\x78' === '\x57\x58\x4b\x52\x54')
-                    this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'] = null, _0x3cf0a3[_0x4261f0(0x179)](this, !![]), this[_0x4261f0(0x154)]();
-                else {
-                    if (!this[_0x4261f0(0x163)]())
-                        return;
-                    if (Input[_0x4261f0(0x132)]())
-                        return Input['\x63\x6c\x65\x61\x72'](), ANInterpreterManager[_0x4261f0(0x14e)](), this[_0x4261f0(0x16b)](), !![];
-                }
-            } catch (_0x44f5d0) {
-                _0x48bcc8 = _0x44f5d0, ANET['\x77'](_0x48bcc8);
-            }
-            return ![];
-        }
-    }, _0x457fea[_0x5e27a6(0x154)] = function () {
-        var _0x2136fb = _0x5e27a6;
-        this[_0x2136fb(0x12e)] = {
-            '\x69\x6e\x64\x65\x78': this[_0x2136fb(0x17b)],
-            '\x69\x6e\x64\x65\x6e\x74': this[_0x2136fb(0x134)]
-        };
-        if (ANInterpreterManager[_0x2136fb(0x13d)]())
-            this[_0x2136fb(0x15c)]();
-        else {
-            if (_0x2136fb(0x177) === '\x42\x55\x6d\x69\x7a')
-                this[_0x2136fb(0x166)]();
-            else
-                return !this[_0x2136fb(0x15d)]() && this[_0x2136fb(0x12e)][_0x2136fb(0x130)] === 0x0;
-        }
-        ANInterpreterManager[_0x2136fb(0x173)]();
-    }, _0x457fea[_0x5e27a6(0x176)] = function (_0x9b5dac, _0xee08c, _0x42747b) {
-        var _0x3341c8 = _0x5e27a6, _0x52fe87;
-        try {
-            if (_0x3341c8(0x16d) !== _0x3341c8(0x16d))
-                return;
-            else {
-                if (this['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61'] == null)
-                    return;
-                if (this[_0x3341c8(0x143)] == null)
-                    return;
-                if (this['\x6e\x53\x79\x6e\x63\x57\x61\x69\x74\x43\x6f\x6d\x6d\x61\x6e\x64\x44\x61\x74\x61'][_0x3341c8(0x130)] === _0x9b5dac && this[_0x3341c8(0x12e)]['\x69\x6e\x64\x65\x6e\x74'] === _0xee08c) {
-                    if (_0x3341c8(0x147) !== _0x3341c8(0x147))
-                        this[_0x3341c8(0x143)][_0x3341c8(0x138)]();
-                    else
-                        return _0x3341c8(0x175)['\x70'](_0x42747b), this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'][_0x3341c8(0x161)](_0x42747b);
-                }
-            }
-        } catch (_0x499949) {
-            _0x3341c8(0x178) !== _0x3341c8(0x13e) ? (_0x52fe87 = _0x499949, ANET['\x77'](_0x52fe87)) : this['\x5f\x6e\x52\x65\x70\x65\x61\x74\x41\x6e\x73\x77\x65\x72\x54\x6f\x53\x65\x72\x76\x65\x72\x54\x69\x6d\x65\x72'] >= 0x0 && (this['\x5f\x6e\x52\x65\x70\x65\x61\x74\x41\x6e\x73\x77\x65\x72\x54\x6f\x53\x65\x72\x76\x65\x72\x54\x69\x6d\x65\x72']--, this[_0x3341c8(0x17f)] === 0x0 && this[_0x3341c8(0x166)]());
-        }
-    }, _0x457fea[_0x5e27a6(0x15c)] = function () {
-        var _0x586a0b = _0x5e27a6;
-        _0x586a0b(0x12f)['\x70'](), this[_0x586a0b(0x143)] == null ? this[_0x586a0b(0x143)] = new PlayersWaitPool() : this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'][_0x586a0b(0x138)](), this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'][_0x586a0b(0x137)](), this[_0x586a0b(0x133)] = _0x586a0b(0x170);
-    }, _0x457fea[_0x5e27a6(0x139)] = function () {
-        var _0x4b0af2 = _0x5e27a6, _0x5b3193;
-        this[_0x4b0af2(0x143)][_0x4b0af2(0x14f)]();
-        if (this['\x6e\x49\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x57\x61\x69\x74\x50\x6f\x6f\x6c\x43\x61\x6e\x63\x65\x6c\x6c\x65\x64']())
-            return _0x4b0af2(0x14d)['\x70'](), !![];
-        return _0x5b3193 = !this[_0x4b0af2(0x143)]['\x69\x73\x52\x65\x61\x64\x79'](), !_0x5b3193 && ('\x53\x54\x4f\x50\x20\x57\x41\x49\x54\x49\x4e\x47\x20\x50\x4c\x41\x59\x45\x52\x53\x20\x3a\x20\x49\x53\x20\x52\x45\x41\x44\x59'['\x70'](), ANInterpreterManager[_0x4b0af2(0x13b)](), ANInterpreterManager['\x68\x69\x64\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'](), this[_0x4b0af2(0x151)](), this[_0x4b0af2(0x133)] = ''), _0x5b3193;
-    }, _0x457fea[_0x5e27a6(0x151)] = function () {
-        var _0x1aa1a4 = _0x5e27a6;
-        if ('\x7a\x44\x4b\x4e\x52' === _0x1aa1a4(0x16e))
-            this[_0x1aa1a4(0x12e)] = null;
-        else
-            return _0x1aa1a4(0x175)['\x70'](_0xc8f17c), this[_0x1aa1a4(0x143)][_0x1aa1a4(0x161)](_0x400985);
-    }, _0x457fea[_0x5e27a6(0x166)] = function () {
-        var _0x27456e = _0x5e27a6;
-        if (_0x27456e(0x13f) !== _0x27456e(0x13f))
-            return _0x27456e(0x14d)['\x70'](), !![];
-        else
-            this[_0x27456e(0x145)] = ![], ANInterpreterManager['\x73\x65\x6e\x64\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x52\x65\x67\x69\x73\x74\x65\x72\x65\x64\x44\x6f\x6e\x65'](), '\x57\x41\x49\x54\x20\x53\x45\x52\x56\x45\x52\x20\x46\x4f\x52\x20\x4e\x45\x58\x54\x20\x43\x4f\x4d\x4d\x41\x4e\x44'['\x70'](), this[_0x27456e(0x17f)] = 0x3c, this['\x5f\x77\x61\x69\x74\x4d\x6f\x64\x65'] = _0x27456e(0x155);
-    }, _0x457fea[_0x5e27a6(0x14b)] = function () {
-        var _0x1a9015 = _0x5e27a6;
-        if (_0x1a9015(0x159) !== '\x7a\x53\x4e\x57\x73') {
-            var _0x58bae5;
-            if ($gameTemp['\x5f\x73\x68\x6f\x75\x6c\x64\x46\x6f\x72\x63\x65\x45\x78\x69\x74\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] === !![]) {
-                if (_0x1a9015(0x17e) === _0x1a9015(0x131))
-                    this[_0x1a9015(0x12e)] = {
-                        '\x69\x6e\x64\x65\x78': this[_0x1a9015(0x17b)],
-                        '\x69\x6e\x64\x65\x6e\x74': this[_0x1a9015(0x134)]
-                    }, _0x292e37['\x69\x73\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74\x4d\x61\x73\x74\x65\x72']() ? this[_0x1a9015(0x15c)]() : this[_0x1a9015(0x166)](), _0x1e3383[_0x1a9015(0x173)]();
-                else
-                    return this[_0x1a9015(0x16b)](), !![];
-            }
-            return _0x58bae5 = !this[_0x1a9015(0x145)], !_0x58bae5 ? (_0x1a9015(0x165)['\x70'](), this[_0x1a9015(0x133)] = '') : _0x1a9015(0x169) === _0x1a9015(0x153) ? this[_0x1a9015(0x166)]() : this[_0x1a9015(0x17f)] >= 0x0 && (this['\x5f\x6e\x52\x65\x70\x65\x61\x74\x41\x6e\x73\x77\x65\x72\x54\x6f\x53\x65\x72\x76\x65\x72\x54\x69\x6d\x65\x72']--, this[_0x1a9015(0x17f)] === 0x0 && this[_0x1a9015(0x166)]()), !![];
-        } else
-            return;
-    }, _0x457fea[_0x5e27a6(0x174)] = function () {
-        var _0x488dc3 = _0x5e27a6;
-        if (this[_0x488dc3(0x133)] !== _0x488dc3(0x155)) {
-            if (_0x488dc3(0x172) !== _0x488dc3(0x160))
-                return;
-            else
-                return;
-        }
-        this['\x5f\x63\x61\x6e\x43\x6f\x6e\x74\x69\x6e\x75\x65\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74'] = !![], this[_0x488dc3(0x17f)] = -0x1, ANInterpreterManager['\x68\x69\x64\x65\x57\x61\x69\x74\x50\x6c\x61\x79\x65\x72\x73\x4f\x6e\x53\x68\x61\x72\x65\x64\x45\x76\x65\x6e\x74']();
-    }, _0x457fea[_0x5e27a6(0x17a)] = function () {
-        var _0x11140a = _0x5e27a6;
-        if (this['\x6e\x50\x6c\x61\x79\x65\x72\x50\x6f\x6f\x6c'] != null && this[_0x11140a(0x143)][_0x11140a(0x168)]()) {
-            if (_0x11140a(0x15e) !== _0x11140a(0x15e))
-                return _0x1f3577[_0x11140a(0x167)](), _0x12ff9a[_0x11140a(0x14e)](), this[_0x11140a(0x16b)](), !![];
-            else
-                return;
-        }
-        '\x53\x68\x61\x72\x65\x64\x20\x45\x76\x65\x6e\x74\x20\x43\x68\x6f\x69\x63\x65\x73\x20\x69\x6e\x20\x4d\x61\x73\x74\x65\x72\x20\x6f\x6e\x6c\x79\x20\x6d\x6f\x64\x65'['\x70'](), $gameTemp[_0x11140a(0x150)] = !![];
+  };
+  _.nIsEventIsSharedAndStrict = function() {
+    var e, ref;
+    try {
+      return this.nIsEventIsShared() && ((ref = this.nStartOptions.sharedMode) != null ? ref.contains("Strict") : void 0);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+      return false;
+    }
+  };
+  _.nIsSharedEventCanBeForceCancelled = function() {
+    return !this.nIsEventIsSharedAndStrict() && this.nSyncWaitCommandData.index === 0;
+  };
+  _.nPrepareSharedEvent = function() {
+    ANInterpreterManager.resetSharedEvent();
+    "PREPARE SHARED MOD".p(this._eventId);
+    if ($gameTemp._nSharedEventOuterStartFlag == null) {
+      // * Сброс пула игроков
+      this.nPlayerPool = null;
+      // * Регестрируем общее событие (второй аргумент флаг - мастер этот клиент?)
+      ANInterpreterManager.setupSharedInterpreter(this, true);
+      // * Запускаем пул игроков (на карте)
+      this.nRequestSyncedNextEventCommand();
+    } else {
+      "OUUTER START".p();
+      // * Сброс флага
+      $gameTemp._nSharedEventOuterStartFlag = null;
+      // * Отправим, что мы зарегестрировались на этом событии
+      ANInterpreterManager.setupSharedInterpreter(this, false);
+      // * Ждём разрешение на старт следующей команды (от сервера, мастера общего события)
+      this.nRequestSyncedNextEventCommand();
+    }
+  };
+  
+  // * Игрок отменил ожидания других игроков (события должно закрыться сразу)
+  _.nIsSharedEventWaitPoolCancelled = function() {
+    var e;
+    try {
+      if (!this.nIsSharedEventCanBeForceCancelled()) {
+        return;
+      }
+      if (Input.isCancel()) {
+        // * Прерываем событие сразу (не запускаем)
+        // * Очищаем ввод, чтобы меню сразу не выскочело после нажатия Esc
+        Input.clear();
+        ANInterpreterManager.forceCancelSharedEvent();
+        this.terminate();
+        return true;
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+    return false;
+  };
+  // * Следующая команда события должна быть синхронизированна
+  _.nRequestSyncedNextEventCommand = function() {
+    this.nSyncWaitCommandData = {
+      index: this._index,
+      indent: this._indent
     };
-}()));
+    if (ANInterpreterManager.isSharedEventMaster()) {
+      this.nSetWaitPlayerPool();
+    } else {
+      this.nSetWaitStartNextCommandFromServer();
+    }
+    ANInterpreterManager.showWaitPlayersOnSharedEvent();
+  };
+  // * Когда пришли данные от клиента
+  _.nOnSyncedEventCommandResponse = function(index, indent, actorId) {
+    var e;
+    try {
+      if (this.nSyncWaitCommandData == null) {
+        return;
+      }
+      if (this.nPlayerPool == null) {
+        return;
+      }
+      if (this.nSyncWaitCommandData.index === index && this.nSyncWaitCommandData.indent === indent) {
+        "PLAYER ANSWER ".p(actorId);
+        return this.nPlayerPool.onAnswer(actorId);
+      }
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Ожидания пула игроков
+  _.nSetWaitPlayerPool = function() {
+    "START POOL".p();
+    if (this.nPlayerPool == null) {
+      this.nPlayerPool = new PlayersWaitPool();
+    } else {
+      // * Не пересоздаём, так как нам важно учитывать только тех игроков на карте
+      // * которые были во время запуска события, а не подключились позже
+      this.nPlayerPool.reset();
+    }
+    // * Отправляем на сервер запрос
+    this.nPlayerPool.register();
+    this._waitMode = "netPlayersPool";
+  };
+  // * Ожидание готовности пула игроков (этот метод работает только на мастере общего события)
+  _.nUpdateWaitPlayersPool = function() {
+    var waiting;
+    // * Пул надо обновлять (таймер внутри на повторную отправку запроса о готовности клиентов)
+    this.nPlayerPool.update();
+    if (this.nIsSharedEventWaitPoolCancelled()) {
+      "STOP WAITING PLAYERS : IS CANCELED!".p();
+      return true; // * Сразу выход из ожидания, если ожидание было преврано
+    }
+    waiting = !this.nPlayerPool.isReady();
+    if (!waiting) {
+      // * Теперь событие продолжается (мастер)
+      "STOP WAITING PLAYERS : IS READY".p();
+      ANInterpreterManager.sendSharedEventReadyToContinue();
+      ANInterpreterManager.hideWaitPlayersOnSharedEvent();
+      this.nClearSharedSyncEventCommandWait();
+      this._waitMode = '';
+    }
+    return waiting;
+  };
+  // * Очистить пул и данные команды на синхронизацию
+  _.nClearSharedSyncEventCommandWait = function() {
+    this.nSyncWaitCommandData = null;
+  };
+  // * Ждать разрешение от сервера (мастера общего события) на запуск следующей команды события
+  // * Этот метод работает только на клиентах (не мастере общего события)
+  _.nSetWaitStartNextCommandFromServer = function() {
+    this._canContinueSharedEvent = false;
+    ANInterpreterManager.sendSharedEventRegisteredDone();
+    "WAIT SERVER FOR NEXT COMMAND".p();
+    // * Когда клиент уже на команде, которую надо синхронизировать, он будет
+    // * каждую секунду "напоминать" о себе (снова отправлять что он готов продолжать)
+    this._nRepeatAnswerToServerTimer = 60;
+    this._waitMode = "netNextCommand";
+  };
+  // * Ожидание разрешения от сервера на запуск следующей команды
+  _.nUpdateWaitServerNextCommandPermission = function() {
+    var waiting;
+    // * Сервер закрыл общее событие (отменил ожидание старта)
+    // * В GameTemp, потому что может отменить, как тут ещё и не стартует это событие
+    if ($gameTemp._shouldForceExitSharedEvent === true) {
+      this.terminate();
+      return true;
+    }
+    waiting = !this._canContinueSharedEvent;
+    if (!waiting) {
+      // * Событие продолжается (клиент)
+      "CAN PROCESS TO NEXT COMMAND".p();
+      this._waitMode = '';
+    } else {
+      if (this._nRepeatAnswerToServerTimer >= 0) {
+        this._nRepeatAnswerToServerTimer--;
+        if (this._nRepeatAnswerToServerTimer === 0) {
+          this.nSetWaitStartNextCommandFromServer();
+        }
+      }
+    }
+    return true;
+  };
+  // * Получен ответ от сервера, что можно продолжать выполнение общего события
+  _.nAllowContinueSharedEvent = function() {
+    if (this._waitMode !== "netNextCommand") {
+      return;
+    }
+    this._canContinueSharedEvent = true;
+    // * Чтобы сброс переменной не произошёл снова
+    this._nRepeatAnswerToServerTimer = -1;
+    ANInterpreterManager.hideWaitPlayersOnSharedEvent();
+  };
+  // * Следующий выбор (команда 102) будет в режиме "только мастер события"
+  _.nRequestMasterOnlyChoicesModeForNextChoice = function() {
+    // * Если Пул игроков пустой, то не задаём флаг, чтобы сервер лишний раз не грузить
+    if ((this.nPlayerPool != null) && this.nPlayerPool.isSinglePool()) {
+      return;
+    }
+    "Shared Event Choices in Master only mode".p();
+    $gameTemp.nRequireChoiceOnlyForMaster = true;
+  };
+})();
+
+// ■ END Game_Interpreter.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -17537,7 +23788,7 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
 (function() {
-  var ALIAS__initialize, ALIAS__refresh, ALIAS__setup, ALIAS__setupStartingEvent, ALIAS__update, _;
+  var ALIAS__initialize, ALIAS__refresh, ALIAS__setup, ALIAS__setupStartingEvent, ALIAS__update, ALIAS__updateInterpreter, _;
   //@[DEFINES]
   _ = Game_Map.prototype;
   //@[ALIAS]
@@ -17562,6 +23813,20 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
     ALIAS__update.call(this, sceneActive);
     if (ANNetwork.isConnected()) {
       return this.updateNetwork();
+    }
+  };
+  
+  //@[ALIAS]
+  ALIAS__updateInterpreter = _.updateInterpreter;
+  _.updateInterpreter = function() {
+    // * Данная проверка была добавлена в версии 0.8.1 чтобы работали Autorun
+    // * события которые имеют Event Start Options или Event Command Options
+    if (ANNetwork.isConnected()) {
+      if (ANGameManager.isActorIsBinded()) {
+        return ALIAS__updateInterpreter.call(this, ...arguments);
+      }
+    } else {
+      return ALIAS__updateInterpreter.call(this, ...arguments);
     }
   };
   
@@ -17618,7 +23883,14 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
     }
   };
   _.netCharsIsSomeoneCollided = function(x, y) {
-    return this._networkCharacters.isSomeoneCollided(x, y);
+    var e;
+    try {
+      return this._networkCharacters.isSomeoneCollided(x, y);
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+      return false;
+    }
   };
   _.nGetNetCharXY = function(x, y) {
     if (this.netCharsIsSomeoneCollided(x, y)) {
@@ -17662,6 +23934,53 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
       ANET.w(e);
     }
     return false;
+  };
+  _.nRefreshNetworkObserversForAll = function() {
+    var char, e, event, i, j, len, len1, ref, ref1, results;
+    try {
+      if (!ANNetwork.isConnected()) {
+        return;
+      }
+      try {
+        if (typeof $gamePlayer !== "undefined" && $gamePlayer !== null) {
+          $gamePlayer.nRefreshUserDefinedObservers();
+        }
+      } catch (error) {
+        e = error;
+        KDCore.warning(e);
+      }
+      ref = this.events();
+      for (i = 0, len = ref.length; i < len; i++) {
+        event = ref[i];
+        if (event == null) {
+          continue;
+        }
+        try {
+          event.nRefreshUserDefinedObservers();
+        } catch (error) {
+          e = error;
+          KDCore.warning(e);
+        }
+      }
+      ref1 = this._networkCharacters.characters();
+      results = [];
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        char = ref1[j];
+        if (char == null) {
+          continue;
+        }
+        try {
+          results.push(char.nRefreshUserDefinedObservers());
+        } catch (error) {
+          e = error;
+          results.push(KDCore.warning(e));
+        }
+      }
+      return results;
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
   };
 })();
 
@@ -17938,6 +24257,32 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
   _.nClearBeforeRefresh = function() {
     return this._actors = [];
   };
+  _.nRefreshNetworkObserversForAll = function() {
+    var actor, e, i, len, ref, results;
+    try {
+      if (!ANNetwork.isConnected()) {
+        return;
+      }
+      ref = this.members();
+      results = [];
+      for (i = 0, len = ref.length; i < len; i++) {
+        actor = ref[i];
+        if (actor == null) {
+          continue;
+        }
+        try {
+          results.push(actor.nRefreshUserDefinedObservers());
+        } catch (error) {
+          e = error;
+          results.push(KDCore.warning(e));
+        }
+      }
+      return results;
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
 })();
 
 // ■ END Game_Party.coffee
@@ -18202,7 +24547,7 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
 (function() {
-  var _;
+  var OBSERVERS_STORE_FIELD_NAME, _;
   //@[DEFINES]
   _ = Game_System.prototype;
   // * Инициализация стилей таблиц имён для персонажей
@@ -18248,6 +24593,102 @@ function _0x57bf(_0x3313a5, _0x3a5d2f) {
     } catch (error) {
       e = error;
       ANET.w(e);
+    }
+  };
+  _.nRefreshWaitTransferMode = function(isWait, __isOuter = false) {
+    var e;
+    try {
+      this.nWaitTransferModeState = isWait;
+      if (!ANNetwork.isConnected()) {
+        return;
+      }
+      if (!__isOuter) {
+        ANGameManager.sendNetworkOption('waitTransferMode', isWait);
+      }
+      if (isWait === false) {
+        if (ANGameManager._waitMode === "playersOnMap") {
+          return ANGameManager.resetWait();
+        }
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _._nSetupUserDefinedObservers = function(observerObj, typeId) {
+    var e, userDefinedFields;
+    try {
+      if (observerObj == null) {
+        return;
+      }
+      userDefinedFields = this._nGetUserDefinedObserverFields(typeId);
+      if ((userDefinedFields != null) && userDefinedFields.length > 0) {
+        return observerObj.netDataObserver.addFields(observerObj, userDefinedFields);
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  OBSERVERS_STORE_FIELD_NAME = "_netUserDefinedObserverStore_";
+  _._nGetUserDefinedObserverFields = function(typeId) {
+    var e, fieldName;
+    try {
+      if (!String.any(typeId)) {
+        return [];
+      }
+      fieldName = OBSERVERS_STORE_FIELD_NAME;
+      if (this[fieldName + typeId] == null) {
+        return [];
+      }
+      return this[fieldName + typeId];
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+  _.nModifyUserDefinedObserver = function(typeId, prop, isAdd) {
+    var e, fieldName;
+    try {
+      fieldName = OBSERVERS_STORE_FIELD_NAME;
+      if (this[fieldName + typeId] == null) {
+        this[fieldName + typeId] = [];
+      }
+      if (isAdd === true) {
+        if (!this[fieldName + typeId].contains(prop)) {
+          this[fieldName + typeId].push(prop);
+        }
+      } else {
+        this[fieldName + typeId].delete(prop);
+      }
+      if (typeof $gameMap !== "undefined" && $gameMap !== null) {
+        $gameMap.nRefreshNetworkObserversForAll();
+      }
+      if (typeof $gameParty !== "undefined" && $gameParty !== null) {
+        $gameParty.nRefreshNetworkObserversForAll();
+      }
+      if (ANNetwork.isConnected()) {
+        ANGameManager.sendNetworkOption('userDefinedObservers', {
+          typeId,
+          data: this[fieldName + typeId]
+        });
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+  };
+  _._nModifyUserDefinedObserversFromServer = function({typeId, data}) {
+    var e;
+    try {
+      this[OBSERVERS_STORE_FIELD_NAME + typeId] = data;
+      if (typeof $gameMap !== "undefined" && $gameMap !== null) {
+        $gameMap.nRefreshNetworkObserversForAll();
+      }
+      return typeof $gameParty !== "undefined" && $gameParty !== null ? $gameParty.nRefreshNetworkObserversForAll() : void 0;
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
     }
   };
 })();
@@ -18540,6 +24981,9 @@ nAPI = function() {};
   // * (только если в Scene_Title нет пункта или используется кастомная сцена)
   //$[Внимание: могут быть проблемы в вызове из сцены карты (одиночная игра) и выходе из сцены]
   _.startNetworkGameScene = function() {
+    if (!ANNetwork.isConnected()) {
+      $gameTemp.__netShouldDisconnectAfterLocalModeScene = true;
+    }
     SceneManager.push(Scene_NetworkGameMenu);
   };
   _.ID = function() {
@@ -18605,6 +25049,15 @@ nAPI = function() {};
       }
       return false;
     };
+    _.setWaitWhenTransfer = function(isWait) {
+      var e;
+      try {
+        return $gameSystem.nRefreshWaitTransferMode(isWait, false);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
     // * Возвращает набор данных исходя из what (см. ANGameManager.getPlayerInfo)
     //? what && byWhat: actor, actorId, netId, actorName, playerName, playerIndex, info
     _.getPlayerInfo = function(what, byWhat, value) {
@@ -18627,7 +25080,11 @@ nAPI = function() {};
         playerData = this.getPlayerInfo("info", byWhat, value);
         // * Персонаж должен быть на текущей карте + сцена карты должна быть текущая
         if ((playerData != null) && NetPlayerDataWrapper.isCharOnMap(playerData)) {
-          return $gameMap.networkCharacterById(playerData.id);
+          if (playerData.id === ANGameManager.myPlayerData().id) {
+            return $gamePlayer;
+          } else {
+            return $gameMap.networkCharacterById(playerData.id);
+          }
         }
       } catch (error) {
         e = error;
@@ -18728,7 +25185,7 @@ nAPI = function() {};
       }
     };
     // * Подписать на определённую (кастомную) команду выполенине общего события
-    return _.registerCommonEventForCommand = function(name, commonEventId) {
+    _.registerCommonEventForCommand = function(name, commonEventId) {
       var e;
       try {
         return ANNetwork.callback(NMS.Game("customCommandLink", {name, commonEventId}), function() {
@@ -18737,6 +25194,32 @@ nAPI = function() {};
           }
           return console.log("Custom network command register to Common Event is done");
         });
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    // * Добавить (удалить) значение поля в Observer (Game_CharacterBase)
+    _.setupAutoSyncPropertyForCharacter = function(propertyName, isAddSync = true) {
+      var e;
+      try {
+        if (typeof $gameSystem === "undefined" || $gameSystem === null) {
+          return;
+        }
+        return $gameSystem.nModifyUserDefinedObserver('character', propertyName, isAddSync);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    // * Аналогично, только для Game_BattlerBase
+    return _.setupAutoSyncPropertyForBattler = function(propertyName, isAddSync = true) {
+      var e;
+      try {
+        if (typeof $gameSystem === "undefined" || $gameSystem === null) {
+          return;
+        }
+        return $gameSystem.nModifyUserDefinedObserver('battler', propertyName, isAddSync);
       } catch (error) {
         e = error;
         return KDCore.warning(e);
@@ -18844,7 +25327,7 @@ nAPI = function() {};
 
     // * NAMEPLATES
     // -----------------------------------------------------------------------
-    return _.setNameplateStyle = function(actorId, styleId) {
+    _.setNameplateStyle = function(actorId, styleId) {
       var e;
       try {
         if (!ANET.isPro()) {
@@ -18854,6 +25337,24 @@ nAPI = function() {};
           return;
         }
         return $gameSystem.nSetNameplateStyleForActor(actorId, styleId);
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
+    };
+    return _.requestNameplatesRefresh = function() {
+      var e, ref;
+      try {
+        if (!ANET.isPro()) {
+          return;
+        }
+        if (!ANNetwork.isConnected()) {
+          return;
+        }
+        if (!KDCore.Utils.isSceneMap()) {
+          return;
+        }
+        return (ref = SceneManager._scene._spriteset) != null ? ref.refreshNetworkCharactersNameplates() : void 0;
       } catch (error) {
         e = error;
         return KDCore.warning(e);
@@ -19556,9 +26057,21 @@ ANET.UI = function() {};
         return this._isHttps === true;
       }
 
-      //? MULTIPLAYER GROUP -----------------------------------------------------------
+      //Allow Quick Connection?
+      isQuickDevConnectionAllowed() {
+        return this.getParam("isQuickDevConnectionAllowed", false);
+      }
 
-        //Join to Game Allowed?
+      isEndGameWhenHostIsLeave() {
+        return this.getParam('isEndGameWhenHostIsLeave', true);
+      }
+
+      //? MULTIPLAYER GROUP -----------------------------------------------------------
+      isAddNetGameCmdToTitleMenu() {
+        return this.getParam("netGameTitleCmd", true);
+      }
+
+      //Join to Game Allowed?
       isJoinStartedRoomAllowed() {
         return this.getParam("joinStartedAllowed", false);
       }
@@ -19625,6 +26138,12 @@ ANET.UI = function() {};
       //Is Encounters is Global?
       isMapEncountersGlobal() {
         return this.getParam("isMapEncountersGlobal", false);
+      }
+
+      //Is Custom Start Map?
+      //Note: <nCustomStart:MAPID,X,Y,DIR>
+      isCustomStartMap() {
+        return !this.isOnlySameMapMode() && this.getParam("isCustomStartMap", false);
       }
 
       //? NAMEPLATES SUBGROUP ----------------------------------------------------
@@ -19796,6 +26315,11 @@ ANET.UI = function() {};
         return this.getParam("playerLeaveGameCommonEvent", 0);
       }
 
+      //Players Collisions
+      isAllowCollsBetweenNetChars() {
+        return this.getParam("isAllowCollsBetweenNetChars", false);
+      }
+
       //? OTHER -----------------------------------------------------------
       globalVariablesIds() {
         return this._globalVars;
@@ -19812,7 +26336,7 @@ ANET.UI = function() {};
 
       getLocaleValue(id, arg) {
         var value;
-        value = this._localeDB[id] || id.toString();
+        value = this._localeDB[id] || (id.toString() + "*");
         if ((arg != null) && String.any(arg.toString())) {
           value = value.replace("%1", arg);
         }
@@ -19992,117 +26516,90 @@ ANET.UI = function() {};
 //---------------------------------------------------------------------------
 
 
-function _0x2670() {
-    var _0x1feec4 = [
-        '\x5f\x67\x65\x74\x44\x65\x66\x61\x75\x6c\x74\x56\x69\x73\x75\x61\x6c\x46\x6f\x72\x5f\x6e\x65\x74\x43\x68\x61\x74\x54\x65\x78\x74\x4c\x69\x6e\x65',
-        '\x36\x36\x32\x32\x38\x73\x58\x4c\x71\x62\x4f',
-        '\x31\x34\x35\x71\x63\x73\x4c\x69\x47',
-        '\x67\x65\x74\x50\x61\x72\x61\x6d',
-        '\x5c\x7d\x5c\x7d\x5c\x43\x5b\x33\x5d\x5b\x25\x31\x5d\x5c\x7b\x5c\x7b\x20\x5c\x43\x5b\x36\x5d\x25\x33',
-        '\x31\x36\x36\x36\x39\x31\x30\x4b\x58\x6f\x4e\x68\x52',
-        '\x41\x4c\x4c',
-        '\x69\x6e\x47\x61\x6d\x65\x43\x68\x61\x74\x54\x65\x78\x74\x4c\x69\x6e\x65\x53\x65\x74\x74\x69\x6e\x67\x73',
-        '\x33\x35\x36\x35\x36\x37\x34\x78\x57\x46\x50\x71\x4b',
-        '\x31\x36\x34\x30\x38\x39\x37\x30\x6f\x51\x79\x74\x4b\x64',
-        '\x74\x6f\x43\x73\x73',
-        '\x5c\x7d\x5c\x7d\x5c\x43\x5b\x33\x5d\x5b\x25\x31\x5d\x20\x5c\x7b\x5c\x7b\x5c\x43\x5b\x32\x5d\x25\x32\x20\x5c\x43\x5b\x30\x5d\x25\x33',
-        '\x31\x34\x39\x39\x38\x38\x36\x52\x79\x4a\x53\x6c\x77',
-        '\x4d\x41\x50',
-        '\x31\x32\x34\x39\x31\x38\x30\x4e\x55\x56\x4d\x4b\x73',
-        '\x5c\x7d\x5c\x7d\x5c\x43\x5b\x33\x5d\x5b\x25\x31\x5d\x5c\x43\x5b\x31\x5d\x5b\x4d\x45\x5d\x5c\x7b\x5c\x7b\x20\x5c\x43\x5b\x30\x5d\x25\x33',
-        '\x39\x6f\x78\x72\x5a\x49\x6e',
-        '\x38\x52\x71\x71\x61\x44\x73',
-        '\x34\x35\x37\x38\x37\x34\x39\x49\x4b\x49\x44\x45\x46',
-        '\x47\x72\x61\x70\x68\x69\x63\x73\x2e\x68\x65\x69\x67\x68\x74\x20\x2d\x20\x31\x39\x33',
-        '\x23\x35\x39\x61\x33\x64\x39',
-        '\x5f\x67\x65\x74\x44\x65\x66\x61\x75\x6c\x74\x56\x69\x73\x75\x61\x6c\x46\x6f\x72\x5f\x69\x6e\x47\x61\x6d\x65\x43\x68\x61\x74\x57\x69\x6e\x64\x6f\x77'
-    ];
-    _0x2670 = function () {
-        return _0x1feec4;
-    };
-    return _0x2670();
-}
-function _0x3842(_0x4a9af4, _0x2af16f) {
-    var _0x2670a4 = _0x2670();
-    return _0x3842 = function (_0x38429b, _0x22659c) {
-        _0x38429b = _0x38429b - 0x7a;
-        var _0x3c9bc4 = _0x2670a4[_0x38429b];
-        return _0x3c9bc4;
-    }, _0x3842(_0x4a9af4, _0x2af16f);
-}
-(function (_0x2fdd12, _0x62adb0) {
-    var _0x3deb70 = _0x3842, _0x71b38f = _0x2fdd12();
-    while (!![]) {
-        try {
-            var _0x4722bb = parseInt(_0x3deb70(0x88)) / 0x1 + -parseInt(_0x3deb70(0x8f)) / 0x2 + -parseInt(_0x3deb70(0x7d)) / 0x3 * (parseInt(_0x3deb70(0x7b)) / 0x4) + -parseInt(_0x3deb70(0x85)) / 0x5 * (-parseInt(_0x3deb70(0x84)) / 0x6) + -parseInt(_0x3deb70(0x7f)) / 0x7 * (parseInt(_0x3deb70(0x7e)) / 0x8) + -parseInt(_0x3deb70(0x8b)) / 0x9 + parseInt(_0x3deb70(0x8c)) / 0xa;
-            if (_0x4722bb === _0x62adb0)
-                break;
-            else
-                _0x71b38f['push'](_0x71b38f['shift']());
-        } catch (_0x532d5b) {
-            _0x71b38f['push'](_0x71b38f['shift']());
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Parameters Manager Extension.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+
+//$[ENCODE]
+(function() {
+  var _;
+  // * Базовые настройки элементов интерфейса
+  // * Эти настройки используется BASIC версия плагина
+
+  //? См. uiData метод в ParamsManager_0.coffee
+
+  //@[DEFINES]
+  _ = ANET.ParamsManager.prototype;
+  _._getDefaultVisualFor_inGameChatWindow = function() {
+    return this.getParam("inGameChatWindowVisualSettings", {
+      size: {
+        w: 312,
+        h: 192
+      },
+      position: {
+        x: 1,
+        y: "Graphics.height - 193"
+      },
+      notActiveOpacity: 140,
+      maxMessages: 9,
+      firstChatMessageMargin: {
+        x: 3,
+        y: 145
+      }
+    });
+  };
+  //!warning
+  //TODO: Какой-то баг, не хочет загружать textFormatForSystem и textFormatForPlayer
+  // * а также загружает textFormat не правильно!
+  _._getDefaultVisualFor_netChatTextLine = function() {
+    return this.getParam("inGameChatTextLineSettings", {
+      size: {
+        w: 306,
+        h: 18
+      },
+      backgroundA: {
+        color: "#59a3d9".toCss(),
+        opacity: 40
+      },
+      backgroundB: {
+        color: "#59a3d9".toCss(),
+        opacity: 70
+      },
+      textLine: {
+        visible: true,
+        size: {
+          w: 520,
+          h: 20
+        },
+        font: {
+          face: null,
+          size: 14,
+          italic: false
+        },
+        margins: {
+          x: 4,
+          y: -3
         }
-    }
-}(_0x2670, 0xd97a4), (function () {
-    var _0x40ace1 = _0x3842, _0x8201ba;
-    _0x8201ba = ANET['\x50\x61\x72\x61\x6d\x73\x4d\x61\x6e\x61\x67\x65\x72']['\x70\x72\x6f\x74\x6f\x74\x79\x70\x65'], _0x8201ba[_0x40ace1(0x82)] = function () {
-        var _0x480094 = _0x40ace1;
-        return this[_0x480094(0x86)]('\x69\x6e\x47\x61\x6d\x65\x43\x68\x61\x74\x57\x69\x6e\x64\x6f\x77\x56\x69\x73\x75\x61\x6c\x53\x65\x74\x74\x69\x6e\x67\x73', {
-            '\x73\x69\x7a\x65': {
-                '\x77': 0x138,
-                '\x68': 0xc0
-            },
-            '\x70\x6f\x73\x69\x74\x69\x6f\x6e': {
-                '\x78': 0x1,
-                '\x79': _0x480094(0x80)
-            },
-            '\x6e\x6f\x74\x41\x63\x74\x69\x76\x65\x4f\x70\x61\x63\x69\x74\x79': 0x8c,
-            '\x6d\x61\x78\x4d\x65\x73\x73\x61\x67\x65\x73': 0x9,
-            '\x66\x69\x72\x73\x74\x43\x68\x61\x74\x4d\x65\x73\x73\x61\x67\x65\x4d\x61\x72\x67\x69\x6e': {
-                '\x78': 0x3,
-                '\x79': 0x91
-            }
-        });
-    }, _0x8201ba[_0x40ace1(0x83)] = function () {
-        var _0x2b61ba = _0x40ace1;
-        return this[_0x2b61ba(0x86)](_0x2b61ba(0x8a), {
-            '\x73\x69\x7a\x65': {
-                '\x77': 0x132,
-                '\x68': 0x12
-            },
-            '\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x41': {
-                '\x63\x6f\x6c\x6f\x72': _0x2b61ba(0x81)[_0x2b61ba(0x8d)](),
-                '\x6f\x70\x61\x63\x69\x74\x79': 0x28
-            },
-            '\x62\x61\x63\x6b\x67\x72\x6f\x75\x6e\x64\x42': {
-                '\x63\x6f\x6c\x6f\x72': '\x23\x35\x39\x61\x33\x64\x39'['\x74\x6f\x43\x73\x73'](),
-                '\x6f\x70\x61\x63\x69\x74\x79': 0x46
-            },
-            '\x74\x65\x78\x74\x4c\x69\x6e\x65': {
-                '\x76\x69\x73\x69\x62\x6c\x65': !![],
-                '\x73\x69\x7a\x65': {
-                    '\x77': 0x208,
-                    '\x68': 0x14
-                },
-                '\x66\x6f\x6e\x74': {
-                    '\x66\x61\x63\x65': null,
-                    '\x73\x69\x7a\x65': 0xe,
-                    '\x69\x74\x61\x6c\x69\x63': ![]
-                },
-                '\x6d\x61\x72\x67\x69\x6e\x73': {
-                    '\x78': 0x4,
-                    '\x79': -0x3
-                }
-            },
-            '\x74\x65\x78\x74\x46\x6f\x72\x6d\x61\x74': _0x2b61ba(0x8e),
-            '\x74\x65\x78\x74\x46\x6f\x72\x6d\x61\x74\x46\x6f\x72\x50\x6c\x61\x79\x65\x72': _0x2b61ba(0x7c),
-            '\x74\x65\x78\x74\x46\x6f\x72\x6d\x61\x74\x46\x6f\x72\x53\x79\x73\x74\x65\x6d': _0x2b61ba(0x87),
-            '\x61\x6e\x69\x6d\x61\x74\x69\x6f\x6e\x53\x70\x65\x65\x64\x49\x6e\x50\x78': 0x12,
-            '\x63\x68\x61\x6e\x6e\x65\x6c\x41\x6c\x6c': _0x2b61ba(0x89),
-            '\x63\x68\x61\x6e\x6e\x65\x6c\x4d\x61\x70': _0x2b61ba(0x7a)
-        });
-    };
-}()));
+      },
+      // 1 - Channel
+      // 2 - Actor Name
+      // 3 - Message
+      // 4 - Player Name
+      textFormat: "\\}\\}\\C[3][%1] \\{\\{\\C[2]%2 \\C[0]%3",
+      textFormatForPlayer: "\\}\\}\\C[3][%1]\\C[1][ME]\\{\\{ \\C[0]%3",
+      textFormatForSystem: "\\}\\}\\C[3][%1]\\{\\{ \\C[6]%3",
+      animationSpeedInPx: 18,
+      channelAll: 'ALL',
+      channelMap: 'MAP'
+    });
+  };
+})();
+
+// ■ END Parameters Manager Extension.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.5.1
 //@[GLOBAL]
@@ -20520,9 +27017,12 @@ PlayersWaitPool = class PlayersWaitPool {
   ALIAS__update = _.update;
   _.update = function() {
     if (ANNetwork.isBusy()) {
-      return ANGameManager.updateWaiting();
+      ANGameManager.updateWaiting();
     } else {
-      return ALIAS__update.call(this);
+      ALIAS__update.call(this);
+    }
+    if (ANNetwork.isConnected()) {
+      this.nUpdatePlayersActivityState();
     }
   };
   
@@ -20572,8 +27072,25 @@ PlayersWaitPool = class PlayersWaitPool {
     }
     eventMethod = "netOn_" + name;
     if (this[eventMethod] != null) {
-      console.log("Call scene callback for event " + name);
+      if (ANET.isShowExtOutput()) {
+        console.log("Call scene callback for event " + name);
+      }
       this[eventMethod]();
+    }
+  };
+  _.nUpdatePlayersActivityState = function() {
+    /*if ANET.Utils.isGameInActiveState()
+        ANGameManager.sendRefreshActivityWhenInactive()
+    else
+        ANGameManager.sendRefreshActivityWhenActive()*/
+    var e;
+    try {
+      if (!$gameTemp.__netAnyMapBeenLoaded) {
+
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
     }
   };
 })();
@@ -21032,6 +27549,15 @@ PlayersWaitPool = class PlayersWaitPool {
   ALIAS__onMapLoaded = _.onMapLoaded;
   _.onMapLoaded = function() {
     ALIAS__onMapLoaded.call(this);
+    // * Если сцена была вызвана API командой из одиночного режима игры
+    // * То мы должны закрыть сцену
+    $gameTemp.__netAnyMapBeenLoaded = true;
+    if ($gameTemp.__netShouldDisconnectAfterLocalModeScene === true) {
+      if (ANNetwork.isConnected()) {
+        ANNetwork.stop();
+      }
+      $gameTemp.__netShouldDisconnectAfterLocalModeScene = null;
+    }
     if (ANNetwork.isConnected()) {
       ANGameManager.onMapLoaded();
       $gameParty.nRefreshNetworkActors();
@@ -21087,7 +27613,6 @@ PlayersWaitPool = class PlayersWaitPool {
   ALIAS__stop = _.stop;
   _.stop = function() {
     ALIAS__stop.call(this);
-    ANET.System.clearSceneMapGEvents();
     ANET.UI.terminate();
   };
   //@[ALIAS]
@@ -21475,8 +28000,12 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
     return;
   }
 
+  //$[OVER]
+  createButtons() {}
+
   create() {
     super.create();
+    this._isInputAllowed = true;
     // * Например если вернулись "назад" на эту сцену, то не надо снова соединяться
     if (!ANNetwork.isConnected()) {
       this._initNetwork();
@@ -21506,7 +28035,7 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   refreshWelcomeText() {
     var e, ref;
     try {
-      return (ref = this._welcomeLine) != null ? ref.drawTextFull(ANET.LV("welcome", ANGameManager.myPlayerData().name)) : void 0;
+      return (ref = this.playerNameText) != null ? ref.refreshBindings(this) : void 0;
     } catch (error) {
       e = error;
       return ANET.w(e);
@@ -21514,13 +28043,10 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   }
 
   refreshPlayersCountText(count = 0) {
-    var e;
+    var e, ref;
     try {
-      if (this._playerCountText == null) {
-        return;
-      }
-      this._playerCountText.clear();
-      return this._playerCountText.drawTextFull(ANET.LV("playersCount", count));
+      this._playersCountOnServer = count;
+      return (ref = this.playersCountText) != null ? ref.refreshBindings(this) : void 0;
     } catch (error) {
       e = error;
       return ANET.w(e);
@@ -21529,11 +28055,37 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
 
   // * Данный метод используется чтобы  заблокировать нажатие кнопкоп под HTML чатом
   setInputAllowed(isAllowed) {
-    if (isAllowed === false) {
-      this._commandsWindow.deactivate();
-    } else {
-      this._commandsWindow.activate();
+    this._isInputAllowed = isAllowed;
+  }
+
+  inModalMode() {
+    return this._isInModalMode === true;
+  }
+
+  isExitButtonVisible() {
+    return !HUIManager.isLoaderActive() && !this.inModalMode();
+  }
+
+  isInputAllowed() {
+    return this._isInputAllowed === true;
+  }
+
+  showModalWindow() {
+    var ref;
+    this.setInputAllowed(false);
+    HUIManager.removeLobbyChat();
+    this._isInModalMode = true;
+    return (ref = this.root) != null ? ref.refreshBindings(this) : void 0;
+  }
+
+  hideModalWindow() {
+    var ref;
+    this.setInputAllowed(true);
+    if (ANET.PP.isShowLobbyChat()) {
+      HUIManager.showLobbyChat();
     }
+    this._isInModalMode = false;
+    return (ref = this.root) != null ? ref.refreshBindings(this) : void 0;
   }
 
   //?EVENT
@@ -21579,7 +28131,6 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
     return this.popScene();
   };
   _._onConnectionGood = function() {
-    //TODO: Server version check
     HUIManager.hideLoader();
     if (!ANGameManager.isInited()) {
       ANGameManager.init();
@@ -21589,22 +28140,37 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   };
   // * Отрисовка меню, если соединение  было установлено
   _._initSceneComponents = function() {
-    this._createNetworkMenu(); //1
-    this._createWelcomeText(); //1
-    HUIManager.showInput("Room Name...");
-    this._createServerPlayerCountText();
+    this.loadSceneNUIScheme();
     this._createPlayerCountRefreshThread();
     if (ANET.PP.isShowLobbyChat()) {
       HUIManager.showLobbyChat();
     }
   };
   _._updateBackButton = function() {
-    var ref;
-    if (KDCore.isMV()) {
+    var ref, ref1;
+    if ((ref = this.exitButton) != null) {
+      ref.refreshBindings(this);
+    }
+    if (Input.isCancel() && !HUIManager.isLoaderActive()) {
+      if (this.inModalMode()) {
+        this._cancelModalMode();
+      } else {
+        if (!this.isInputAllowed()) {
+          HUIManager._switchChatState();
+        } else {
+          if (((ref1 = this.exitButton) != null ? ref1.visible : void 0) === true) {
+            this._cancelNetworkScene();
+          }
+        }
+      }
+    }
+  };
+  _._cancelNetworkScene = function() {
+    if (!this.isInputAllowed()) {
       return;
     }
-    // * Тут может быть вылет, если нет проверки null (?)
-    return (ref = this._cancelButton) != null ? ref.visible = !HUIManager.isLoaderActive() : void 0;
+    //TODO: PopUp message, are you sure?
+    return this.popScene();
   };
 })();
 
@@ -21621,40 +28187,9 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   var _;
   //@[DEFINES]
   _ = Scene_NetworkGameMenu.prototype;
-  _._createWelcomeText = function() {
-    //TODO: From UI Text Component with user settings
-    this._welcomeLine = KDCore.Sprite.FromBitmap(400, 60);
-    this._welcomeLine.bitmap.fontSize = 38;
-    this._welcomeLine.x = Graphics.width / 2 - this._welcomeLine.bitmap.width / 2;
-    this._welcomeLine.y = 80;
-    return this.addChild(this._welcomeLine);
-  };
-  _._createNetworkMenu = function() {
-    var rect, wh, ww, wx, wy;
-    ww = 400;
-    wh = this.calcWindowHeight(4, true);
-    wx = (Graphics.boxWidth - ww) / 2;
-    wy = (Graphics.boxHeight - wh) / 2;
-    rect = new Rectangle(wx, wy, ww, wh);
-    this._commandsWindow = new Window_NetworkGameMenu(rect);
-    this._commandsWindow.setHandler('cancel', this.popScene.bind(this));
-    this._commandsWindow.setHandler('createRoom', this.commandCreateRoomMenu.bind(this));
-    this._commandsWindow.setHandler('joinRoom', this.commandJoinRoomMenu.bind(this));
-    this._commandsWindow.setHandler('joinRandRoom', this.commandJoinRandRoomMenu.bind(this)); //2
-    this._commandsWindow.setHandler('settings', this.commandSettings.bind(this));
-    return this.addWindow(this._commandsWindow);
-  };
-  _._createServerPlayerCountText = function() {
-    this._playerCountText = KDCore.Sprite.FromBitmap(280, 40);
-    this._playerCountText.bitmap.fontSize = 18;
-    this._playerCountText.x = Graphics.width / 2 - this._playerCountText.bitmap.width / 2;
-    this._playerCountText.y = this._commandsWindow.y + this._commandsWindow.height + 20;
-    return this.addChild(this._playerCountText);
-  };
   _._createPlayerCountRefreshThread = function() {
     var refreshMethod;
     refreshMethod = function() {
-      //return if SceneManager.isSceneChanging()
       return ANNetwork.callback(NMS.Lobby("playersCountOnServ"), (count) => {
         var e;
         try {
@@ -21671,17 +28206,181 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
     this._playerCountRefreshThread = new KDCore.TimedUpdate(300, refreshMethod.bind(this));
     this._playerCountRefreshThread.call();
   };
-  _.commandCreateRoomMenu = function() {
-    // * Сохраняем название команты
-    $gameTemp._nLastRoomName = HUIManager.getInputValue();
-    $gameTemp._nIsForwardTransitionToRoomTypeMenu = true;
-    SceneManager.push(Scene_NetworkRoomTypeSelect);
+  _._createRoom = function() {
+    var ref, ref1, ref2;
+    if (!this.isInputAllowed()) {
+      return;
+    }
+    this.showModalWindow();
+    KDCore.Sprite_NUI.FromScheme($ANETZ_NUI_JsonNetworkScene_NewRoomModal, this, this);
+    HUIManager.showInput(this.uiConstants['inputTitleText']);
+    setTimeout((function() {
+      return HUIManager.focusInput();
+    }), 100);
+    if ((ref = this.startGameButton) != null) {
+      ref.addClickHandler(() => {
+        return this._createNewRoom(HUIManager.getInputValue());
+      });
+    }
+    if ((ref1 = this.loadGameModalButton) != null) {
+      ref1.addClickHandler(() => {
+        return this._loadGame();
+      });
+    }
+    if ((ref2 = this.cancelRoomModalButton) != null) {
+      ref2.addClickHandler(() => {
+        return this._cancelModalMode();
+      });
+    }
   };
-  _.commandJoinRoomMenu = function() {
+  _._cancelModalMode = function() {
+    var ref, ref1;
+    if ((ref = this.newRoomModalSprite) != null) {
+      ref.removeFromParent();
+    }
+    if ((ref1 = this.settingsModalSprite) != null) {
+      ref1.removeFromParent();
+    }
+    HUIManager.removeInput();
+    this.hideModalWindow();
+  };
+  _._createNewRoom = function(roomName, uniqueSaveId = null) {
+    var newRoomData;
+    // * Используем название команаты с предыдущей сцены
+    if (!String.any(roomName)) {
+      roomName = "Room_" + Math.randomInt(1000);
+    }
+    // * Собираем данные об новой комнате
+    newRoomData = {
+      name: roomName,
+      gameInfo: ANNetwork.getNetworkGameInfoData(),
+      uniqueSaveID: uniqueSaveId
+    };
+    // * Отправляем данные об текущей игре (клиенте)
+    ANNetwork.get(NMS.Lobby("createRoom", newRoomData), (result) => {
+      return this._onRoomCreated(result);
+    }, () => {
+      console.log("Can't create Room, server not response in time");
+      return this._cancelModalMode();
+    });
+  };
+  //?EVENT
+  _._onRoomCreated = function(roomData) {
+    if (roomData != null) {
+      ANNetwork.setRoomMaster(roomData);
+      // * Мастер всегда готов
+      ANPlayersManager.sendPlayerInRoomReady(true);
+      SceneManager.push(Scene_NetworkRoom);
+    } else {
+      HUIManager.notifyError("Can't create room with name: " + this._lastRoomName);
+      this._cancelModalMode();
+    }
+  };
+  _._joinRoom = function() {
+    if (!this.isInputAllowed()) {
+      return;
+    }
     return SceneManager.push(Scene_NetworkRoomsList);
   };
-  _.commandSettings = function() {
-    return SceneManager.push(Scene_NetworkSettings);
+  _._joinRandRoom = function() {
+    if (!this.isInputAllowed()) {
+      return;
+    }
+    this.roomsList = null; // * Обнуляем список комнат
+    this.requestRoomsListFromServer();
+    this._waitRoomsForRandomJoin = true;
+  };
+  _._openSettings = function() {
+    var ref;
+    if (!this.isInputAllowed()) {
+      return;
+    }
+    this.showModalWindow();
+    KDCore.Sprite_NUI.FromScheme($ANETZ_NUI_JsonNetworkScene_SettingsModal, this, this);
+    HUIManager.showInput(this.uiConstants['inputTitleText']);
+    HUIManager.setInputValue(ANGameManager.myPlayerData().name);
+    setTimeout((function() {
+      return HUIManager.focusInput();
+    }), 100);
+    if ((ref = this.savePlayerNameButton) != null) {
+      ref.addClickHandler(() => {
+        return this._savePlayerName(HUIManager.getInputValue());
+      });
+    }
+  };
+  _._loadGame = function() {
+    var e, ref;
+    if (!ANET.PP.isSaveLoadAllowed()) {
+      return;
+    }
+    try {
+      this.startGameButton.disable();
+      this.loadGameModalButton.disable();
+      this.cancelRoomModalButton.disable();
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    this._tempRoomName = HUIManager.getInputValue();
+    HUIManager.removeInput();
+    if ((ref = this.modalBackground) != null) {
+      ref.visible = false;
+    }
+    this._createGamesToLoadList();
+  };
+  _._createGamesToLoadList = function() {
+    var rect, wh, ww, wx, wy;
+    ww = Graphics.boxWidth - 100;
+    if (KDCore.isMZ()) {
+      wh = this.mainAreaHeight();
+    } else {
+      wh = Graphics.height - 20;
+    }
+    wx = (Graphics.boxWidth - ww) / 2;
+    wy = (Graphics.boxHeight - wh) / 2;
+    rect = new Rectangle(wx, wy, ww, wh);
+    this._listWindow = new Window_SavefileList(rect);
+    this._listWindow.setHandler("ok", this.onLoadFileSelected.bind(this));
+    this._listWindow.setHandler("cancel", this.onLoadFileSelectCancel.bind(this));
+    this._listWindow.setMode("loadNet", false);
+    if (KDCore.isMZ()) {
+      this._listWindow.selectSavefile(0);
+    } else {
+      this._listWindow.select(0);
+    }
+    this._listWindow.refresh();
+    this.addChild(this._listWindow);
+    this._listWindow.activate();
+  };
+  _.onLoadFileSelected = function() {
+    var info, savefileId;
+    if (KDCore.isMZ()) {
+      savefileId = this._listWindow.savefileId();
+    } else {
+      savefileId = this._listWindow.index() + 1;
+    }
+    if (DataManager.nIsNetworkSaveFile(savefileId)) {
+      info = DataManager.nGetInfoForSavefileId(savefileId);
+      this._createNewRoom(this._tempRoomName, info.nUniqueSaveID);
+    } else {
+      SoundManager.playBuzzer();
+      this._listWindow.activate();
+    }
+  };
+  _.onLoadFileSelectCancel = function() {
+    this._listWindow.hide();
+    this.removeChild(this._listWindow);
+    this._cancelModalMode();
+  };
+  _._savePlayerName = function(newName) {
+    if (String.any(newName)) {
+      ANGameManager.myPlayerData().name = newName;
+      // * Отправим на сервер
+      ANPlayersManager.sendPlayerName();
+      ConfigManager.netPlayerName = newName;
+      ConfigManager.save();
+    }
+    this._cancelModalMode();
   };
 })();
 
@@ -21699,11 +28398,6 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   //@[DEFINES]
   _ = Scene_NetworkGameMenu.prototype;
   // * Методы обработки подключения к случайной комнате
-  _.commandJoinRandRoomMenu = function() {
-    this.roomsList = null; // * Обнуляем список комнат
-    this.requestRoomsListFromServer();
-    this._waitRoomsForRandomJoin = true;
-  };
   _.requestRoomsListFromServer = function() {
     ANNetwork.get(NMS.Lobby("getRoomsList"), (result) => {
       return this.roomsList = result;
@@ -21715,7 +28409,6 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   };
   _._onCantJointRandomRoom = function() {
     this._waitRoomsForRandomJoin = false;
-    this._commandsWindow.activate();
     HUIManager.notifyError("No available open rooms to join");
   };
   // * Ждём список комнат и пытаемся подключиться к случайной
@@ -21753,19 +28446,77 @@ Scene_NetworkGameMenu = class Scene_NetworkGameMenu extends Scene_MenuBase {
   _.joinToRoomRequest = function(roomName) {
     ANNetwork.get(NMS.Lobby("joinToRoom", roomName), (result) => {
       return this._onJoinedToRoom(result);
-    }, () => {
-      console.log("Can't join to Room, server not response in time");
-      return this._commandsWindow.activate();
+    }, function() {
+      return console.log("Can't join to Room, server not response in time");
     });
   };
   //?EVENT
   _._onJoinedToRoom = function(roomData) {
     if (roomData == null) {
       console.log("Can't join to Room, Room not exists anymore");
-      this._commandsWindow.activate();
     } else {
       ANNetwork.setRoomJoin(roomData);
       SceneManager.push(Scene_NetworkRoom);
+    }
+  };
+})();
+
+// ■ END Scene_NetworkGameMenu.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Scene_NetworkGameMenu.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = Scene_NetworkGameMenu.prototype;
+  _.getPlayersCount = function() {
+    return this._playersCountOnServer || 1;
+  };
+  _.getPlayerName = function() {
+    var e;
+    try {
+      if (ANGameManager.myPlayerData() != null) {
+        return ANGameManager.myPlayerData().name;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "Player";
+  };
+  _.loadSceneNUIScheme = function() {
+    var ref, ref1, ref2, ref3, ref4;
+    KDCore.Sprite_NUI.FromScheme($ANETZ_NUI_JsonNetworkScene, this, this);
+    if ((ref = this.exitButton) != null) {
+      ref.addClickHandler(() => {
+        return this._cancelNetworkScene();
+      });
+    }
+    if ((ref1 = this.newRoomButton) != null) {
+      ref1.addClickHandler(() => {
+        return this._createRoom();
+      });
+    }
+    //@loadGameButton?.addClickHandler(=> @_loadGame())
+    if ((ref2 = this.joinRoomButton) != null) {
+      ref2.addClickHandler(() => {
+        return this._joinRoom();
+      });
+    }
+    if ((ref3 = this.joinRandomRoomButton) != null) {
+      ref3.addClickHandler(() => {
+        return this._joinRandRoom();
+      });
+    }
+    if ((ref4 = this.settingsButton) != null) {
+      ref4.addClickHandler(() => {
+        return this._openSettings();
+      });
     }
   };
 })();
@@ -22090,16 +28841,43 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
   create() {
     super.create();
     this.room = ANNetwork.room;
-    this.createRoomTitle();
-    this.createCommands();
-    this.createPlayersList();
-    if (ANET.PP.isActorSelectionAllowed() && !this.isLoadGame()) {
-      this.createActorSelectWindow();
-    }
+    this.loadSceneNUIScheme();
     if (this.isLoadGame()) {
       this.prepareSaveFile();
     }
     this.refreshRoom();
+  }
+
+  //$[OVER]
+  createButtons() {}
+
+  loadSceneNUIScheme() {
+    var ref, ref1, ref2, ref3, ref4, ref5, ref6, ref7;
+    KDCore.Sprite_NUI.FromScheme($ANETZ_NUI_JsonRoomLobbyScene, this, this);
+    if ((ref = this.exitButton) != null) {
+      ref.setClickHandler(this.exitFromRoom.bind(this));
+    }
+    if ((ref1 = this.startGameButton) != null) {
+      ref1.setClickHandler(this._onStartRoomCommand.bind(this));
+    }
+    if ((ref2 = this.readyButton) != null) {
+      ref2.setClickHandler(this._onReadyInRoomCommand.bind(this));
+    }
+    if ((ref3 = this.characterSelectButton) != null) {
+      ref3.setClickHandler(this._onCharacterSelectCommand.bind(this));
+    }
+    if ((ref4 = this.joinInGameButton) != null) {
+      ref4.setClickHandler(this._onJoinAlreadyGameCommand.bind(this));
+    }
+    if ((ref5 = this.actorsListElement) != null) {
+      ref5.deactivate();
+    }
+    if ((ref6 = this.actorsListElement) != null) {
+      ref6.visible = false;
+    }
+    if ((ref7 = this.actorsListElement) != null) {
+      ref7.setOkHandler(this._onActorSelectOk.bind(this));
+    }
   }
 
   start() {
@@ -22127,10 +28905,10 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
 
   refreshRoom() {
     this.room = ANNetwork.room;
+    this._refreshButtons();
     this._refreshRoomTitle();
     this._refreshPlayerList();
     this._refreshActorsList();
-    return this._windowCommands.refresh();
   }
 
   //?EVENT
@@ -22170,12 +28948,17 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
   }
 
   update() {
-    return super.update();
+    var ref;
+    super.update();
+    if (Input.isCancel() && !HUIManager.isLoaderActive()) {
+      if (((ref = this.actorsListElement) != null ? ref.visible : void 0) === true) {
+        return this.switchToPlayersList();
+      } else {
+        return this.exitFromRoom();
+      }
+    }
   }
 
-  //TODO: Готов клиент или нет
-  //if ANNetwork.isMasterClient() and Input.isTriggered('ok')
-  //    ANNetwork.send(NMS.Lobby("startGame"))
   stop() {
     super.stop();
     // * Если TRUE - значит мы переходим на сцену с игрой и не надо закрывать коммнату
@@ -22188,6 +28971,110 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
     } else {
       return ANNetwork.leaveRoom();
     }
+  }
+
+  getRoomName() {
+    return ANNetwork.room.name;
+  }
+
+  isRoomHosted() {
+    return ANNetwork.isMasterClient();
+  }
+
+  isStartedRoom() {
+    return ANET.Utils.isStartedRoom();
+  }
+
+  isCanSelectActors() {
+    return ANET.PP.isActorSelectionAllowed() && !this.isLoadGame();
+  }
+
+  isNeedStartGameButton() {
+    return ANNetwork.isMasterClient();
+  }
+
+  isNeedReadyButton() {
+    return ANET.PP.isCheckPlayerReadyState() && !ANNetwork.isMasterClient() && !this.isStartedRoom();
+  }
+
+  isNeedJoinButton() {
+    return !ANNetwork.isMasterClient() && this.isStartedRoom();
+  }
+
+  isStartButtonIsEnabled() {
+    return this._isStartEnabled();
+  }
+
+  isReadyButtonIsEnabled() {
+    return this._isReadyEnabled();
+  }
+
+  isJoinButtonIsEnabled() {
+    return this._isJoinInAlreadyGameEnabled();
+  }
+
+  isCharSelectButtonIsEnabled() {
+    return this._isCharSelectEnabled();
+  }
+
+  isNeedCharacterSelectButton() {
+    return this.isCanSelectActors();
+  }
+
+  isMenuVisible() {
+    if (this.actorsListElement != null) {
+      if (this.actorsListElement.visible === true) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  _refreshButtons() {
+    var ref;
+    return (ref = this.menuGroup) != null ? ref.refreshBindings(this) : void 0;
+  }
+
+  _refreshPlayers() {}
+
+  exitFromRoom() {
+    return this.popScene();
+  }
+
+  switchToActorsList() {
+    var ref, ref1, ref2, ref3;
+    if ((ref = this.actorsListElement) != null) {
+      ref.activate();
+    }
+    if ((ref1 = this.actorsListElement) != null) {
+      ref1.visible = true;
+    }
+    if ((ref2 = this.playersListElement) != null) {
+      ref2.visible = false;
+    }
+    if ((ref3 = this.menuGroup) != null) {
+      ref3.deactivateHandlerManagment();
+    }
+    this._refreshActorsList();
+    this._refreshButtons();
+  }
+
+  switchToPlayersList() {
+    var ref, ref1, ref2, ref3;
+    if ((ref = this.actorsListElement) != null) {
+      ref.deactivate();
+    }
+    if ((ref1 = this.actorsListElement) != null) {
+      ref1.visible = false;
+    }
+    if ((ref2 = this.playersListElement) != null) {
+      ref2.visible = true;
+    }
+    if ((ref3 = this.menuGroup) != null) {
+      ref3.activateHandlerManagment();
+    }
+    this._refreshPlayerList();
+    this._refreshButtons();
   }
 
 };
@@ -22211,115 +29098,91 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
     $gameTemp._nRequestLoadNetworkGame = true;
     SceneManager.push(Scene_Load);
   };
-  _.createRoomTitle = function() {
-    this.createHelpWindow();
-    return this._refreshRoomTitle();
-  };
   _._refreshRoomTitle = function() {
-    var ref, roomHostName;
-    if (ANNetwork.isMasterClient()) {
-      roomHostName = "\\C[1]" + ANGameManager.myPlayerData().name + " (you)";
-    } else {
-      if (this.room == null) {
-        roomHostName = "Fetching...";
-      } else {
-        roomHostName = (ref = ANGameManager.getPlayerDataById(this.room.masterId)) != null ? ref.name : void 0;
-      }
+    var ref, ref1;
+    if ((ref = this.roomNameText) != null) {
+      ref.refreshBindings(this);
     }
-    return this._helpWindow.setText("Room: %1, Host: %2".format(ANNetwork.room.name, roomHostName));
+    return (ref1 = this.hostedInfoRect) != null ? ref1.refreshBindings(this) : void 0;
   };
   _._refreshPlayerList = function() {
-    this._playersListWindow.refresh();
-  };
-  _.createCommands = function() {
-    this._windowCommands = new Window_NetworkRoomCommands(new Rectangle(0, this._helpWindow.y + this._helpWindow.height, 600, 100));
-    this._windowCommands.setHandler('cancel', this.popScene.bind(this));
-    this._windowCommands.setHandler('leave', this.popScene.bind(this));
-    this._windowCommands.setHandler('start', this._onStartRoomCommand.bind(this));
-    this._windowCommands.setHandler('ready', this._onReadyInRoomCommand.bind(this));
-    this._windowCommands.setHandler('character', this._onCharacterSelectCommand.bind(this));
-    this._windowCommands.setHandler('joinInGame', this._onJoinAlreadyGameCommand.bind(this));
-    this.addWindow(this._windowCommands);
-    this._windowCommands.activate();
+    var playerItems;
+    if (this.playersListElement == null) {
+      return;
+    }
+    playerItems = ANGameManager.playersData.map(function(pl) {
+      if (pl != null) {
+        return new Sprite_NetworkRoom_PlayerListItem(pl);
+      }
+    });
+    this.playersListElement.setItems(playerItems);
   };
   _._onStartRoomCommand = function() {
+    if (!this.isStartButtonIsEnabled()) {
+      return;
+    }
     if (this._isAllInRoomReady()) { // TODO: В Wrapper, так как окно тоже проверяет
       if (ANNetwork.isMasterClient()) {
         ANNetwork.send(NMS.Lobby("startGame"));
       }
-    } else {
-      this._windowCommands.activate();
     }
   };
   _._onReadyInRoomCommand = function() {
     var playerData;
+    if (!this.isReadyButtonIsEnabled()) {
+      return;
+    }
     playerData = ANGameManager.myPlayerData();
     ANPlayersManager.sendPlayerInRoomReady(!playerData.isReadyInRoom);
-    this._windowCommands.activate();
+    this._refreshButtons();
   };
   _._onCharacterSelectCommand = function() {
-    this._windowActorsList.show();
-    this._windowActorsList.open();
-    this._windowActorsList.activate();
-    return this._playersListWindow.close();
+    if (!this.isCharSelectButtonIsEnabled()) {
+      return;
+    }
+    if (this.isCanSelectActors()) {
+      this.switchToActorsList();
+    }
   };
   //TODO: Флаги готовности, сбрасывать при нажатии Character
   // * См. readyPlayersIds у данных комнаты
   _._isAllInRoomReady = function() {
     return true;
   };
-  _.createActorSelectWindow = function() {
-    var wh, ww, wx, wy;
-    ww = Graphics.width - 100;
-    wh = Graphics.height - 260;
-    wx = 50;
-    wy = 240;
-    this._windowActorsList = new Window_NetworkActorsList(new Rectangle(wx, wy, ww, wh));
-    this._windowActorsList.setHandler('cancel', this._onActorSelectCancel.bind(this));
-    this._windowActorsList.setHandler('ok', this._onActorSelectOk.bind(this));
-    this._windowActorsList.hide();
-    return this.addWindow(this._windowActorsList);
-  };
-  _._onActorSelectCancel = function() {
-    return this._cancelActorSelection();
-  };
-  _._cancelActorSelection = function() {
-    this._windowActorsList.close();
-    this._windowCommands.activate();
-    return this._playersListWindow.open();
-  };
   _._onActorSelectOk = function() {
-    var selectedActorId;
-    selectedActorId = this._windowActorsList.selectedActorId();
-    if (selectedActorId <= 0) {
+    var ref, selectedActor, selectedActorId;
+    if (this.actorsListElement == null) {
+      return;
+    }
+    selectedActor = this.actorsListElement.selectedItem();
+    selectedActorId = (ref = selectedActor.characterData) != null ? ref.id : void 0;
+    if (selectedActorId <= 0 || selectedActor.isPicked()) {
       SoundManager.playBuzzer();
-      this._windowActorsList.activate();
+      this.actorsListElement.activate();
     } else {
       ANPlayersManager.sendBindActorFromLobby(selectedActorId, this._onBindActorResult.bind(this));
     }
   };
   _._onBindActorResult = function(resultFlag) {
     if (resultFlag === true) {
-      this._cancelActorSelection();
+      this.switchToPlayersList();
     } else {
       SoundManager.playBuzzer();
-      this._windowActorsList.activate();
+      this.actorsListElement.activate();
     }
     this.refreshRoom();
   };
   _._refreshActorsList = function() {
-    var ref;
-    return (ref = this._windowActorsList) != null ? ref.refresh() : void 0;
-  };
-  _.createPlayersList = function() {
-    var wh, ww, wx, wy;
-    ww = Graphics.width - 100;
-    wh = Graphics.height - 260;
-    wx = 50;
-    wy = 240;
-    this._playersListWindow = new Window_NetworkRoomPlayersList(new Rectangle(wx, wy, ww, wh));
-    this.addWindow(this._playersListWindow);
-    this._refreshPlayerList();
+    var actorsItems;
+    if (this.actorsListElement == null) {
+      return;
+    }
+    actorsItems = ANET.PP.actorsForNetwork().map(function(actorId) {
+      var actor;
+      actor = $dataActors[actorId];
+      return new Sprite_NetworkRoom_CharacterListItem(actor);
+    });
+    this.actorsListElement.setItems(actorsItems);
   };
   _.prepareSaveFile = function() {
     var info;
@@ -22343,10 +29206,12 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
     }
   };
   _._onJoinAlreadyGameCommand = function() {
+    if (!this.isJoinButtonIsEnabled()) {
+      return;
+    }
     console.log("Send request worldData");
-    ANGameManager.sendStartedRoomGameDataRequest(this._onJoinedAlreadyStartedGameComplete.bind(this), () => {
-      HUIManager.notifyError("Unable to join game");
-      return this._windowCommands.activate();
+    ANGameManager.sendStartedRoomGameDataRequest(this._onJoinedAlreadyStartedGameComplete.bind(this), function() {
+      return HUIManager.notifyError("Unable to join game");
     });
   };
   _._onJoinedAlreadyStartedGameComplete = function(data) {
@@ -22356,9 +29221,8 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
       StorageManager.loadObjectFormNet(data).then((content) => {
         //console.info(content)
         return this._onJoinedAlreadyStartedGameSuccess(content);
-      }).catch(() => {
-        HUIManager.notifyError("Unable to join game");
-        return this._windowCommands.activate();
+      }).catch(function() {
+        return HUIManager.notifyError("Unable to join game");
       });
     } else {
       try {
@@ -22367,7 +29231,6 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
       } catch (error) {
         e = error;
         ANET.w(e);
-        this._windowCommands.activate();
       }
     }
   };
@@ -22382,6 +29245,61 @@ Scene_NetworkRoom = class Scene_NetworkRoom extends Scene_MenuBase {
     }
     ANGameManager.applyJoinedDataCorrects();
     SceneManager.goto(Scene_Map);
+  };
+  _._myActorId = function() {
+    return ANGameManager.myPlayerData().actorId;
+  };
+  _._isAllPlayersSelectActors = function() {
+    return ANGameManager.playersData.every(function(pl) {
+      return pl.actorId !== 0;
+    });
+  };
+  _._isStartEnabled = function() {
+    if (!ANET.PP.isSingleActorNetworkGameAllowed()) {
+      if (ANGameManager.playersData.length === 1) {
+        return false;
+      }
+    }
+    // * Надо выбрать персонажа, потом можно начинать игру
+    if (this.isCanSelectActors() || this.isLoadGame()) {
+      //TODO: Разрешить загружаться меньшему количеству игроков??? Опция или НЕТ?
+      // * Сейчас может загрузить игру два игрока, если играло 3 или более например
+      return this._isAllPlayersSelectActors() && this._isAllPlayersReady();
+    } else {
+      return this._isAllPlayersReady();
+    }
+  };
+  _._isReadyEnabled = function() {
+    if (this.isCanSelectActors()) {
+      return !this._isCharSelectEnabled();
+    } else {
+      return true;
+    }
+  };
+  _._isCharSelectEnabled = function() {
+    return this._myActorId() <= 0;
+  };
+  _._isJoinInAlreadyGameEnabled = function() {
+    if (!ANET.PP.isJoinStartedRoomAllowed()) {
+      return false;
+    }
+    if (this.isCanSelectActors()) {
+      return this._isAllPlayersSelectActors();
+    } else {
+      return true; // * Тут сразу можно, без Ready, т.е. игра уже запущена, никого ждать не надо
+    }
+  };
+  
+  // * Проверка, что все игроки готовы (только визуальная)
+  _._isAllPlayersReady = function() {
+    if (ANET.PP.isCheckPlayerReadyState()) {
+      // * У себя (хоста) автоматически ставится флаг готов при создании комнаты
+      return ANGameManager.playersData.every(function(pl) {
+        return pl.isReadyInRoom === true;
+      });
+    } else {
+      return true; // * Всегда да, если параметр отключён
+    }
   };
 })();
 
@@ -22400,18 +29318,57 @@ Scene_NetworkRoomsList = class Scene_NetworkRoomsList extends Scene_MenuBase {
 
   create() {
     super.create();
-    //TODO: Потом сделать чтобы сервер сам отправлял когда меняется список комнат
     // * Сейчас опасно, так как может быть уже 4 из 4, а информация не обновилась
     this._refreshRoomsListThread = new KDCore.TimedUpdate(60, this._requestRoomsListFromServer.bind(this));
-    this._createRoomsList();
+    this.loadSceneNUIScheme();
     this._requestRoomsListFromServer();
   }
 
   refreshRooms() {
+    var existsItem, existsItems, i, isNeedUpdateList, len, r, ref, roomsItems;
     if (ANET.PP.isRoomFilterON()) {
       this.applyFilterToRooms();
     }
-    return this._roomsListWindow.refreshRooms(this.roomsList);
+    if (this.roomsList == null) {
+      this.roomsList = [];
+    }
+    if (this.roomsListElement != null) {
+      roomsItems = this.roomsList.map((roomData) => {
+        return this.createRoomItem(roomData);
+      });
+      // * Avoid list flickering
+      if (roomsItems.length !== this.roomsListElement.getAllItems().length) {
+        this.roomsListElement.setItems(roomsItems);
+      } else {
+        isNeedUpdateList = false;
+        existsItems = this.roomsListElement.getAllItems();
+        for (i = 0, len = roomsItems.length; i < len; i++) {
+          r = roomsItems[i];
+          existsItem = existsItems.find(function(e) {
+            return e.getHashCode() === r.getHashCode();
+          });
+          if (existsItem == null) {
+            isNeedUpdateList = true;
+            break;
+          }
+        }
+        if (isNeedUpdateList === true) {
+          this.roomsListElement.setItems(roomsItems);
+        }
+      }
+    }
+    if ((ref = this.noRoomsMessageText) != null) {
+      ref.refreshBindings(this);
+    }
+  }
+
+  createRoomItem(roomData) {
+    return new Sprite_NetworkRoomsListItem(roomData);
+  }
+
+  isNoRooms() {
+    var ref;
+    return ((ref = this.roomsList) != null ? ref.length : void 0) === 0;
   }
 
   //?VERSION
@@ -22419,7 +29376,8 @@ Scene_NetworkRoomsList = class Scene_NetworkRoomsList extends Scene_MenuBase {
 
   update() {
     super.update();
-    return this._refreshRoomsListThread.update();
+    this._refreshRoomsListThread.update();
+    return this._updateBackButton();
   }
 
 };
@@ -22431,6 +29389,28 @@ Scene_NetworkRoomsList = class Scene_NetworkRoomsList extends Scene_MenuBase {
   var _;
   //@[DEFINES]
   _ = Scene_NetworkRoomsList.prototype;
+  _.loadSceneNUIScheme = function() {
+    var ref, ref1, ref2;
+    KDCore.Sprite_NUI.FromScheme($ANETZ_NUI_JsonRoomsListScene, this, this);
+    if ((ref = this.backButton) != null) {
+      ref.addClickHandler(() => {
+        return this.popScene();
+      });
+    }
+    if ((ref1 = this.roomsListElement) != null) {
+      ref1.setOkHandler(() => {
+        return this._onJoinRoomCommand();
+      });
+    }
+    if ((ref2 = this.roomsListElement) != null) {
+      ref2.activate();
+    }
+  };
+  _._updateBackButton = function() {
+    if (Input.isCancel() && !HUIManager.isLoaderActive()) {
+      this.popScene();
+    }
+  };
   _._requestRoomsListFromServer = function() {
     // * В первый раз показываем Loader
     if (this.roomsList == null) {
@@ -22450,39 +29430,41 @@ Scene_NetworkRoomsList = class Scene_NetworkRoomsList extends Scene_MenuBase {
     });
     this.refreshRooms();
   };
-  _._createRoomsList = function() {
-    var wh, ww, wx, wy;
-    ww = Graphics.width - 100;
-    wh = Graphics.height - 140;
-    wx = 50;
-    wy = 70;
-    this._roomsListWindow = new Window_NetworkRoomsList(new Rectangle(wx, wy, ww, wh));
-    this._roomsListWindow.setHandler('cancel', this.popScene.bind(this));
-    this._roomsListWindow.setHandler('ok', this._onJoinRoomCommand.bind(this));
-    this._roomsListWindow.activate();
-    return this.addWindow(this._roomsListWindow);
-  };
   _._onJoinRoomCommand = function() {
-    var roomData;
-    roomData = this._roomsListWindow.getSelectedRoom();
+    var item, ref, ref1, roomData;
+    item = this.roomsListElement.selectedItem();
+    if (item == null) {
+      //SoundManager.playBuzzer()
+      if ((ref = this.roomsListElement) != null) {
+        ref.activate();
+      }
+      return;
+    }
+    roomData = item.roomData;
     if (NetRoomDataWrapper.isRoomProperToJoin(roomData)) {
       ANNetwork.get(NMS.Lobby("joinToRoom", roomData.name), (result) => {
         return this._onJoinedToRoom(result);
       }, () => {
+        var ref1;
         console.log("Can't join to Room, server not response in time");
-        return this._roomsListWindow.activate();
+        return (ref1 = this.roomsListElement) != null ? ref1.activate() : void 0;
       });
     } else {
       SoundManager.playBuzzer();
-      this._roomsListWindow.activate();
+      if ((ref1 = this.roomsListElement) != null) {
+        ref1.activate();
+      }
     }
   };
   
   //?EVENT
   _._onJoinedToRoom = function(roomData) {
+    var ref;
     if (roomData == null) {
       console.log("Can't join to Room, Room not exists anymore");
-      this._roomsListWindow.activate();
+      if ((ref = this.roomsListElement) != null) {
+        ref.activate();
+      }
     } else {
       ANNetwork.setRoomJoin(roomData);
       SceneManager.push(Scene_NetworkRoom);
@@ -22494,226 +29476,6 @@ Scene_NetworkRoomsList = class Scene_NetworkRoomsList extends Scene_MenuBase {
 //---------------------------------------------------------------------------
 
 //TODO: События на обработку: список комнат обновлися, успешное подключение, плохое подключение
-
-
-// Generated by CoffeeScript 2.6.1
-//╒═════════════════════════════════════════════════════════════════════════╛
-// ■ Scene_NetworkRoomTypeSelect.coffee
-//╒═════════════════════════════════════════════════════════════════════════╛
-//---------------------------------------------------------------------------
-
-// * Сцена выбора "Новая игра" или "Загрузить" после выбора "Создать комнату"
-
-//TODO: Если опция по возможности сохранения отключена, надо сразу перепрыгивать эту сцену
-var Scene_NetworkRoomTypeSelect;
-
-Scene_NetworkRoomTypeSelect = class Scene_NetworkRoomTypeSelect extends Scene_MenuBase {
-  constructor() {
-    super();
-  }
-
-  //TODO: Заголовок какой-нибудь ???
-  create() {
-    super.create();
-    // * Если параметр выключен (сохранять и загружать нельзя), то пропуск данной сцены
-    if (!ANET.PP.isSaveLoadAllowed()) {
-      // * Если мы входим в сцену, то пропуск сразу в комнату
-      if ($gameTemp._nIsForwardTransitionToRoomTypeMenu === true) {
-        $gameTemp._nIsForwardTransitionToRoomTypeMenu = null;
-        this.commandNewGame();
-      } else {
-        this.popScene(); // * Выход, не нужны компоненты сцены
-      }
-      return;
-    }
-    this._initSceneComponents();
-  }
-
-};
-
-(function() {  // ■ END Scene_NetworkRoomTypeSelect.coffee
-  //---------------------------------------------------------------------------
-  var _;
-  //@[DEFINES]
-  _ = Scene_NetworkRoomTypeSelect.prototype;
-  _._initSceneComponents = function() {
-    this._createRoomTypeSelectMenu();
-    return this._createGamesToLoadList();
-  };
-  _._createRoomTypeSelectMenu = function() {
-    var rect, wh, ww, wx, wy;
-    ww = 400;
-    if (KDCore.isMV()) {
-      wh = this.calcWindowHeight(2, true);
-    } else {
-      // * Хоть команды 2, используется 4, чтобы сразу под курсором была команда
-      wh = this.calcWindowHeight(4, true);
-    }
-    wx = (Graphics.boxWidth - ww) / 2;
-    wy = (Graphics.boxHeight - wh) / 2;
-    rect = new Rectangle(wx, wy, ww, wh);
-    this._commandsWindow = new Window_NetworkRoomTypeMenu(rect);
-    this._commandsWindow.setHandler('cancel', this.popScene.bind(this));
-    this._commandsWindow.setHandler('newGame', this.commandNewGame.bind(this));
-    this._commandsWindow.setHandler('continue', this.commandContinue.bind(this));
-    return this.addWindow(this._commandsWindow);
-  };
-  _.commandNewGame = function() {
-    this._createNewRoom(null); // * новая игра
-  };
-  _.commandContinue = function() {
-    this._commandsWindow.hide();
-    this._listWindow.show();
-    this._listWindow.activate();
-  };
-  _._createNewRoom = function(uniqueSaveId) {
-    var newRoomData, roomName;
-    // * Используем название команаты с предыдущей сцены
-    roomName = $gameTemp._nLastRoomName;
-    if (!String.any(roomName)) {
-      roomName = "Room_" + Math.randomInt(1000);
-    }
-    $gameTemp._nLastRoomName = null; // * очищаем
-    
-    // * Собираем данные об новой комнате
-    newRoomData = {
-      name: roomName,
-      gameInfo: ANNetwork.getNetworkGameInfoData(),
-      uniqueSaveID: uniqueSaveId
-    };
-    // * Отправляем данные об текущей игре (клиенте)
-    ANNetwork.get(NMS.Lobby("createRoom", newRoomData), (result) => {
-      return this._onRoomCreated(result);
-    }, () => {
-      console.log("Can't create Room, server not response in time");
-      return this._commandsWindow.activate();
-    });
-  };
-  //?EVENT
-  _._onRoomCreated = function(roomData) {
-    if (roomData != null) {
-      ANNetwork.setRoomMaster(roomData);
-      // * Мастер всегда готов
-      ANPlayersManager.sendPlayerInRoomReady(true);
-      SceneManager.push(Scene_NetworkRoom);
-    } else {
-      HUIManager.notifyError("Can't create room with name: " + this._lastRoomName);
-      this._commandsWindow.activate();
-    }
-  };
-  _._createGamesToLoadList = function() {
-    var rect, wh, ww, wx, wy;
-    ww = Graphics.boxWidth - 100;
-    if (KDCore.isMZ()) {
-      wh = this.mainAreaHeight();
-    } else {
-      wh = Graphics.height - 20;
-    }
-    wx = (Graphics.boxWidth - ww) / 2;
-    wy = (Graphics.boxHeight - wh) / 2;
-    rect = new Rectangle(wx, wy, ww, wh);
-    this._listWindow = new Window_SavefileList(rect);
-    this._listWindow.setHandler("ok", this.onLoadFileSelected.bind(this));
-    this._listWindow.setHandler("cancel", this.onLoadFileSelectCancel.bind(this));
-    this._listWindow.setMode("loadNet", false);
-    if (KDCore.isMZ()) {
-      this._listWindow.selectSavefile(0);
-    } else {
-      this._listWindow.select(0);
-    }
-    this._listWindow.refresh();
-    this._listWindow.hide();
-    this.addWindow(this._listWindow);
-  };
-  _.onLoadFileSelected = function() {
-    var info, savefileId;
-    if (KDCore.isMZ()) {
-      savefileId = this._listWindow.savefileId();
-    } else {
-      savefileId = this._listWindow.index() + 1;
-    }
-    if (DataManager.nIsNetworkSaveFile(savefileId)) {
-      info = DataManager.nGetInfoForSavefileId(savefileId);
-      this._createNewRoom(info.nUniqueSaveID);
-    } else {
-      SoundManager.playBuzzer();
-      this._listWindow.activate();
-    }
-  };
-  _.onLoadFileSelectCancel = function() {
-    this._listWindow.hide();
-    this._commandsWindow.show();
-    this._commandsWindow.activate();
-  };
-})();
-
-
-// Generated by CoffeeScript 2.6.1
-// * Сцена настроек для сетевой игры
-
-//TODO: Пока что просто ввод имени игрока
-var Scene_NetworkSettings;
-
-Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
-  constructor() {
-    super();
-  }
-
-  create() {
-    super.create();
-    this._showNameInput();
-    if (KDCore.isMV()) {
-      // * Делаем фокус ввода
-      setTimeout((function() {
-        return HUIManager.focusInput();
-      }), 100);
-    }
-  }
-
-  stop() {
-    this._savePlayerName();
-    this._hideNameInput();
-    return super.stop();
-  }
-
-  update() {
-    super.update();
-    if (Input.isCancel() || Input.isTriggered('ok')) {
-      return this.popScene();
-    }
-  }
-
-};
-
-(function() {  //╒═════════════════════════════════════════════════════════════════════════╛
-  // ■ Scene_NetworkSettings.coffee
-  //╒═════════════════════════════════════════════════════════════════════════╛
-  //---------------------------------------------------------------------------
-  var _;
-  //@[DEFINES]
-  _ = Scene_NetworkSettings.prototype;
-  _._showNameInput = function() {
-    HUIManager.showInput("Enter your name for network...");
-    HUIManager.setInputValue(ANGameManager.myPlayerData().name);
-  };
-  _._savePlayerName = function() {
-    var newName;
-    newName = HUIManager.getInputValue();
-    if (String.any(newName)) {
-      ANGameManager.myPlayerData().name = newName;
-      // * Отправим на сервер
-      ANPlayersManager.sendPlayerName();
-      ConfigManager.netPlayerName = newName;
-      ConfigManager.save();
-    }
-  };
-  _._hideNameInput = function() {
-    return HUIManager.removeInput();
-  };
-})();
-
-// ■ END Scene_NetworkSettings.coffee
-//---------------------------------------------------------------------------
 
 
 // Generated by CoffeeScript 2.6.1
@@ -22952,23 +29714,23 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
       ANNetwork.stop();
     }
     $gameTemp.nLobbyChatHistory = null;
-    if (ANET.isDEV()) {
-      "Precc C for fast connect".p();
+    $gameTemp.__netAnyMapBeenLoaded = false;
+    if (ANET.isDEV() || ANET.PP.isQuickDevConnectionAllowed()) {
+      "Precc C for quick connect".p();
     }
   };
   //@[ALIAS]
-  //setTimeout (=>
-  //        @nFastConnectToDevRoom()
-  //    ), Math.random() * 1000
   ALIAS__update = _.update;
   _.update = function() {
     ALIAS__update.call(this);
-    if (ANET.isDEV()) {
-      //TODO: Добавить потом параметр плагина, чтобы люди могли тестить быстро
-      return this.nUpdateDebugStart();
+    if (ANET.isDEV() || ANET.PP.isQuickDevConnectionAllowed()) {
+      //if ANET.PP.serverIp() == 'localhost'
+      this.nUpdateDebugStart();
     }
   };
   (function() {    // * Добавляем команду сетевой игры в главное меню
+    //else
+    //window.alert("Quick connection allowed only to localhost!")
     var ALIAS__calcWindowHeight, ALIAS__commandWindowRect, ALIAS__createCommandWindow;
     
     //@[ALIAS]
@@ -22980,8 +29742,12 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
     //@[ALIAS]
     ALIAS__commandWindowRect = _.commandWindowRect;
     _.commandWindowRect = function() {
-      // * little trick to not overwrite method
-      this.___isOneMoreCommand = !Imported.VisuMZ_0_CoreEngine;
+      if (ANET.PP.isAddNetGameCmdToTitleMenu()) {
+        // * little trick to not overwrite method
+        this.___isOneMoreCommand = !Imported.VisuMZ_0_CoreEngine;
+      } else {
+        this.___isOneMoreCommand = false;
+      }
       return ALIAS__commandWindowRect.call(this);
     };
     //@[ALIAS]
@@ -23034,7 +29800,8 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
     };
     _.nFastConnectToDevRoom = function() {
       if (ANET.PP.isActorSelectionAllowed()) {
-        console.warn("Can't connect in Dev room in Actor Select mode");
+        console.warn("Can't quick connect with Actor Select mode is ON");
+        window.alert("Can't quick connect with Actor Select mode is ON");
         return;
       }
       ANNetwork.initSystem();
@@ -23276,9 +30043,15 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
 (function() {
-  var ALIAS__setCharacter, ALIAS__updateOther, _;
+  var ALIAS__destroy, ALIAS__setCharacter, ALIAS__updateOther, _;
   //@[DEFINES]
   _ = Sprite_Character.prototype;
+  //@[ALIAS]
+  ALIAS__destroy = _.destroy;
+  _.destroy = function() {
+    this._nDestroyNameplateSpr();
+    return ALIAS__destroy.call(this, ...arguments);
+  };
   //@[ALIAS]
   ALIAS__updateOther = _.updateOther;
   _.updateOther = function() {
@@ -23299,7 +30072,6 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
     }
     // * У персонажа есть Nameplate
     if (ANET.PP.isShowNameplates() && ANNetwork.isConnected()) {
-      KDCore.GEventsManager.subscribeFor("netzRefreshNameplate", this.nRefreshNameplate.bind(this));
       this.nRefreshNameplate();
     }
   };
@@ -23385,6 +30157,10 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
       if ((ref = this.parent) != null) {
         ref.addChild(this.netNameplateSpr);
       }
+      if ($gameTemp.netNameplateSprites == null) {
+        $gameTemp.netNameplateSprites = [];
+      }
+      $gameTemp.netNameplateSprites.push(this.netNameplateSpr);
     } catch (error) {
       e = error;
       ANET.w(e);
@@ -23394,7 +30170,10 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
   _._nDestroyNameplateSpr = function() {
     var e;
     try {
-      this.netNameplateSpr.removeFromParent();
+      if (this.netNameplateSpr == null) {
+        return;
+      }
+      this.netNameplateSpr.dispose();
       return this.netNameplateSpr = null;
     } catch (error) {
       e = error;
@@ -23541,6 +30320,17 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
         ({text, style} = nameplate);
       }
       return this.refreshAll(text, style);
+    }
+
+    dispose() {
+      var e;
+      try {
+        this.removeFromParent();
+        return this.visible = false;
+      } catch (error) {
+        e = error;
+        return KDCore.warning(e);
+      }
     }
 
     // * Данный стиль определён в базовых параметрах плагина, но на всякий случай тут есть тоже
@@ -23906,6 +30696,362 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
 
 
 // Generated by CoffeeScript 2.6.1
+var Sprite_NetworkRoom_CharacterListItem;
+
+Sprite_NetworkRoom_CharacterListItem = class Sprite_NetworkRoom_CharacterListItem extends KDCore.Sprite_NUI {
+  constructor(characterData) {
+    super($ANETZ_NUI_JsonRoomLobbyCharacterItem);
+    this.characterData = characterData;
+    if (this.characterData != null) {
+      this.refreshBindings(this);
+    }
+    return;
+  }
+
+  refresh() {
+    if (this.characterData != null) {
+      return this.refreshBindings(this);
+    }
+  }
+
+  activateInList() {
+    var ref;
+    this._isActiveInList = true;
+    return (ref = this.listItemSelected) != null ? ref.refreshBindings(this) : void 0;
+  }
+
+  deactivateInList() {
+    var ref;
+    this._isActiveInList = false;
+    return (ref = this.listItemSelected) != null ? ref.refreshBindings(this) : void 0;
+  }
+
+  isActiveInList() {
+    return this._isActiveInList === true;
+  }
+
+  getActorFaceImage() {
+    var e;
+    try {
+      if (this.characterData != null) {
+        return ANET.Utils.getActorFaceForNetwork(this.characterData);
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "faceNoActor";
+  }
+
+  getActorName() {
+    var e;
+    try {
+      if (this.characterData != null) {
+        return this.characterData.name;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "???";
+  }
+
+  getActorClassName() {
+    var e;
+    try {
+      if (this.characterData != null) {
+        return $dataClasses[this.characterData.classId].name;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "???";
+  }
+
+  isPicked() {
+    var actorId, e;
+    try {
+      if (this.characterData == null) {
+        return false;
+      }
+      actorId = this.characterData.id;
+      return ANGameManager.playersData.some(function(pl) {
+        return pl.actorId === actorId;
+      });
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return false;
+  }
+
+};
+
+
+// Generated by CoffeeScript 2.6.1
+var Sprite_NetworkRoom_PlayerListItem;
+
+Sprite_NetworkRoom_PlayerListItem = class Sprite_NetworkRoom_PlayerListItem extends KDCore.Sprite_NUI {
+  constructor(playerData) {
+    super($ANETZ_NUI_JsonRoomLobbyPlayerItem);
+    this.playerData = playerData;
+    if (this.playerData != null) {
+      this.refreshBindings(this);
+    }
+    return;
+  }
+
+  refresh() {
+    if (this.playerData != null) {
+      return this.refreshBindings(this);
+    }
+  }
+
+  activateInList() {
+    return this._isActiveInList = true;
+  }
+
+  deactivateInList() {
+    return this._isActiveInList = false;
+  }
+
+  isActiveInList() {
+    return this._isActiveInList === true;
+  }
+
+  isLoadGame() {
+    return ANET.Utils.isLoadGameRoom();
+  }
+
+  isStartedRoom() {
+    return ANET.Utils.isStartedRoom();
+  }
+
+  isCanSelectActors() {
+    return ANET.PP.isActorSelectionAllowed();
+  }
+
+  isMyPlayer() {
+    if (this.playerData != null) {
+      return this.playerData.id === ANNetwork.myId();
+    } else {
+      return false;
+    }
+  }
+
+  getActorFaceImage() {
+    var actor, e, possibleActorId;
+    try {
+      if (this.playerData != null) {
+        if (this.playerData.actorId > 0) {
+          actor = $dataActors[this.playerData.actorId];
+          if (actor != null) {
+            return ANET.Utils.getActorFaceForNetwork(actor);
+          }
+        } else if (!this.isCanSelectActors()) {
+          possibleActorId = ANET.PP.actorsForNetwork()[ANGameManager.playersData.indexOf(this.playerData)];
+          actor = $dataActors[possibleActorId];
+          if (actor != null) {
+            return ANET.Utils.getActorFaceForNetwork(actor);
+          }
+        }
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "faceNoActor";
+  }
+
+  getActorName() {
+    var actor, actorName, e, possibleActorId;
+    try {
+      if (this.isCanSelectActors()) {
+        actorName = this.uiConstant('notSelectedActorText');
+      } else {
+        actorName = "";
+      }
+      if (this.playerData == null) {
+        return actorName;
+      }
+      if (this.playerData.actorId > 0) {
+        actorName = $dataActors[this.playerData.actorId].name;
+      } else if (!this.isCanSelectActors()) {
+        possibleActorId = ANET.PP.actorsForNetwork()[ANGameManager.playersData.indexOf(this.playerData)];
+        actor = $dataActors[possibleActorId];
+        if (actor != null) {
+          actorName = actor.name;
+        }
+      }
+      return actorName;
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return "???";
+  }
+
+  isReady() {
+    var e;
+    try {
+      if (!ANET.PP.isCheckPlayerReadyState()) {
+        return false;
+      }
+      if (this.playerData == null) {
+        return false;
+      }
+      if (this.isCanSelectActors()) {
+        if (!(this.playerData.actorId > 0)) {
+          return false;
+        }
+      }
+      return this.playerData.isReadyInRoom === true;
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return false;
+  }
+
+  isHost() {
+    var e;
+    try {
+      if (this.playerData != null) {
+        return this.playerData.id === ANNetwork.room.masterId;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return false;
+  }
+
+  readyStateText() {
+    if (this.isStartedRoom() && NetPlayerDataWrapper.isHaveCharacterInGame(this.playerData)) {
+      return this.uiConstant('inGameStateText');
+    } else {
+      if (this.isReady()) {
+        return this.uiConstant('readyStateText');
+      }
+    }
+    return "";
+  }
+
+};
+
+
+// Generated by CoffeeScript 2.6.1
+var Sprite_NetworkRoomsListItem;
+
+Sprite_NetworkRoomsListItem = class Sprite_NetworkRoomsListItem extends KDCore.Sprite_NUI {
+  constructor(roomData) {
+    super($ANETZ_NUI_JsonRoomsListItem);
+    this.roomData = roomData;
+    this._prepareData();
+    this.refreshBindings(this);
+    return;
+  }
+
+  getHashCode() {
+    var hashCode;
+    hashCode = "" + this.getRPGMakerVersionIcon() + this.roomData.uniqueSaveID + this.getGameTitle() + this.getRoomName() + this.getPlayersCount() + this.getMaxPlayers() + this.getRoomStateText();
+    return hashCode;
+  }
+
+  isRPGMVGame() {
+    return this._rpgVersion === 'MV';
+  }
+
+  getRPGMakerVersionIcon() {
+    if (this.isRPGMVGame()) {
+      return 'rpgMv';
+    }
+    return 'rpgMz';
+  }
+
+  getGameTitle() {
+    if (this.roomData != null) {
+      return this.roomData.gameTitle;
+    } else {
+      return "???";
+    }
+  }
+
+  getRoomName() {
+    if (this.roomData != null) {
+      return this.roomData.name;
+    } else {
+      return "???";
+    }
+  }
+
+  getPlayersCount() {
+    var e;
+    try {
+      if ((this.roomData != null) && (this.roomData.playersIds != null)) {
+        return this.roomData.playersIds.length;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return 0;
+  }
+
+  getMaxPlayers() {
+    var e;
+    try {
+      if (this.roomData != null) {
+        return this.roomData.maxPlayers || 0;
+      }
+    } catch (error) {
+      e = error;
+      KDCore.warning(e);
+    }
+    return 0;
+  }
+
+  getRoomStateText() {
+    return this._roomState || 'unknown';
+  }
+
+  getIsLoadedGame() {
+    return this._isLoadGame || false;
+  }
+
+  activateInList() {
+    this._isActiveInList = true;
+    return this.listItemSelected.refreshBindings(this);
+  }
+
+  deactivateInList() {
+    this._isActiveInList = false;
+    return this.listItemSelected.refreshBindings(this);
+  }
+
+  isActiveInList() {
+    return this._isActiveInList === true;
+  }
+
+  isDisabled() {
+    return !NetRoomDataWrapper.isRoomProperToJoin(this.roomData);
+  }
+
+  _prepareData() {
+    if (this.roomData == null) {
+      return;
+    }
+    this._isActiveInList = false;
+    this._rpgVersion = this.roomData.rpgVersion === 0 ? 'MZ' : 'MV';
+    this._roomState = this.roomData.inGame === true ? 'In Game' : 'In Lobby';
+    this._isLoadGame = NetRoomDataWrapper.isLoadGameRoom(this.roomData) ? true : false;
+  }
+
+};
+
+
+// Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
 // ■ Sprite_PlayerNetworkStatus.coffee
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -24093,7 +31239,38 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
       this._networkCharacterSprites.push(spr);
       this._tilemap.addChild(spr);
     }
-    KDCore.GEventsManager.call("netzRefreshNameplate");
+    nAPI.requestNameplatesRefresh();
+  };
+  _.refreshNetworkCharactersNameplates = function() {
+    var char, e, i, j, len, len1, ref, ref1, results, spr;
+    try {
+      if ($gameTemp.netNameplateSprites != null) {
+        ref = $gameTemp.netNameplateSprites;
+        for (i = 0, len = ref.length; i < len; i++) {
+          spr = ref[i];
+          if (spr != null) {
+            spr.dispose();
+          }
+        }
+        $gameTemp.netNameplateSprites = [];
+      }
+      ref1 = this._characterSprites;
+      results = [];
+      for (j = 0, len1 = ref1.length; j < len1; j++) {
+        char = ref1[j];
+        if (char == null) {
+          continue;
+        }
+        if (char.nRefreshNameplate == null) {
+          continue;
+        }
+        results.push(char.nRefreshNameplate());
+      }
+      return results;
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
   };
   
   // * Специальный слой для иконок статусов и имён сетевых персонажей
@@ -24759,376 +31936,6 @@ Scene_NetworkSettings = class Scene_NetworkSettings extends Scene_MenuBase {
 })();
 
 // ■ END Window_Message.coffee
-//---------------------------------------------------------------------------
-
-
-// Generated by CoffeeScript 2.6.1
-var Window_NetworkActorsList;
-
-Window_NetworkActorsList = class Window_NetworkActorsList extends Window_Selectable {
-  constructor(rect) {
-    super(rect);
-    this.setBackgroundType(ANET.VD.getWindowBackgroundType());
-    this.select(0);
-  }
-
-  maxItems() {
-    return this.actorsForNetwork().length;
-  }
-
-  maxCols() {
-    return 2;
-  }
-
-  actorsForNetwork() {
-    return ANET.PP.actorsForNetwork();
-  }
-
-  isCurrentItemEnabled() {
-    var e;
-    try {
-      return this.isEnable(this.index());
-    } catch (error) {
-      e = error;
-      ANET.w(e);
-      return false;
-    }
-  }
-
-  selectedActorId() {
-    if (!this.isCurrentItemEnabled()) {
-      return 0;
-    }
-    return this.getActorData(this.index()).id;
-  }
-
-  isEnable(index) {
-    var actorId;
-    actorId = this.getActorData(index).id;
-    return !ANGameManager.playersData.some(function(pl) {
-      return pl.actorId === actorId;
-    });
-  }
-
-  drawItem(index) {
-    var actorData, faceBitmap, rect;
-    actorData = this.getActorData(index);
-    if (actorData == null) {
-      return;
-    }
-    rect = this.itemRect(index);
-    faceBitmap = ImageManager.loadFace(actorData.faceName);
-    faceBitmap.addLoadListener(() => {
-      return this._drawActor(rect, actorData, index);
-    });
-  }
-
-  itemHeight() {
-    return 110;
-  }
-
-  getActorData(index) {
-    return $dataActors[this.actorsForNetwork()[index]];
-  }
-
-};
-
-(function() {  //╒═════════════════════════════════════════════════════════════════════════╛
-  // ■ Window_NetworkActorsList.coffee
-  //╒═════════════════════════════════════════════════════════════════════════╛
-  //---------------------------------------------------------------------------
-  var _;
-  //@[DEFINES]
-  _ = Window_NetworkActorsList.prototype;
-  _._drawActor = function(rect, a, index) {
-    this.changePaintOpacity(this.isEnable(index));
-    this._drawActorInfo(rect, a);
-    this._drawActorClass(rect, a);
-    if (!this.isEnable(index)) {
-      this._drawNetworkStatus(rect);
-    }
-    this.changePaintOpacity(1);
-  };
-  _._drawActorInfo = function(rect, a) {
-    this.drawFaceWithCustomSize(a.faceName, a.faceIndex, rect.x + 4, rect.y + 2, this.itemHeight() - 8);
-    return this.drawText(a.name, rect.x + 120, rect.y + 4, 168);
-  };
-  _._drawActorClass = function(rect, a) {
-    var aClass, className, e;
-    try {
-      aClass = $dataClasses[a.classId];
-      if (aClass != null) {
-        className = aClass.name;
-      } else {
-        className = "";
-      }
-      if (KDCore.isMV()) {
-        this.changeTextColor(this.crisisColor());
-      } else {
-        this.changeTextColor(ColorManager.crisisColor());
-      }
-      this.contents.fontSize -= 8;
-      this.drawText(className, rect.x + 132, rect.y + 44, 168);
-      this.contents.fontSize += 8;
-      this.resetTextColor();
-    } catch (error) {
-      e = error;
-      AA.warning(e);
-    }
-  };
-  _._drawNetworkStatus = function(rect) {
-    if (KDCore.isMV()) {
-      this.changeTextColor(this.deathColor());
-    } else {
-      this.changeTextColor(ColorManager.deathColor());
-    }
-    this.contents.fontSize -= 8;
-    this.drawText('Picked', rect.x + 270, rect.y + 4);
-    this.contents.fontSize += 8;
-    this.resetTextColor();
-  };
-})();
-
-// ■ END Window_NetworkActorsList.coffee
-//---------------------------------------------------------------------------
-
-
-// Generated by CoffeeScript 2.6.1
-//╒═════════════════════════════════════════════════════════════════════════╛
-// ■ Window_NetworkGameMenu.coffee
-//╒═════════════════════════════════════════════════════════════════════════╛
-//---------------------------------------------------------------------------
-var Window_NetworkGameMenu;
-
-Window_NetworkGameMenu = class Window_NetworkGameMenu extends Window_Command {
-  constructor(rect) {
-    super(rect);
-    this.setBackgroundType(ANET.VD.getWindowBackgroundType());
-  }
-
-  makeCommandList() {
-    this.addCommand(ANET.LV("createRoom"), "createRoom");
-    this.addCommand(ANET.LV("joinRoom"), "joinRoom");
-    if (ANET.PP.isJoinRandomRoomAllowed()) {
-      this.addCommand(ANET.LV("joinRandomRoom"), "joinRandRoom");
-    }
-    this.addCommand(ANET.LV("Settings"), "settings");
-  }
-
-};
-
-(function() {
-  var _;
-  //@[DEFINES]
-  _ = Window_NetworkGameMenu.prototype;
-})();
-
-// ■ END Window_NetworkGameMenu.coffee
-//---------------------------------------------------------------------------
-
-
-// Generated by CoffeeScript 2.6.1
-var Window_NetworkRoomCommands;
-
-Window_NetworkRoomCommands = class Window_NetworkRoomCommands extends Window_HorzCommand {
-  constructor(rect) {
-    super(rect);
-    this.setBackgroundType(ANET.VD.getWindowBackgroundType());
-  }
-
-  maxCols() {
-    return 3;
-  }
-
-  isLoadGame() {
-    return ANET.Utils.isLoadGameRoom();
-  }
-
-  isStartedRoom() {
-    return ANET.Utils.isStartedRoom();
-  }
-
-  isCanSelectActors() {
-    return ANET.PP.isActorSelectionAllowed() && !this.isLoadGame();
-  }
-
-  makeCommandList() {
-    var leaveCommandName;
-    if (ANNetwork.isMasterClient()) {
-      this.addCommand(ANET.LV("start"), 'start', this._isStartEnabled());
-    } else {
-      // * Если комната в режиме "В игре"
-      if (this.isStartedRoom()) {
-        this.addCommand(ANET.LV("joinGame"), 'joinInGame', this._isJoinInAlreadyGameEnabled());
-      } else {
-        if (ANET.PP.isCheckPlayerReadyState()) {
-          this.addCommand(ANET.LV("ready"), 'ready', this._isReadyEnabled());
-        }
-      }
-    }
-    if (this.isCanSelectActors()) {
-      this.addCommand(ANET.LV("character"), 'character', this._isCharSelectEnabled());
-    }
-    leaveCommandName = ANNetwork.isMasterClient() ? ANET.LV("close") : ANET.LV("leave");
-    this.addCommand(leaveCommandName, 'leave');
-  }
-
-};
-
-(function() {  
-  //╒═════════════════════════════════════════════════════════════════════════╛
-  // ■ Window_NetworkRoomCommands.coffee
-  //╒═════════════════════════════════════════════════════════════════════════╛
-  //---------------------------------------------------------------------------
-  var _;
-  //@[DEFINES]
-  _ = Window_NetworkRoomCommands.prototype;
-  _._myActorId = function() {
-    return ANGameManager.myPlayerData().actorId;
-  };
-  _._isAllPlayersSelectActors = function() {
-    return ANGameManager.playersData.every(function(pl) {
-      return pl.actorId !== 0;
-    });
-  };
-  _._isStartEnabled = function() {
-    if (!ANET.PP.isSingleActorNetworkGameAllowed()) {
-      if (ANGameManager.playersData.length === 1) {
-        return false;
-      }
-    }
-    // * Надо выбрать персонажа, потом можно начинать игру
-    if (this.isCanSelectActors() || this.isLoadGame()) {
-      //TODO: Разрешить загружаться меньшему количеству игроков??? Опция или НЕТ?
-      // * Сейчас может загрузить игру два игрока, если играло 3 или более например
-      return this._isAllPlayersSelectActors() && this._isAllPlayersReady();
-    } else {
-      return this._isAllPlayersReady();
-    }
-  };
-  _._isReadyEnabled = function() {
-    if (this.isCanSelectActors()) {
-      return !this._isCharSelectEnabled();
-    } else {
-      return true;
-    }
-  };
-  _._isCharSelectEnabled = function() {
-    return this._myActorId() <= 0;
-  };
-  _._isJoinInAlreadyGameEnabled = function() {
-    if (!ANET.PP.isJoinStartedRoomAllowed()) {
-      return false;
-    }
-    if (this.isCanSelectActors()) {
-      return this._isAllPlayersSelectActors();
-    } else {
-      return true; // * Тут сразу можно, без Ready, т.е. игра уже запущена, никого ждать не надо
-    }
-  };
-  
-  // * Проверка, что все игроки готовы (только визуальная)
-  _._isAllPlayersReady = function() {
-    if (ANET.PP.isCheckPlayerReadyState()) {
-      // * У себя (хоста) автоматически ставится флаг готов при создании комнаты
-      return ANGameManager.playersData.every(function(pl) {
-        return pl.isReadyInRoom === true;
-      });
-    } else {
-      return true; // * Всегда да, если параметр отключён
-    }
-  };
-})();
-
-// ■ END Window_NetworkRoomCommands.coffee
-//---------------------------------------------------------------------------
-
-
-// Generated by CoffeeScript 2.6.1
-// * Список игроков в комнате
-//TODO: Пока нельзя выделять игрока и что-то с ним делать
-//TODO: Возможно добавить возможность кикнуть игрока
-var Window_NetworkRoomPlayersList;
-
-Window_NetworkRoomPlayersList = class Window_NetworkRoomPlayersList extends Window_Selectable {
-  constructor(rect) {
-    super(rect);
-  }
-
-  //@setBackgroundType ANET.VD.getWindowBackgroundType()
-  maxItems() {
-    return ANGameManager.playersData.length;
-  }
-
-  drawItem(index) {
-    var playerData, rect;
-    playerData = this.playerData(index);
-    if (playerData == null) {
-      return;
-    }
-    rect = this.itemLineRect(index);
-    this.changePaintOpacity(this.isEnabled(index));
-    this._drawPlayerInfo(rect, playerData);
-    this.changePaintOpacity(1);
-  }
-
-  isEnabled(index) {
-    return true;
-  }
-
-  isLoadGame() {
-    return ANET.Utils.isLoadGameRoom();
-  }
-
-  isStartedRoom() {
-    return ANET.Utils.isStartedRoom();
-  }
-
-  playerData(index) {
-    return ANGameManager.playersData[index];
-  }
-
-};
-
-(function() {  //╒═════════════════════════════════════════════════════════════════════════╛
-  // ■ Window_NetworkRoomPlayersList.coffee
-  //╒═════════════════════════════════════════════════════════════════════════╛
-  //---------------------------------------------------------------------------
-  var _;
-  //@[DEFINES]
-  _ = Window_NetworkRoomPlayersList.prototype;
-  _._drawPlayerInfo = function(rect, playerData) {
-    var text;
-    text = playerData.name;
-    if (playerData.id === ANNetwork.room.masterId) {
-      text = "\\C[1]" + text;
-    } else if (playerData.id === ANNetwork.myId()) {
-      text = "\\C[3]" + text;
-    }
-    if (ANET.PP.isActorSelectionAllowed() || this.isLoadGame()) {
-      text += this._getActorName(playerData);
-    }
-    if (this.isStartedRoom() && NetPlayerDataWrapper.isHaveCharacterInGame(playerData)) {
-      text += " \\C[4]\\}[In Game]";
-    }
-    if (ANET.PP.isCheckPlayerReadyState()) {
-      if (playerData.isReadyInRoom === true) {
-        text += " \\C[5]\\}[Ready]";
-      }
-    }
-    this.drawTextEx(text, rect.x, rect.y, rect.width, 'left');
-  };
-  _._getActorName = function(playerData) {
-    var actorName;
-    actorName = "...";
-    if (playerData.actorId > 0) {
-      actorName = $dataActors[playerData.actorId].name;
-    }
-    return "\\C[0] [%1]".format(actorName);
-  };
-})();
-
-// ■ END Window_NetworkRoomPlayersList.coffee
 //---------------------------------------------------------------------------
 
 
@@ -25868,8 +32675,10 @@ Window_NTradeItemsList = class Window_NTradeItemsList extends Window_Selectable 
   ALIAS__makeCommandList = _.makeCommandList;
   _.makeCommandList = function() {
     ALIAS__makeCommandList.call(this);
-    this.addCommand(ANET.LV("network"), "network");
-    this._nRearangeNetworkCommand();
+    if (ANET.PP.isAddNetGameCmdToTitleMenu()) {
+      this.addCommand(ANET.LV`network`, "network");
+      this._nRearangeNetworkCommand();
+    }
     if (!ANET.PP.isSinglePlayerAllowed()) {
       this._nRemoveNewGameCommand();
     }
@@ -25927,63 +32736,22 @@ Window_NTradeItemsList = class Window_NTradeItemsList extends Window_Selectable 
 //---------------------------------------------------------------------------
 
 
-function _0x5ccb(_0x1d9232, _0x27583d) {
-    var _0x111222 = _0x1112();
-    return _0x5ccb = function (_0x5ccb59, _0x357973) {
-        _0x5ccb59 = _0x5ccb59 - 0xae;
-        var _0x2a0ffd = _0x111222[_0x5ccb59];
-        return _0x2a0ffd;
-    }, _0x5ccb(_0x1d9232, _0x27583d);
-}
-function _0x1112() {
-    var _0x30b7c5 = [
-        '\x5f\x70\x6f\x72\x74',
-        '\x37\x54\x73\x4c\x4e\x51\x57',
-        '\x39\x4e\x78\x52\x4b\x4b\x53',
-        '\x33\x50\x78\x64\x57\x71\x78',
-        '\x32\x32\x38\x30\x6f\x64\x6f\x72\x65\x55',
-        '\x33\x30\x33\x34',
-        '\x33\x30\x32\x36\x38\x37\x73\x6a\x63\x56\x51\x50',
-        '\x5f\x69\x70',
-        '\x35\x39\x34\x37\x39\x32\x38\x71\x4e\x46\x48\x42\x64',
-        '\x31\x31\x30\x37\x39\x38\x32\x32\x78\x76\x64\x54\x61\x75',
-        '\x31\x34\x39\x33\x35\x34\x68\x50\x77\x4a\x46\x66',
-        '\x33\x32\x34\x55\x75\x6e\x52\x75\x50',
-        '\x38\x31\x32\x37\x32\x34\x35\x61\x42\x64\x46\x4a\x42',
-        '\x32\x31\x36\x39\x33\x57\x45\x66\x45\x7a\x77',
-        '\x37\x35\x37\x31\x31\x37\x30\x58\x46\x56\x45\x49\x47',
-        '\x5f\x70\x72\x65\x70\x61\x72\x65\x43\x6f\x6e\x6e\x65\x63\x74\x69\x6f\x6e\x53\x65\x74\x74\x69\x6e\x67\x73',
-        '\x6d\x61\x78\x50\x6c\x61\x79\x65\x72\x73\x49\x6e\x52\x6f\x6f\x6d',
-        '\x67\x65\x74\x50\x61\x72\x61\x6d'
-    ];
-    _0x1112 = function () {
-        return _0x30b7c5;
-    };
-    return _0x1112();
-}
-(function (_0x4f173e, _0x5ebefa) {
-    var _0x4799f1 = _0x5ccb, _0x8d0302 = _0x4f173e();
-    while (!![]) {
-        try {
-            var _0x2a91f2 = -parseInt(_0x4799f1(0xb8)) / 0x1 * (parseInt(_0x4799f1(0xbf)) / 0x2) + -parseInt(_0x4799f1(0xb0)) / 0x3 * (parseInt(_0x4799f1(0xae)) / 0x4) + -parseInt(_0x4799f1(0xaf)) / 0x5 + parseInt(_0x4799f1(0xbe)) / 0x6 * (-parseInt(_0x4799f1(0xb6)) / 0x7) + parseInt(_0x4799f1(0xbd)) / 0x8 + -parseInt(_0x4799f1(0xb7)) / 0x9 * (parseInt(_0x4799f1(0xb1)) / 0xa) + -parseInt(_0x4799f1(0xbb)) / 0xb * (-parseInt(_0x4799f1(0xb9)) / 0xc);
-            if (_0x2a91f2 === _0x5ebefa)
-                break;
-            else
-                _0x8d0302['push'](_0x8d0302['shift']());
-        } catch (_0xb0e487) {
-            _0x8d0302['push'](_0x8d0302['shift']());
-        }
-    }
-}(_0x1112, 0xe3ba8), (function () {
-    var _0x374407 = _0x5ccb, _0x3e02a8;
-    _0x3e02a8 = ANET['\x50\x61\x72\x61\x6d\x73\x4d\x61\x6e\x61\x67\x65\x72']['\x70\x72\x6f\x74\x6f\x74\x79\x70\x65'], _0x3e02a8[_0x374407(0xb3)] = function () {
-        var _0x4113bb = _0x374407, _0xce3dd6;
-        return _0xce3dd6 = this[_0x4113bb(0xb4)]('\x6d\x61\x78\x50\x6c\x61\x79\x65\x72\x73\x49\x6e\x52\x6f\x6f\x6d', 0x2), _0xce3dd6 >= 0x2 ? 0x2 : _0xce3dd6;
-    }, _0x3e02a8[_0x374407(0xb2)] = function () {
-        var _0x192a8a = _0x374407;
-        this[_0x192a8a(0xbc)] = '\x31\x39\x35\x2e\x31\x36\x31\x2e\x34\x31\x2e\x32\x30', this[_0x192a8a(0xb5)] = _0x192a8a(0xba);
-    };
-}()));
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Parameters Manager Extension.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+(function() {
+  var _;
+  // * Реализация загрузки настроек визуальных компонентов из параметров
+
+  //@[DEFINES]
+  _ = ANET.ParamsManager.prototype;
+})();
+
+// ■ END Parameters Manager Extension.coffee
+//---------------------------------------------------------------------------
+
 
 // Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
@@ -26037,6 +32805,59 @@ function _0x1112() {
 
 // Generated by CoffeeScript 2.6.1
 //╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Game_System.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = Game_System.prototype;
+  // * Задать стиль для персонажа
+  //?VERSION
+  _.nSetNameplateStyleForActor = function(actorId, style) {
+    var e;
+    this.nInitNameplatesStylesForActors();
+    try {
+      if ((style != null) && String.any(style)) {
+        this.nActorsNameplatesStyles[actorId] = style;
+      } else {
+        delete this.nActorsNameplatesStyles[actorId];
+      }
+      // * Синхронизируем сразу данные между всеми игроками
+      if (ANNetwork.isConnected()) {
+        ANPlayersManager.sendNameplatesStyles();
+      }
+      // * Обновляем таблички
+      nAPI.requestNameplatesRefresh();
+    } catch (error) {
+      e = error;
+      ANET.w(e);
+    }
+  };
+  // * Получить текущий стиль данного персонажа
+  //?VERSION
+  _.nGetNameplateStyleForActor = function(actorId) {
+    var e;
+    this.nInitNameplatesStylesForActors();
+    try {
+      if (this.nActorsNameplatesStyles[actorId] != null) {
+        return this.nActorsNameplatesStyles[actorId];
+      } else {
+        return null; // * default
+      }
+    } catch (error) {
+      e = error;
+      return KDCore.warning(e);
+    }
+  };
+})();
+
+// ■ END Game_System.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
 // ■ Scene_Battle.coffee
 //╒═════════════════════════════════════════════════════════════════════════╛
 //---------------------------------------------------------------------------
@@ -26065,6 +32886,30 @@ function _0x1112() {
 })();
 
 // ■ END Scene_Battle.coffee
+//---------------------------------------------------------------------------
+
+
+// Generated by CoffeeScript 2.6.1
+//╒═════════════════════════════════════════════════════════════════════════╛
+// ■ Scene_NetworkRoomsList.coffee
+//╒═════════════════════════════════════════════════════════════════════════╛
+//---------------------------------------------------------------------------
+(function() {
+  var _;
+  //@[DEFINES]
+  _ = Scene_NetworkRoomsList.prototype;
+  _.applyFilterToRooms = function() {
+    if (this.roomsList == null) {
+      return;
+    }
+    // * Применяем фильтр по gameId
+    this.roomsList = this.roomsList.filter(function(room) {
+      return room.gameId === ANET.VD.getGameVersion();
+    });
+  };
+})();
+
+// ■ END Scene_NetworkRoomsList.coffee
 //---------------------------------------------------------------------------
 
 
@@ -26143,4 +32988,4 @@ function _0x1112() {
 // ■ END Window_NTradeItemNumberInput.coffee
 //---------------------------------------------------------------------------
 
-//Plugin Alpha_NETZ builded by PKD PluginBuilder 2.1 - 21.06.2022
+//Plugin Alpha_NETZ builded by PKD PluginBuilder 2.2 - 22.05.2024
