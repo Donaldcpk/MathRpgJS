@@ -2,7 +2,7 @@
 var questionDatabase = {"Questions" : [
 
     
-//S1MCQ  BAADCCDBCBADCABBBDDCCAAB
+//S1MCQ  BAADCCDBCBADCABBBDD CAAB
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ1","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ2","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ3","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
@@ -22,13 +22,12 @@ var questionDatabase = {"Questions" : [
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ17","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ18","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"D","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"C","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ19","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"D","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"C","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
-{"Note":"S1MCQSet1","GUID":"JSMathS1MCQ20","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"C","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ21","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"C","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ22","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ23","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet1","GUID":"JSMathS1MCQ24","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 
-//S1MCQ  AABDDCADABBACBCCBCDDDBB
+//S1MCQ  AABDDCADABBACBCCBCDDD
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ25","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ26","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"A","A2":"B","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ27","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
@@ -50,8 +49,6 @@ var questionDatabase = {"Questions" : [
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ43","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"D","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"C","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ44","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"D","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"C","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 {"Note":"S1MCQSet2","GUID":"JSMathS1MCQ45","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"D","A2":"A","A2_Why":"","A3":"B","A3_Why":"","A4":"C","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
-{"Note":"S1MCQSet2","GUID":"JSMathS1MCQ46","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
-{"Note":"S1MCQSet2","GUID":"JSMathS1MCQ47","E":0,"Q_T":4,"Q":"MCQ","T":0,"I":1,"A":0,"C_A":"B","A2":"A","A2_Why":"","A3":"C","A3_Why":"","A4":"D","A4_Why":"","A5":"","A5_Why":"","S":"",     "R_T":"None","R_I":0,"R_A":0,"P_T":"None","P_I":0,"P_A":0,"O_L":0},
 
    
 // JSMathS2MCQ SET1  CACBCDBBDBBDCCDBCCBADDDADCCCBBBCCCDBCDDCDCDDCDDBCBBDCBDC
